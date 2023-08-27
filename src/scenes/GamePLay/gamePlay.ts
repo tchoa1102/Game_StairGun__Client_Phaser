@@ -1,4 +1,5 @@
 import { Stick } from "@/characters"
+import { useMainStore } from "@/stores"
 import Phaser from "phaser"
 const fileConfigCircleStick = JSON.stringify({
     "width": 231,
@@ -63,13 +64,15 @@ class GamePlay extends Phaser.Scene {
     
     create() {
         console.log('%c\nCreate...\n', 'color: red; font-size: 16px;');
+        const mainStore = useMainStore()
+        this.matter.world.setBounds(0, 0, mainStore.width * mainStore.zoom, mainStore.height * mainStore.zoom)
         this.circleStick.create()
     }
 
     update() {
         console.log('%c\nUpdating...\n', 'color: blue; font-size: 16px;');
         let isEvent = false
-        // this.circleStick.update()
+        this.circleStick.update()
         
     }
     

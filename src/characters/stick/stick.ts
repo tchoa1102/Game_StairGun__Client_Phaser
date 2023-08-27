@@ -1,48 +1,7 @@
 import { BootGame } from "@/scenes"
 import {Character} from ".."
-
-interface EventListenerITF {
-    [key: string]: Phaser.Input.Keyboard.Key | undefined
-}
-
-interface AnimationITF {
-    [key: string]: Phaser.Animations.Animation | boolean
-}
-
-interface frameAnimationITF {
-    start: number |undefined,
-    end: number |undefined,
-    first: number |undefined,
-    outputArray: Phaser.Types.Animations.AnimationFrame[] |undefined,
-    frames: boolean | number[] | undefined,
-}
-
-interface AnimationItemITF {
-    key:                string | undefined
-    frames:             frameAnimationITF,
-    frameRate:          number | undefined
-    repeat:             number | undefined
-    repeatDelay:        number | undefined
-    defaultTextureKey:  string | undefined
-    delay:              number | undefined
-    duration:           number | undefined
-    hideOnComplete:     boolean | undefined
-    yoyo:               boolean | undefined
-    showBeforeDelay:    boolean | undefined
-    showOnStart:        boolean | undefined
-    skipMissedFrames:   boolean | undefined
-    sortFrames:         boolean | undefined
-}
-
-interface StickAnimationConfigITF {
-    width: number,
-    height: number
-    src: string,
-    frame: { frameWidth: number, frameHeight: number}
-    animation: {
-        [key: string]: AnimationItemITF
-    }
-}
+import { useMainStore } from "@/stores"
+import './interface'
 
 const keyActivities = {
     stand: 'stand',
@@ -56,11 +15,12 @@ const keyActivities = {
 const initKeyAnimation = (name: string, key: string) => `animation_${name}_${key}`
 
 class Stick extends Character {
-
-    private stickSprite: Phaser.Physics.Matter.Sprite| null
+    // #region declaration
+    private stickSprite: Phaser.Physics.Matter.Sprite | null
     private stickAnimation: AnimationITF
     private eventListener: EventListenerITF
     private fileConfig: StickAnimationConfigITF
+    // #endregion
 
     constructor(_this: any, name: string, fileConfig: string) {
         super(_this, name)
@@ -101,11 +61,10 @@ class Stick extends Character {
 
         // #region init sprite
         this.stickSprite = this.game.matter.add.sprite(200, 200, this.name)
-        this.stickSprite.setRectangle(this.fileConfig.frame.frameWidth, this.fileConfig.frame.frameHeight)
-        // this.stickSprite = this.game.physics.add.sprite(200, 200, this.name)
-        // this.stickSprite.scale = 0.5
-        // this.stickSprite.setBounce(0.5)
-        // this.stickSprite.anims.play(initKeyAnimation(this.name, keyActivities.stand))
+        this.stickSprite.setRectangle(this.fileConfig.frame.frameWidth * 0.5, this.fileConfig.frame.frameHeight * 0.5)
+        this.stickSprite.scale = 0.5
+        this.stickSprite.setBounce(0)
+        this.stickSprite.anims.play(initKeyAnimation(this.name, keyActivities.stand))
         // #endregion
 
         // #region add event
@@ -119,44 +78,43 @@ class Stick extends Character {
     update() {
         console.log(`%c\nUpdating stick ${this.name}...\n`, 'color: blue; font-size: 16px;');
         let isEvent = false
+        const cur = this.stickSprite?.anims.currentAnim
         if (this.eventListener.left?.isDown) {
             isEvent = true
-            const cur = this.stickSprite?.anims.currentAnim
             const keyAnim = initKeyAnimation(this.name, keyActivities.runLeft)
             if (cur !== this.stickAnimation[keyAnim]) {
                 this.stickSprite?.anims.play(keyAnim)
             }
-            this.stickSprite?.setX(this.stickSprite.x - 2)
+            this.stickSprite?.setX(this.stickSprite.x - 8)
         }
         if (this.eventListener.right?.isDown) {
             isEvent = true
-            const cur = this.stickSprite?.anims.currentAnim
             const keyAnim = initKeyAnimation(this.name, keyActivities.runRight)
             if (cur !== this.stickAnimation[keyAnim]) {
                 this.stickSprite?.anims.play(keyAnim)
             }
-            this.stickSprite?.setX(this.stickSprite.x + 2)
+            this.stickSprite?.setX(this.stickSprite.x + 8)
         }
         if (this.eventListener.jumpUp?.isDown) {
             isEvent = true
-            const cur = this.stickSprite?.anims.currentAnim
             const keyAnim = initKeyAnimation(this.name, keyActivities.jump)
             if (cur !== this.stickAnimation[keyAnim]) {
                 this.stickSprite?.anims.play(keyAnim)
             }
-            this.stickSprite?.setY(this.stickSprite.y - 16)
+            this.stickSprite?.setY(this.stickSprite.y - 50)
         }
         if (this.eventListener.jumpDown?.isDown) {
             isEvent = true
-            const cur = this.stickSprite?.anims.currentAnim
             const keyAnim = initKeyAnimation(this.name, keyActivities.jump)
             if (cur !== this.stickAnimation[keyAnim]) {
                 this.stickSprite?.anims.play(keyAnim)
             }
-            this.stickSprite?.setY(this.stickSprite.y + 16)
+            this.stickSprite?.setY(this.stickSprite.y + 50)
         }
-        if (!isEvent) {
-            const keyAnim = initKeyAnimation(this.name, keyActivities.stand)
+
+        // recovery animation
+        const keyAnim = initKeyAnimation(this.name, keyActivities.stand)
+        if (!isEvent && cur !== this.stickAnimation[keyAnim]) {
             this.stickSprite?.anims.play(keyAnim)
         }
     }

@@ -40,7 +40,7 @@ const useMainStore = defineStore('main', {
                         enabled: true,
                         debug: true,
                         gravity: {
-                            y: 600
+                            y: 9.6
                         },
                     }
                 }
