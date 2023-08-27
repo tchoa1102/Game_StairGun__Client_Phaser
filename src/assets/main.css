@@ -1,0 +1,12 @@
+@import './base.css';
+
+#app {
+  margin: 0 auto;
+  font-weight: normal;
+}
+
+#game {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #ffffff60;
+}
