@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "phaser": "^3.60.0",
+    "phaser-matter-collision-plugin": "^1.0.0",
     "pinia": "^2.1.4",
+    "socket.io-client": "^4.7.2",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
   },

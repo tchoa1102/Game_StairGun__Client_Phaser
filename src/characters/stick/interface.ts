@@ -1,22 +1,22 @@
-interface EventListenerITF {
+interface IEventListener {
     [key: string]: Phaser.Input.Keyboard.Key | undefined
 }
 
-interface AnimationITF {
+interface IAnimation {
     [key: string]: Phaser.Animations.Animation | boolean
 }
 
-interface frameAnimationITF {
-    start: number |undefined,
-    end: number |undefined,
-    first: number |undefined,
-    outputArray: Phaser.Types.Animations.AnimationFrame[] |undefined,
-    frames: boolean | number[] | undefined,
-}
+// interface IFrameAnimation {
+//     start: number |undefined,
+//     end: number |undefined,
+//     first: number |undefined,
+//     outputArray: Phaser.Types.Animations.AnimationFrame[] |undefined,
+//     frames: boolean | number[] | undefined,
+// }
 
-interface AnimationItemITF {
+interface IAnimationItem {
     key:                string | undefined
-    frames:             frameAnimationITF,
+    frames:             Phaser.Types.Animations.AnimationFrame[],
     frameRate:          number | undefined
     repeat:             number | undefined
     repeatDelay:        number | undefined
@@ -31,13 +31,13 @@ interface AnimationItemITF {
     sortFrames:         boolean | undefined
 }
 
-interface StickAnimationConfigITF {
+interface IStickAnimationConfig {
     width: number,
     height: number
     src: string,
     frame: { frameWidth: number, frameHeight: number}
     animation: {
-        [key: string]: AnimationItemITF
+        [key: string]: IAnimationItem
     }
 }
 

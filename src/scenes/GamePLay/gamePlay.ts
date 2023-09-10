@@ -1,83 +1,68 @@
-import { Stick } from "@/characters"
-import { useMainStore } from "@/stores"
-import Phaser from "phaser"
-const fileConfigCircleStick = JSON.stringify({
-    "width": 231,
-    "height": 882,
-    "src": "src/assets/circle.stick.png",
-    "frame": { "frameWidth": 33, "frameHeight": 147 },
-    "animation": {
-        "stand": {
-            "key": "stand",
-            "frames": { "start": 0, "end": 1 },
-            "frameRate": 10,
-            "repeat": -1
+import Phaser from 'phaser'
+import StairGame from './stairGame'
+import GunGame from './gunGame'
+
+const stairsData = {
+    data: [
+        {
+            width: 500,
+            height: 20,
+            img: 'src/assets/stair-img.png',
+            x: 0,
+            y: 3000,
         },
-        "runRight": {
-            "key": "runRight",
-            "frames": { "start": 7, "end": 13 },
-            "frameRate": 10,
-            "repeat": -1
+        {
+            width: 500,
+            height: 20,
+            img: 'src/assets/stair-img.png',
+            x: 100,
+            y: 2500,
         },
-        "runLeft": {
-            "key": "runLeft",
-            "frames": { "start": 14, "end": 20 },
-            "frameRate": 10,
-            "repeat": -1
+        {
+            width: 100,
+            height: 20,
+            img: 'src/assets/stair-img.png',
+            x: 0,
+            y: 2000,
         },
-        "jump": {
-            "key": "jump",
-            "frames": { "start": 21, "end": 25 },
-            "frameRate": 100,
-            "repeat": 0,
-            "duration": 10000,
-        },
-        "jumpRight": {
-            "key": "jumpRight",
-            "frames": { "start": 28, "end": 28 },
-            "frameRate": 10,
-            "repeat": 0
-        },
-        "jumpLeft": {
-            "key": "jumpLeft",
-            "frames": { "start": 35, "end": 35 },
-            "frameRate": 10,
-            "repeat": 0
-        }
-    }
-})
+    ],
+}
 
 class GamePlay extends Phaser.Scene {
-    private circleStick: Stick
+    public MAX_WIDTH = 0
+    public MAX_HEIGHT = 0
+    private stairGame: Phaser.Scene | null
+    private gunGame: GunGame
     constructor() {
         super('gamePlay')
-        this.circleStick = new Stick(this, 'circleStick', fileConfigCircleStick)
+        this.stairGame = null
+        this.gunGame = new GunGame(this)
     }
 
-    init() {
-    }
+    init() {}
 
     preload() {
-        console.log('%c\nLoading...\n', 'color: yellow; font-size: 16px;');
-        this.circleStick.preload()
-    }
-    
-    create() {
-        console.log('%c\nCreate...\n', 'color: red; font-size: 16px;');
-        const mainStore = useMainStore()
-        this.matter.world.setBounds(0, 0, mainStore.width * mainStore.zoom, mainStore.height * mainStore.zoom)
-        this.circleStick.create()
+        console.log('%c\nLoading...\n', 'color: yellow; font-size: 16px;')
+        this.stairGame = this.scene.add('stairGame', StairGame, true, {
+            stairs: JSON.stringify(stairsData),
+        })
+        // this.stairGame
+        this.gunGame.preload()
     }
 
-    update() {
-        console.log('%c\nUpdating...\n', 'color: blue; font-size: 16px;');
-        let isEvent = false
-        this.circleStick.update()
-        
+    create() {
+        console.log('%c\nCreate...\n', 'color: red; font-size: 16px;')
+        // this.gunGame = new GunGame(this)
+        this.gunGame.create()
     }
-    
+
+    update(time: number, delta: number) {
+        // console.log('%c\nUpdating...\n', 'color: blue; font-size: 16px;');
+        this.gunGame.update()
+    }
+
     render() {
-        console.log('%c\nRendering...\n', 'color: #363; font-size: 16px;');
+        console.log('%c\nRendering...\n', 'color: #363; font-size: 16px;')
     }
 }
 
