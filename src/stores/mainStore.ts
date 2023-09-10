@@ -4,16 +4,17 @@ import Phaser from 'phaser'
 import { type IIndicator, type IState } from '@/util/interface/index.interface'
 import { BootGame, GamePlay } from '@/scenes/index'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
+import { io } from 'socket.io-client'
 
 const MIN_WIDTH = 740
 
 const state: IState = {
     game: undefined,
+    socket: io('http://localhost:4000'),
     zoom: 1,
     width: MIN_WIDTH * 2,
     height: MIN_WIDTH,
 }
-
 const useMainStore = defineStore('main', {
     state: () => state,
     getters: {
