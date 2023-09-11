@@ -24,10 +24,24 @@ interface IAnimationItem {
 }
 
 interface IStickAnimationConfig {
-    width: number
-    height: number
+    meta: {
+        app: string
+        version: string
+        image: string
+        format: string
+        size: { w: number; h: number }
+        scale: string
+    }
     src: string
-    frame: { frameWidth: number; frameHeight: number }
+    frames: {
+        [key: string]: {
+            frame: { x: number; y: number; w: number; h: number }
+            rotated: boolean | false
+            trimmed: boolean | false
+            spriteSourceSize: { x: number; y: number; w: number; h: number }
+            sourceSize: { x: number; y: number }
+        }
+    }
     animation: {
         [key: string]: IAnimationItem
     }

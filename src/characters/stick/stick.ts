@@ -39,11 +39,7 @@ class Stick extends Character {
     }
 
     preload() {
-        this.game.load.atlas(
-            this.name,
-            this.fileConfig.src,
-            'src/characters/stick/circleStickAtlas.json',
-        )
+        this.game.load.atlas(this.name, this.fileConfig.src, this.fileConfig)
     }
 
     create() {

@@ -1,108 +1,6 @@
 import { Stick } from '@/characters'
 import { useMainStore } from '@/stores'
 import './gamePlay.interface'
-const fileConfigCircleStick = JSON.stringify({
-    width: 256,
-    height: 441,
-    src: 'src/assets/circle.stick.png',
-    animation: {
-        stand: {
-            key: 'stand',
-            frames: [
-                {
-                    frame: 'stand-0',
-                    duration: 1,
-                    flipX: false,
-                },
-                {
-                    frame: 'stand-1',
-                    duration: 1,
-                    flipX: false,
-                },
-            ],
-            frameRate: 10,
-            repeat: -1,
-        },
-        runRight: {
-            key: 'runRight',
-            frames: [
-                {
-                    frame: 'run-0',
-                    duration: 1,
-                    flipX: false,
-                },
-                {
-                    frame: 'run-1',
-                    duration: 1,
-                    flipX: false,
-                },
-                {
-                    frame: 'run-2',
-                    duration: 1,
-                    flipX: false,
-                },
-                {
-                    frame: 'run-3',
-                    duration: 1,
-                    flipX: false,
-                },
-            ],
-            frameRate: 10,
-            repeat: -1,
-        },
-        runLeft: {
-            key: 'runLeft',
-            frames: [
-                {
-                    frame: 'run-0',
-                    duration: 1,
-                    flipX: true,
-                },
-                {
-                    frame: 'run-1',
-                    duration: 1,
-                    flipX: true,
-                },
-                {
-                    frame: 'run-2',
-                    duration: 1,
-                    flipX: true,
-                },
-                {
-                    frame: 'run-3',
-                    duration: 1,
-                    flipX: true,
-                },
-            ],
-            frameRate: 10,
-            repeat: -1,
-        },
-        jumpRight: {
-            key: 'jumpRight',
-            frames: [
-                {
-                    frame: 'jump-0',
-                    duration: 1,
-                    flipX: false,
-                },
-            ],
-            frameRate: 10,
-            repeat: 0,
-        },
-        jumpLeft: {
-            key: 'jumpLeft',
-            frames: [
-                {
-                    frame: 'jump-0',
-                    duration: 1,
-                    flipX: true,
-                },
-            ],
-            frameRate: 10,
-            repeat: 0,
-        },
-    },
-})
 
 class StairGame extends Phaser.Scene {
     public MAX_WIDTH = 1000
@@ -116,36 +14,35 @@ class StairGame extends Phaser.Scene {
     private CAMERA_V_Y = 0
     private cameraGame: Phaser.Cameras.Scene2D.Camera | undefined
     private mainStore: any
-    private circleStick: Stick
+    private sticks: Array<Stick>
     private background: Phaser.GameObjects.Image | undefined
     private stairs: Array<IStair> | undefined
-    constructor(stairs: string) {
+    constructor() {
         super('stairGame')
         this.mainStore = useMainStore()
         this.CAMERA_WIDTH = (this.mainStore.width * this.mainStore.zoom) / 3.7
         this.MARGIN_WIDTH = this.CAMERA_WIDTH / 2
         this.MARGIN_HEIGHT = this.mainStore.height / 2
+        this.sticks = []
+    }
 
-        this.circleStick = new Stick(
+    init({ stairs, fileConfigStick }: { stairs: string; fileConfigStick: string }) {
+        this.stairs = JSON.parse(stairs)
+        this.sticks[0] = new Stick(
             this,
             'circleStick',
             0,
             this.MAX_HEIGHT - 100,
-            fileConfigCircleStick,
+            fileConfigStick,
             0.5,
         )
     }
 
-    init({ stairs }: { stairs: string }) {
-        const data = JSON.parse(stairs).data
-        this.stairs = data
-    }
-
     preload() {
-        this.circleStick.preload()
+        this.sticks.forEach((stick: Stick) => stick.preload())
         this.load.image(
             'background',
-            'src/assets/backgorund-fusion-edit-through-increaseShadow.png',
+            'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
         )
         const stairIsLoading: Array<string> = []
         this.stairs?.forEach((stair: IStair) => {
@@ -189,7 +86,7 @@ class StairGame extends Phaser.Scene {
         // #endregion
 
         // #region init game object
-        this.circleStick.create()
+        this.sticks[0].create()
         // #endregion
 
         // #region config camera
@@ -207,12 +104,11 @@ class StairGame extends Phaser.Scene {
     }
 
     update() {
-        this.circleStick.update()
-        // console.log(this.cameraGame!.x);
-        const x = this.circleStick.stickSprite ? this.circleStick.stickSprite.x : 0
-        const y = this.circleStick.stickSprite ? this.circleStick.stickSprite.y : 0
+        this.sticks[0].update()
+        const x = this.sticks[0].stickSprite ? this.sticks[0].stickSprite.x : 0
+        const y = this.sticks[0].stickSprite ? this.sticks[0].stickSprite.y : 0
         this.cameraGame!.startFollow(
-            this.circleStick.stickSprite!,
+            this.sticks[0].stickSprite!,
             true,
             this.CAMERA_V_X,
             this.CAMERA_V_Y,

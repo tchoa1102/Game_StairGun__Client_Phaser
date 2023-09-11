@@ -2,7 +2,7 @@ import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
 
 import { type IIndicator, type IState } from '@/util/interface/index.interface'
-import { BootGame, GamePlay } from '@/scenes/index'
+import { GamePlay } from '@/scenes/index'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
 
@@ -18,8 +18,17 @@ const state: IState = {
 const useMainStore = defineStore('main', {
     state: () => state,
     getters: {
+        getSocket(): typeof this.socket {
+            return this.socket
+        },
         getWidth(): number {
             return this.width
+        },
+        getHeight(): number {
+            return this.height
+        },
+        getGame(): typeof this.game {
+            return this.game
         },
     },
     actions: {
@@ -36,7 +45,7 @@ const useMainStore = defineStore('main', {
                 physics: {
                     default: 'matter',
                     matter: {
-                        // debug: true,
+                        debug: true,
                     },
                 },
                 // backgroundColor: '#E5FB8E',
