@@ -1,26 +1,78 @@
-import type GamePlay from "./gamePlay";
-import { useMainStore } from "@/stores"
-const tiled = JSON.stringify('')
+import { useMainStore } from '@/stores'
 
-class GunGame {
-    private game: GamePlay
+class GunGame extends Phaser.Scene {
+    public MAX_WIDTH = 1480
+    public MAX_HEIGHT = 1000
+    public CAMERA_WIDTH: number
+    public CAMERA_HEIGHT: number
+    public x: number
+
     private mainStore: any
-    constructor(_this: any) {
-        this.game = _this
+    private background: Phaser.GameObjects.Image | undefined
+    private cameraGame: Phaser.Cameras.Scene2D.Camera | undefined
+    private tiledMapConfig: any
+    private map: Phaser.Tilemaps.Tilemap | undefined
+    private controls: any
+    constructor() {
+        super('gun-game')
         this.mainStore = useMainStore()
+        this.CAMERA_WIDTH = ((this.mainStore.width * this.mainStore.zoom) / 24) * 18
+        this.x = ((this.mainStore.width * this.mainStore.zoom) / 24) * 6 + 1
+        this.CAMERA_HEIGHT = this.mainStore.height * this.mainStore.zoom
     }
 
-    preload() {}
+    init({ tiledMapConfig }: { tiledMapConfig: string }) {
+        console.log('init')
+        this.tiledMapConfig = JSON.parse(tiledMapConfig)
+    }
+
+    preload() {
+        console.log('pre')
+
+        this.load.image('background-gun', this.tiledMapConfig.background)
+        this.load.tilemapTiledJSON('tilemap', this.tiledMapConfig)
+        this.load.image(this.tiledMapConfig.tilesets[0].name, this.tiledMapConfig.tilesets[0].image)
+    }
 
     create() {
-        // this.mainStore.width * this.mainStore.zoom - 402 = 1078
-        // this.mainStore.height * this.mainStore.zoom = 740
-        this.game.matter.world.setBounds(401, 0, this.mainStore.width * this.mainStore.zoom - 402, this.mainStore.height * this.mainStore.zoom)
+        // #region config world
+        console.log('create')
+        this.matter.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
+        this.matter.world.setGravity(0, 9.8)
+        // #endregion
 
-        this.game.matter.world.setGravity(undefined, 9.8)
+        // #region config camera
+        this.cameraGame = this.cameras.main
+        this.cameraGame.setViewport(this.x, 0, this.CAMERA_WIDTH, this.CAMERA_HEIGHT)
+        const cursors = this.input.keyboard!.createCursorKeys()
+        const controlConfig = {
+            camera: this.cameras.main,
+            left: cursors.left,
+            right: cursors.right,
+            up: cursors.up,
+            down: cursors.down,
+            speed: 0.5,
+        }
+        this.controls = new Phaser.Cameras.Controls.FixedKeyControl(controlConfig)
+        // #endregion
+
+        // #region config background
+        this.background = this.add.image(0, 0, 'background-gun')
+        this.background.setOrigin(0, 0)
+        // #endregion
+
+        // #region config tiled
+        this.map = this.make.tilemap({ key: 'tilemap' })
+
+        const tileSet = this.map.addTilesetImage(this.tiledMapConfig.tilesets[0].name)
+        const layer = this.map.createLayer('Tile Layer 1', tileSet!)
+        layer?.setSkipCull(true)
+        // #endregion
     }
 
-    update() {}
+    update(time: any, delta: any) {
+        this.controls.update(delta)
+    }
 }
 
 export default GunGame

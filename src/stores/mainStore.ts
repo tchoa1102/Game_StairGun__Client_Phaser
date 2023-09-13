@@ -6,14 +6,14 @@ import { GamePlay } from '@/scenes/index'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
 
-const MIN_WIDTH = 740
+const MIN_HEIGHT = 740
 
 const state: IState = {
     game: undefined,
     socket: io('http://localhost:4000'),
     zoom: 1,
-    width: MIN_WIDTH * 2,
-    height: MIN_WIDTH,
+    width: MIN_HEIGHT * 2,
+    height: MIN_HEIGHT,
 }
 const useMainStore = defineStore('main', {
     state: () => state,
@@ -33,7 +33,7 @@ const useMainStore = defineStore('main', {
     },
     actions: {
         init(heightScreen: number, initObject: IIndicator) {
-            this.zoom = heightScreen / MIN_WIDTH > 1 ? Math.floor(heightScreen / MIN_WIDTH) : 1
+            this.zoom = heightScreen / MIN_HEIGHT > 1 ? Math.floor(heightScreen / MIN_HEIGHT) : 1
             console.log('zoom: %d', this.zoom)
 
             const GAME_CONFIG: Phaser.Types.Core.GameConfig = {

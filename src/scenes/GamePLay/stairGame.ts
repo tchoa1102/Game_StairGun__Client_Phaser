@@ -18,9 +18,9 @@ class StairGame extends Phaser.Scene {
     private background: Phaser.GameObjects.Image | undefined
     private stairs: Array<IStair> | undefined
     constructor() {
-        super('stairGame')
+        super('stair-game')
         this.mainStore = useMainStore()
-        this.CAMERA_WIDTH = (this.mainStore.width * this.mainStore.zoom) / 3.7
+        this.CAMERA_WIDTH = ((this.mainStore.width * this.mainStore.zoom) / 24) * 6
         this.MARGIN_WIDTH = this.CAMERA_WIDTH / 2
         this.MARGIN_HEIGHT = this.mainStore.height / 2
         this.sticks = []
