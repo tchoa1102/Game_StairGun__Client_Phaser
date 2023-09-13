@@ -14,6 +14,9 @@ const state: IState = {
     zoom: 1,
     width: MIN_HEIGHT * 2,
     height: MIN_HEIGHT,
+    player: {
+        _id: '1',
+    },
 }
 const useMainStore = defineStore('main', {
     state: () => state,

@@ -6,9 +6,13 @@ interface IAnimation {
     [key: string]: Phaser.Animations.Animation | boolean
 }
 
+interface IExtendAnimationFrame extends Phaser.Types.Animations.AnimationFrame {
+    flipX: boolean | undefined
+}
+
 interface IAnimationItem {
     key: string | undefined
-    frames: Phaser.Types.Animations.AnimationFrame[]
+    frames: IExtendAnimationFrame[]
     frameRate: number | undefined
     repeat: number | undefined
     repeatDelay: number | undefined
@@ -32,7 +36,7 @@ interface IStickAnimationConfig {
         size: { w: number; h: number }
         scale: string
     }
-    src: string
+    src: Array<string>
     frames: {
         [key: string]: {
             frame: { x: number; y: number; w: number; h: number }
@@ -42,7 +46,7 @@ interface IStickAnimationConfig {
             sourceSize: { x: number; y: number }
         }
     }
-    animation: {
+    animations: {
         [key: string]: IAnimationItem
     }
 }

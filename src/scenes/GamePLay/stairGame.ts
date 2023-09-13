@@ -17,6 +17,7 @@ class StairGame extends Phaser.Scene {
     private sticks: Array<Stick>
     private background: Phaser.GameObjects.Image | undefined
     private stairs: Array<IStair> | undefined
+    private yourIndex: number | undefined
     constructor() {
         super('stair-game')
         this.mainStore = useMainStore()
@@ -26,16 +27,31 @@ class StairGame extends Phaser.Scene {
         this.sticks = []
     }
 
-    init({ stairs, fileConfigStick }: { stairs: string; fileConfigStick: string }) {
+    init({
+        players,
+        stairs,
+        fileConfigStick,
+    }: {
+        players: Array<any>
+        stairs: string
+        fileConfigStick: string
+    }) {
+        this.mainStore = useMainStore()
         this.stairs = JSON.parse(stairs)
-        this.sticks[0] = new Stick(
-            this,
-            'circleStick',
-            0,
-            this.MAX_HEIGHT - 100,
-            fileConfigStick,
-            0.5,
-        )
+        players.forEach((player: any, index: number) => {
+            if (this.mainStore.player._id === player._id) {
+                this.yourIndex = index
+                this.sticks[index] = new Stick(
+                    this,
+                    index,
+                    'circleStick-' + index,
+                    0,
+                    this.MAX_HEIGHT - 100,
+                    fileConfigStick,
+                    0.5,
+                )
+            }
+        })
     }
 
     preload() {
@@ -63,7 +79,8 @@ class StairGame extends Phaser.Scene {
             60,
         )
         marginTopRect.isStatic = true
-        this.matter.world.setGravity(0, 9.8)
+        // this.matter.world.setGravity(0, 9.8)
+        this.matter.pause()
         // #endregion
 
         // #region config background
@@ -74,7 +91,7 @@ class StairGame extends Phaser.Scene {
         // #region init stair
         this.stairs?.forEach((stair: IStair) => {
             const obj = this.matter.add.image(stair.x, stair.y, stair.img)
-            obj.setStatic(true)
+            // obj.setStatic(true)
 
             obj.scaleX = stair.width / obj.width
             obj.scaleY = stair.height / obj.height
@@ -98,22 +115,28 @@ class StairGame extends Phaser.Scene {
             this.mainStore.height * this.mainStore.zoom,
         )
         // #endregion
-
-        //
-        this.matter.world.on('collisionstart', (e: any) => {})
     }
 
     update() {
-        this.sticks[0].update()
-        const x = this.sticks[0].stickSprite ? this.sticks[0].stickSprite.x : 0
-        const y = this.sticks[0].stickSprite ? this.sticks[0].stickSprite.y : 0
+        this.sticks.forEach((stick: Stick, index: number) => {
+            if (this.yourIndex === index) {
+                this.sticks[this.yourIndex].handleEvent(false)
+            }
+            this.sticks[index].update()
+        })
+
+        // #region init game'params, again
         this.cameraGame!.startFollow(
-            this.sticks[0].stickSprite!,
+            this.sticks[this.yourIndex || 0].stickSprite!,
             true,
             this.CAMERA_V_X,
             this.CAMERA_V_Y,
         )
+        // #endregion
+
+        // #region fixed camera position
         this.cameraGame!.scrollX = Phaser.Math.Clamp(
+            //Clamp = (value, min, max) => Math.max(min, Math.min(max, value))
             this.cameraGame?.scrollX!,
             0,
             this.MAX_WIDTH - this.CAMERA_WIDTH,
@@ -123,9 +146,7 @@ class StairGame extends Phaser.Scene {
             0,
             this.MAX_HEIGHT - this.MARGIN_HEIGHT * 2,
         )
-        // var Clamp = function (value, min, max) {
-        //     return Math.max(min, Math.min(max, value))
-        // }
+        // #endregion
     }
 }
 

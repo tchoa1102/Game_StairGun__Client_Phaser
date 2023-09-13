@@ -3,6 +3,7 @@ import StairGame from './stairGame'
 import GunGame from './gunGame'
 import { useMainStore } from '@/stores'
 import { MatchService } from '@/services'
+import FETCH from '@/services/fetchConfig.service'
 
 const stairsData = {
     data: [
@@ -48,15 +49,17 @@ class GamePlay extends Phaser.Scene {
         const mainStore = useMainStore()
 
         const gameData = await MatchService.create({})
-        console.log(gameData)
+        console.log('GameData: ', gameData)
+        // const tiledMap = await FETCH(gameData.data.tiledMapConfig)
 
         this.stairGame = this.scene.add('stair-game', StairGame, true, {
+            players: gameData.data.players,
             stairs: JSON.stringify(gameData.data.stairs),
             fileConfigStick: JSON.stringify(gameData.data.stickConfig),
         })
-        this.gunGame = this.scene.add('gun-game', GunGame, true, {
-            tiledMapConfig: JSON.stringify(gameData.data.tiledMapConfig),
-        })
+        // this.gunGame = this.scene.add('gun-game', GunGame, true, {
+        //     tiledMapConfig: JSON.stringify(tiledMap),
+        // })
     }
 
     create() {

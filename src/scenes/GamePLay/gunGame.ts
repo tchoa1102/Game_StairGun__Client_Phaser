@@ -1,10 +1,14 @@
+import FETCH from '@/services/fetchConfig.service'
 import { useMainStore } from '@/stores'
 
 class GunGame extends Phaser.Scene {
+    // #region declare properties
     public MAX_WIDTH = 1480
     public MAX_HEIGHT = 1000
     public CAMERA_WIDTH: number
     public CAMERA_HEIGHT: number
+    private MARGIN_WIDTH: number
+    private MARGIN_HEIGHT: number
     public x: number
 
     private mainStore: any
@@ -13,12 +17,15 @@ class GunGame extends Phaser.Scene {
     private tiledMapConfig: any
     private map: Phaser.Tilemaps.Tilemap | undefined
     private controls: any
+    // #endregion
     constructor() {
         super('gun-game')
         this.mainStore = useMainStore()
         this.CAMERA_WIDTH = ((this.mainStore.width * this.mainStore.zoom) / 24) * 18
         this.x = ((this.mainStore.width * this.mainStore.zoom) / 24) * 6 + 1
         this.CAMERA_HEIGHT = this.mainStore.height * this.mainStore.zoom
+        this.MARGIN_WIDTH = this.CAMERA_WIDTH / 2
+        this.MARGIN_HEIGHT = this.mainStore.height / 2
     }
 
     init({ tiledMapConfig }: { tiledMapConfig: string }) {
@@ -45,12 +52,15 @@ class GunGame extends Phaser.Scene {
         this.cameraGame = this.cameras.main
         this.cameraGame.setViewport(this.x, 0, this.CAMERA_WIDTH, this.CAMERA_HEIGHT)
         const cursors = this.input.keyboard!.createCursorKeys()
+        // #endregion
+
+        // #region config controls
         const controlConfig = {
             camera: this.cameras.main,
-            left: cursors.left,
-            right: cursors.right,
-            up: cursors.up,
-            down: cursors.down,
+            left: cursors.shift && cursors.left,
+            right: cursors.shift && cursors.right,
+            up: cursors.shift && cursors.up,
+            down: cursors.shift && cursors.down,
             speed: 0.5,
         }
         this.controls = new Phaser.Cameras.Controls.FixedKeyControl(controlConfig)
@@ -72,6 +82,18 @@ class GunGame extends Phaser.Scene {
 
     update(time: any, delta: any) {
         this.controls.update(delta)
+
+        // fixed camera static
+        this.cameraGame!.scrollX = Phaser.Math.Clamp(
+            this.cameraGame?.scrollX!,
+            0,
+            this.MAX_WIDTH - this.CAMERA_WIDTH,
+        )
+        this.cameraGame!.scrollY = Phaser.Math.Clamp(
+            this.cameraGame?.scrollY!,
+            0,
+            this.MAX_HEIGHT - this.MARGIN_HEIGHT * 2,
+        )
     }
 }
 

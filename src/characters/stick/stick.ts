@@ -4,7 +4,7 @@ import { useMainStore } from '@/stores'
 import './interface'
 import type StairGame from '@/scenes/GamePLay/stairGame'
 
-const keyActivities = {
+const keyActivities: Record<string, string> = {
     stand: 'stand',
     runRight: 'runRight',
     runLeft: 'runLeft',
@@ -25,9 +25,18 @@ class Stick extends Character {
     private eventListener: IEventListener
     private fileConfig: IStickAnimationConfig
     public stickSprite: Phaser.Physics.Matter.Sprite | null
+    private index: number
     // #endregion
 
-    constructor(_this: any, name: string, x: number, y: number, fileConfig: string, scale: number) {
+    constructor(
+        _this: any,
+        index: number,
+        name: string,
+        x: number,
+        y: number,
+        fileConfig: string,
+        scale: number,
+    ) {
         super(_this, name, x, y)
         this.fileConfig = JSON.parse(fileConfig)
         // console.log(this.fileConfig)
@@ -36,17 +45,18 @@ class Stick extends Character {
         this.stickSprite = null
         this.eventListener = {}
         this.scale = scale
+        this.index = index
     }
 
     preload() {
-        this.game.load.atlas(this.name, this.fileConfig.src, this.fileConfig)
+        this.game.load.atlas(this.name, this.fileConfig.src[this.index], this.fileConfig)
     }
 
     create() {
         console.log(`%c\nCreate ${this.name}...\n`, 'color: red; font-size: 16px;')
         const mainStore = useMainStore()
         // #region init animation from config json
-        const animations = this.fileConfig.animation
+        const animations = this.fileConfig.animations
         for (const key in animations) {
             if (animations.hasOwnProperty(key)) {
                 const instance = animations[key]
@@ -90,34 +100,31 @@ class Stick extends Character {
         // #endregion
 
         // #region listeners collision
-        this.game.matter.world.on('collisionstart', (e: any) => {
-            e.pairs.forEach((pair: any) => {
-                const { bodyA, bodyB } = pair
-                // if (bodyA === this.stickSprite?.body || bodyB === this.stickSprite?.body) {
-                //     // Check collision bodyA or bodyB is world bottom
-                //     if (
-                //         bodyA.position.y >= this.game.MAX_HEIGHT ||
-                //         bodyB.position.y >= this.game.MAX_HEIGHT
-                //     ) {
-                //     }
-                // }
-            })
-        })
+        // this.game.matter.world.on('collisionstart', (e: any) => {
+        //     e.pairs.forEach((pair: any) => {
+        //         const { bodyA, bodyB } = pair
+        //         // if (bodyA === this.stickSprite?.body || bodyB === this.stickSprite?.body) {
+        //         //     // Check collision bodyA or bodyB is world bottom
+        //         //     if (
+        //         //         bodyA.position.y >= this.game.MAX_HEIGHT ||
+        //         //         bodyB.position.y >= this.game.MAX_HEIGHT
+        //         //     ) {
+        //         //     }
+        //         // }
+        //     })
+        // })
         // #endregion
     }
 
-    update() {
-        this.handleEvent()
-        this.updateLocation()
+    update(event?: string, x?: number, y?: number): void {
+        this.setLocation({ x, y })
         // to keep sprite stand
         this.stickSprite?.setAngle(0)
         this.updateSpriteSize()
     }
 
-    handleEvent() {
+    handleEvent(isEvent: boolean) {
         // console.log(`%c\nUpdating stick ${this.name}...\n`, 'color: blue; font-size: 16px;');
-        let isEvent = false
-        const cur = this.stickSprite?.anims.currentAnim
         const isLeftDown = this.eventListener.left?.isDown || false
         const isRightDown = this.eventListener.right?.isDown || false
         const isJumpUp = this.eventListener.jumpUp?.isDown || false
@@ -125,57 +132,48 @@ class Stick extends Character {
         if (isJumpUp && isLeftDown) {
             // console.log('jumpUp and left')
             isEvent = true
-            const keyJumpLeft = initKeyAnimation(this.name, keyActivities.jumpLeft)
 
-            if (cur !== this.stickAnimation[keyJumpLeft]) {
-                this.stickSprite?.setVelocityY(-this.vy)
-                this.stickSprite?.anims.play(keyJumpLeft)
+            if (this.updateAnimation('jumpLeft')) {
+                // this.stickSprite?.setVelocityY(-this.vy)
+                this.stickSprite?.setY(this.stickSprite.y - 100)
             }
         } else if (isJumpUp && isRightDown) {
             // console.log('jumpUp and right')
             isEvent = true
-            const keyJumpRight = initKeyAnimation(this.name, keyActivities.jumpRight)
-
-            if (cur !== this.stickAnimation[keyJumpRight]) {
-                this.stickSprite?.setVelocityY(-this.vy)
-                this.stickSprite?.anims.play(keyJumpRight)
+            if (this.updateAnimation('jumpRight')) {
+                // this.stickSprite?.setVelocityY(-this.vy)
+                this.stickSprite?.setY(this.stickSprite.y - 100)
             }
-        } else {
-            let keyAnim = initKeyAnimation(this.name, keyActivities.runLeft)
+        } else if (isLeftDown || isRightDown) {
+            let keyAnim = 'runLeft'
             if (isLeftDown) {
                 isEvent = true
             }
             if (isRightDown) {
                 isEvent = true
-                keyAnim = initKeyAnimation(this.name, keyActivities.runRight)
+                keyAnim = 'runRight'
             }
-            if (isEvent && cur !== this.stickAnimation[keyAnim]) {
-                this.stickSprite?.anims.play(keyAnim)
-            }
+            this.updateAnimation(keyAnim)
         }
 
         // moving
         if (this.eventListener.left?.isDown) {
-            this.stickSprite?.setVelocityX(-this.vx)
+            // this.stickSprite?.setVelocityX(-this.vx)
             // this.stickSprite?.setX(this.stickSprite.x - 8)
         }
 
         if (this.eventListener.right?.isDown) {
-            this.stickSprite?.setVelocityX(this.vx)
+            // this.stickSprite?.setVelocityX(this.vx)
             // this.stickSprite?.setX(this.stickSprite.x + 8)
         }
 
-        // flip
-        this.stickSprite?.setFlipX(isLeftDown)
-
         // recovery animation
-        const keyAnim = initKeyAnimation(this.name, keyActivities.stand)
-        if (!isEvent && cur !== this.stickAnimation[keyAnim]) {
-            this.stickSprite?.anims.play(keyAnim)
-        }
+        !isEvent && this.updateAnimation('stand')
     }
 
-    updateLocation() {
+    setLocation({ x, y }: { x?: number; y?: number }) {
+        x && this.stickSprite?.setX(x)
+        y && this.stickSprite?.setY(y)
         this.locationX = this.stickSprite?.x || 200
         this.locationY = this.stickSprite?.y || 200
     }
@@ -201,6 +199,19 @@ class Stick extends Character {
         this.stickSprite?.setVelocity(vx, vy)
 
         // this.stickSprite?.setFixedRotation()
+    }
+
+    updateAnimation(event: string) {
+        const cur = this.stickSprite?.anims.currentAnim
+        const key = initKeyAnimation(this.name, keyActivities[event])
+
+        if (cur !== this.stickAnimation[key]) {
+            this.stickSprite?.anims.play(key)
+            return true
+        }
+        // flip
+        this.stickSprite?.setFlipX(this.fileConfig?.animations[event]?.frames[0].flipX || false)
+        return false
     }
 }
 

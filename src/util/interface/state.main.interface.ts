@@ -6,4 +6,7 @@ export default interface IState {
     zoom: number
     width: number
     height: number
+    player: {
+        [key: string]: any
+    }
 }
