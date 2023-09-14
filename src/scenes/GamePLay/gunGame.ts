@@ -28,9 +28,9 @@ class GunGame extends Phaser.Scene {
         this.MARGIN_HEIGHT = this.mainStore.height / 2
     }
 
-    init({ tiledMapConfig }: { tiledMapConfig: string }) {
+    init({ tiledMapConfig }: { tiledMapConfig: any }) {
         console.log('init')
-        this.tiledMapConfig = JSON.parse(tiledMapConfig)
+        this.tiledMapConfig = tiledMapConfig
     }
 
     preload() {
@@ -81,19 +81,18 @@ class GunGame extends Phaser.Scene {
     }
 
     update(time: any, delta: any) {
-        this.controls.update(delta)
-
-        // fixed camera static
-        this.cameraGame!.scrollX = Phaser.Math.Clamp(
-            this.cameraGame?.scrollX!,
-            0,
-            this.MAX_WIDTH - this.CAMERA_WIDTH,
-        )
-        this.cameraGame!.scrollY = Phaser.Math.Clamp(
-            this.cameraGame?.scrollY!,
-            0,
-            this.MAX_HEIGHT - this.MARGIN_HEIGHT * 2,
-        )
+        // this.controls.update(delta)
+        // // fixed camera static
+        // this.cameraGame!.scrollX = Phaser.Math.Clamp(
+        //     this.cameraGame?.scrollX!,
+        //     0,
+        //     this.MAX_WIDTH - this.CAMERA_WIDTH,
+        // )
+        // this.cameraGame!.scrollY = Phaser.Math.Clamp(
+        //     this.cameraGame?.scrollY!,
+        //     0,
+        //     this.MAX_HEIGHT - this.MARGIN_HEIGHT * 2,
+        // )
     }
 }
 

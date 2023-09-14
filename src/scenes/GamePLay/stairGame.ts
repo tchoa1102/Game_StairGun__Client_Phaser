@@ -103,7 +103,12 @@ class StairGame extends Phaser.Scene {
         // #endregion
 
         // #region init game object
-        this.sticks[0].create()
+        this.sticks.forEach((stick: Stick, index: number) => {
+            stick.create()
+            if (this.yourIndex === index) {
+                stick.addEvent()
+            }
+        })
         // #endregion
 
         // #region config camera
@@ -117,12 +122,10 @@ class StairGame extends Phaser.Scene {
         // #endregion
     }
 
-    update() {
+    async update() {
+        this.sticks[this.yourIndex || 0].handleKeyEvent()
         this.sticks.forEach((stick: Stick, index: number) => {
-            if (this.yourIndex === index) {
-                this.sticks[this.yourIndex].handleEvent(false)
-            }
-            this.sticks[index].update()
+            stick.update()
         })
 
         // #region init game'params, again

@@ -4,20 +4,19 @@ import { useMainStore } from '@/stores'
 import './interface'
 import type StairGame from '@/scenes/GamePLay/stairGame'
 
-const keyActivities: Record<string, string> = {
-    stand: 'stand',
-    runRight: 'runRight',
-    runLeft: 'runLeft',
-    jumpRight: 'jumpRight',
-    jumpLeft: 'jumpLeft',
-}
-
 const initKeyAnimation = (name: string, key: string) => `animation_${name}_${key}`
 
 class Stick extends Character {
     // #region declaration
-    private locationX = 0
-    private locationY = 0
+    public keyActivities: Record<string, string> = {
+        stand: 'stand',
+        runRight: 'runRight',
+        runLeft: 'runLeft',
+        jumpRight: 'jumpRight',
+        jumpLeft: 'jumpLeft',
+    }
+    private locationX = 600
+    private locationY = 3400
     private vy = 200
     private vx = 8
     private scale: number
@@ -82,21 +81,8 @@ class Stick extends Character {
         // this.stickSprite = this.game.matter.add.gameObject(
         //     this.game.add.sprite(0, 600, this.name),
         // ) as Phaser.Physics.Matter.Sprite
-        this.stickSprite.setVelocityY(9.8)
-        this.stickSprite.anims.play(initKeyAnimation(this.name, keyActivities.stand))
-        // #endregion
-
-        // #region add event
-        this.eventListener.left = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A)
-        this.eventListener.right = this.game.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.D,
-        )
-        this.eventListener.jumpUp = this.game.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.W,
-        )
-        this.eventListener.jumpDown = this.game.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.S,
-        )
+        // this.stickSprite.setVelocityY(9.8)
+        this.stickSprite.anims.play(initKeyAnimation(this.name, this.keyActivities.stand))
         // #endregion
 
         // #region listeners collision
@@ -116,59 +102,39 @@ class Stick extends Character {
         // #endregion
     }
 
-    update(event?: string, x?: number, y?: number): void {
-        this.setLocation({ x, y })
+    update(): void {
         // to keep sprite stand
         this.stickSprite?.setAngle(0)
         this.updateSpriteSize()
     }
 
-    handleEvent(isEvent: boolean) {
-        // console.log(`%c\nUpdating stick ${this.name}...\n`, 'color: blue; font-size: 16px;');
-        const isLeftDown = this.eventListener.left?.isDown || false
-        const isRightDown = this.eventListener.right?.isDown || false
-        const isJumpUp = this.eventListener.jumpUp?.isDown || false
+    updateData({ event, x, y }: { event?: string; x?: number; y?: number }): void {
+        this.setLocation({ x, y })
+        this.updateAnimation(event!)
+    }
 
-        if (isJumpUp && isLeftDown) {
-            // console.log('jumpUp and left')
-            isEvent = true
+    checkAnimation(event: string): boolean {
+        const e = event || this.keyActivities.stand
+        const cur = this.stickSprite?.anims.currentAnim
+        const key = initKeyAnimation(this.name, this.keyActivities[e])
 
-            if (this.updateAnimation('jumpLeft')) {
-                // this.stickSprite?.setVelocityY(-this.vy)
-                this.stickSprite?.setY(this.stickSprite.y - 100)
-            }
-        } else if (isJumpUp && isRightDown) {
-            // console.log('jumpUp and right')
-            isEvent = true
-            if (this.updateAnimation('jumpRight')) {
-                // this.stickSprite?.setVelocityY(-this.vy)
-                this.stickSprite?.setY(this.stickSprite.y - 100)
-            }
-        } else if (isLeftDown || isRightDown) {
-            let keyAnim = 'runLeft'
-            if (isLeftDown) {
-                isEvent = true
-            }
-            if (isRightDown) {
-                isEvent = true
-                keyAnim = 'runRight'
-            }
-            this.updateAnimation(keyAnim)
+        if (cur !== this.stickAnimation[key]) return false
+        return true
+    }
+
+    updateAnimation(event?: string): boolean {
+        const e = event || this.keyActivities.stand
+        const cur = this.stickSprite?.anims.currentAnim
+        const key = initKeyAnimation(this.name, this.keyActivities[e])
+        // flip
+        this.stickSprite?.setFlipX(this.fileConfig?.animations[e]?.frames[0].flipX || false)
+
+        if (cur !== this.stickAnimation[key]) {
+            this.stickSprite?.anims.play(key)
+            return true
         }
 
-        // moving
-        if (this.eventListener.left?.isDown) {
-            // this.stickSprite?.setVelocityX(-this.vx)
-            // this.stickSprite?.setX(this.stickSprite.x - 8)
-        }
-
-        if (this.eventListener.right?.isDown) {
-            // this.stickSprite?.setVelocityX(this.vx)
-            // this.stickSprite?.setX(this.stickSprite.x + 8)
-        }
-
-        // recovery animation
-        !isEvent && this.updateAnimation('stand')
+        return false
     }
 
     setLocation({ x, y }: { x?: number; y?: number }) {
@@ -201,17 +167,49 @@ class Stick extends Character {
         // this.stickSprite?.setFixedRotation()
     }
 
-    updateAnimation(event: string) {
-        const cur = this.stickSprite?.anims.currentAnim
-        const key = initKeyAnimation(this.name, keyActivities[event])
+    addEvent() {
+        this.eventListener.left = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A)
+        this.eventListener.right = this.game.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.D,
+        )
+        this.eventListener.jump = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W)
+        this.eventListener.down = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S)
+    }
 
-        if (cur !== this.stickAnimation[key]) {
-            this.stickSprite?.anims.play(key)
-            return true
+    async handleKeyEvent() {
+        // console.log(`%c\nUpdating stick ${this.name}...\n`, 'color: blue; font-size: 16px;');
+        let isEventKeyDown = false
+        // key animation default
+        let keyAnim = this.keyActivities.stand
+        const isLeftDown = this.eventListener.left?.isDown || false
+        const isRightDown = this.eventListener.right?.isDown || false
+        const isJumpDown = this.eventListener.jump?.isDown || false
+
+        if (isJumpDown && isLeftDown) {
+            isEventKeyDown = true
+            keyAnim = this.keyActivities.jumpLeft
+        } else if (isJumpDown && isRightDown) {
+            isEventKeyDown = true
+            keyAnim = this.keyActivities.jumpRight
+        } else if (isLeftDown) {
+            isEventKeyDown = true
+            keyAnim = this.keyActivities.runLeft
+        } else if (isRightDown) {
+            isEventKeyDown = true
+            keyAnim = this.keyActivities.runRight
         }
-        // flip
-        this.stickSprite?.setFlipX(this.fileConfig?.animations[event]?.frames[0].flipX || false)
-        return false
+
+        // check key up and animation isn't stand
+        if (!isEventKeyDown && !this.checkAnimation(this.keyActivities.stand)) {
+            console.log('stand')
+        }
+
+        if (isEventKeyDown) {
+            // send event to api
+        }
+
+        // recovery animation
+        // this.updateAnimation(keyAnim)
     }
 }
 

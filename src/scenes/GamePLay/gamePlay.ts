@@ -50,7 +50,7 @@ class GamePlay extends Phaser.Scene {
 
         const gameData = await MatchService.create({})
         console.log('GameData: ', gameData)
-        // const tiledMap = await FETCH(gameData.data.tiledMapConfig)
+        const tiledMap = await FETCH(gameData.data.tiledMapConfig)
 
         this.stairGame = this.scene.add('stair-game', StairGame, true, {
             players: gameData.data.players,
@@ -58,7 +58,7 @@ class GamePlay extends Phaser.Scene {
             fileConfigStick: JSON.stringify(gameData.data.stickConfig),
         })
         // this.gunGame = this.scene.add('gun-game', GunGame, true, {
-        //     tiledMapConfig: JSON.stringify(tiledMap),
+        //     tiledMapConfig: tiledMap,
         // })
     }
 
