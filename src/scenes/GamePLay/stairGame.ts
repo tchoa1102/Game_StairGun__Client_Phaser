@@ -109,6 +109,7 @@ class StairGame extends Phaser.Scene {
                 stick.addEvent()
             }
         })
+        this.receivingState()
         // #endregion
 
         // #region config camera
@@ -150,6 +151,18 @@ class StairGame extends Phaser.Scene {
             this.MAX_HEIGHT - this.MARGIN_HEIGHT * 2,
         )
         // #endregion
+    }
+
+    receivingState() {
+        this.mainStore.getSocket.on('stick-keyboard-event', (data: any) => {
+            console.log(data)
+            this.sticks.forEach((stick: Stick, index: number) => {
+                if (data._id === this.mainStore.getPlayer._id) {
+                    stick.updateData({ event: data.event })
+                }
+            })
+            // this.updateData({ event: data.event, x: data.x, y: data.y })
+        })
     }
 }
 

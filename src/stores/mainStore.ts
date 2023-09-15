@@ -16,6 +16,8 @@ const state: IState = {
     height: MIN_HEIGHT,
     player: {
         _id: '1',
+        clientId: '59tdxkryAif07wY7AAAA',
+        socketId: 'abc',
     },
 }
 const useMainStore = defineStore('main', {
@@ -23,6 +25,9 @@ const useMainStore = defineStore('main', {
     getters: {
         getSocket(): typeof this.socket {
             return this.socket
+        },
+        getPlayer(): typeof this.player {
+            return this.player
         },
         getWidth(): number {
             return this.width

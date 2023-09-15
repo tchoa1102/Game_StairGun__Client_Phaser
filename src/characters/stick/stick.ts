@@ -3,6 +3,7 @@ import { Character } from '..'
 import { useMainStore } from '@/stores'
 import './interface'
 import type StairGame from '@/scenes/GamePLay/stairGame'
+import { StickService } from '@/services/socket'
 
 const initKeyAnimation = (name: string, key: string) => `animation_${name}_${key}`
 
@@ -25,6 +26,7 @@ class Stick extends Character {
     private fileConfig: IStickAnimationConfig
     public stickSprite: Phaser.Physics.Matter.Sprite | null
     private index: number
+    private mainStore: any
     // #endregion
 
     constructor(
@@ -45,6 +47,7 @@ class Stick extends Character {
         this.eventListener = {}
         this.scale = scale
         this.index = index
+        this.mainStore = useMainStore()
     }
 
     preload() {
@@ -197,19 +200,32 @@ class Stick extends Character {
         } else if (isRightDown) {
             isEventKeyDown = true
             keyAnim = this.keyActivities.runRight
+            // console.log('right')
         }
 
         // check key up and animation isn't stand
         if (!isEventKeyDown && !this.checkAnimation(this.keyActivities.stand)) {
-            console.log('stand')
+            // console.log('stand')
+            StickService.stand(this.mainStore.getSocket, this.mainStore.getPlayer, keyAnim)
         }
 
         if (isEventKeyDown) {
             // send event to api
+            this.sendEvent(keyAnim)
         }
 
         // recovery animation
         // this.updateAnimation(keyAnim)
+    }
+
+    sendEvent(keyEvent: string) {
+        if (typeof StickService[keyEvent as keyof typeof StickService] === 'function') {
+            StickService[keyEvent as keyof typeof StickService](
+                this.mainStore.getSocket,
+                this.mainStore.getPlayer,
+                keyEvent,
+            )
+        }
     }
 }
 
