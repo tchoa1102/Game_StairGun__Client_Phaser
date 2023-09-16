@@ -18,15 +18,16 @@
 </template>
 
 <script>
-import { signInWithGoogle } from '../services/firebase.service'
+import { firebaseService } from '../services'
 export default {
     data() {
         return {}
     },
     methods: {
         async loginWithGoogle() {
-            const data = await signInWithGoogle()
+            const data = await firebaseService.signInWithGoogle()
             console.log(data)
+            console.log(firebaseService.auth.currentUser)
         },
     },
 }

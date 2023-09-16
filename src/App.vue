@@ -1,23 +1,27 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMainStore } from './stores'
-import { useRoute, useRouter } from 'vue-router'
+import { type Router, useRoute, useRouter, type RouteLocationNormalizedLoaded } from 'vue-router'
+import firebaseService from './services/firebase.service'
+import { authService } from './services'
+import { type User, onAuthStateChanged } from 'firebase/auth'
 
 const mainStore = useMainStore()
 onMounted(() => {
-    mainStore.socket.on('connection', (data: any) => {
-        console.log('data connection: ', data)
+    const route: RouteLocationNormalizedLoaded = useRoute()
+    const router: Router = useRouter()
+    console.log('Route: ', route)
+    mainStore.socket.on('connection', async (data: any) => {
         mainStore.player.clientId = data.clientId
         mainStore.player.socketId = data.socketId
+
+        console.group('Connection: ')
+        console.log('data connection: ', data)
         console.log('Player: ', mainStore.player)
+        console.groupEnd()
     })
+    firebaseService.autoSignIn(route, router)
 })
-const route = useRoute()
-console.log([route])
-if (!localStorage.getItem('accessToken')) {
-    const router = useRouter()
-    router.push({ name: 'login' })
-}
 </script>
 
 <template>

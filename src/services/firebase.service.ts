@@ -1,13 +1,21 @@
-import { initializeApp } from 'firebase/app'
+import { getToken } from '@/util/shares'
+import axios, { type AxiosResponse } from 'axios'
+import { initializeApp, type FirebaseApp } from 'firebase/app'
 import {
-    browserLocalPersistence,
-    browserPopupRedirectResolver,
-    browserSessionPersistence,
     getAuth,
     GoogleAuthProvider,
-    setPersistence,
     signInWithPopup,
+    type Auth,
+    type UserCredential,
+    setPersistence,
+    browserLocalPersistence,
+    onAuthStateChanged,
+    type User,
 } from 'firebase/auth'
+import type { RouteLocationNormalizedLoaded, Router } from 'vue-router'
+
+import { useMainStore } from '@/stores'
+import authService from './auth.service'
 
 const firebaseSettings = {
     apiKey: 'AIzaSyCWB2y7o4HkwG2i1XJbDxO7eTtEfkRMwME',
@@ -17,32 +25,67 @@ const firebaseSettings = {
     messagingSenderId: '17874562481',
     appId: '1:17874562481:web:62c90da73c4e343b0aa190',
 }
+async function saveUser(accessToken: string) {
+    await axios
+        .create({
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        })
+        .get('http://localhost:4000/api/auth/login')
+}
 
-const app = initializeApp(firebaseSettings)
-export const auth = getAuth(app)
-const provider = new GoogleAuthProvider()
-export const signInWithGoogle = async () => {
-    try {
-        const result = await signInWithPopup(auth, provider)
-        localStorage.setItem('accessToken', (result.user as any).accessToken)
-        localStorage.setItem('refreshToken', result.user.refreshToken)
+class FirebaseService {
+    public auth: Auth
 
-        const proactiveRefresh = (result.user as any).proactiveRefresh
-        proactiveRefresh.isRunning = true
-        const timer = setInterval(async () => {
-            // console.log('time expired, ', proactiveRefresh)
-            const newAccessToken = await auth.currentUser?.getIdToken(true)
-            localStorage.setItem('accessToken', newAccessToken!)
-
-            return
-        }, proactiveRefresh.errorBackoff - 5000)
-        proactiveRefresh.timerId = timer
-
-        // clearTimeout(timer)
-        return result
-    } catch (e) {
-        console.log(e)
+    private app: FirebaseApp
+    private provider: GoogleAuthProvider
+    constructor() {
+        this.app = initializeApp(firebaseSettings)
+        this.provider = new GoogleAuthProvider()
+        this.auth = getAuth(this.app)
     }
 
-    return null
+    async signInWithGoogle() {
+        try {
+            await setPersistence(this.auth, browserLocalPersistence)
+            const result: UserCredential = await signInWithPopup(this.auth, this.provider)
+            await saveUser((result.user as any).accessToken)
+            return result
+        } catch (e) {
+            console.log(e)
+        }
+
+        return null
+    }
+
+    autoSignIn(route: RouteLocationNormalizedLoaded, router: Router) {
+        onAuthStateChanged(
+            this.auth,
+            async (user: User | null) => {
+                console.log('user: ', user)
+                console.log('auth: ', this.auth)
+                // user is not existing, then redirect to login page
+                if (!user) {
+                    return router.push({ name: 'login' })
+                }
+
+                const userLoaded = await authService.loadUser()
+                const mainStore = useMainStore()
+                mainStore.player = { ...userLoaded }
+                console.log('Player loaded: ', mainStore.player)
+
+                // user !== null and this page is login page, then redirect to home page
+                if (route.name === 'login') {
+                    return router.push({ name: 'home' })
+                }
+            },
+            (e: Error) => {
+                router.push({ name: 'login' })
+                console.log(e)
+            },
+        )
+    }
 }
+
+export default new FirebaseService()
