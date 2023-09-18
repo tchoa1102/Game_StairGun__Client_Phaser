@@ -1,7 +1,14 @@
+import Board from '@/components/board.game'
 import BootDuel from '../BootGame/bootDuel'
+import BoardListRoom from '@/components/BoardListRoom'
+
+const CONSTANTS = {
+    character: 'src/assets/character.png',
+}
 
 class Home extends Phaser.Scene {
     private statesScreen: Array<string>
+    private section: Phaser.GameObjects.DOMElement | undefined
     constructor() {
         super('home')
         this.statesScreen = []
@@ -15,6 +22,25 @@ class Home extends Phaser.Scene {
         const background = this.add.image(0, 0, 'home-background')
         background.setOrigin(0)
         this.physics.pause()
+        const board = new BoardListRoom(this, () => console.log('Exit'))
+
+        // this.scene.add('bootDuel', BootDuel, true)
+
+        // #region create func
+        this.section = this.add.dom(0, 0, 'section').setOrigin(0)
+
+        const sectionFuncBottomRight = this.add
+            .dom(1480, 700, 'section', {
+                'padding-right': '50px',
+            })
+            .setOrigin(1)
+        const character = this.add.dom(0, 0, 'div', {
+            width: '50px',
+            height: '50px',
+            'background-image': `url(${CONSTANTS.character})`,
+        })
+        sectionFuncBottomRight.node.appendChild(character.node)
+        this.section.node.appendChild(sectionFuncBottomRight.node)
 
         // #region create polygon building
         const duelBuilding = this.add.polygon(

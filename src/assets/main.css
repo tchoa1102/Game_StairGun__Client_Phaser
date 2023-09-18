@@ -14,3 +14,59 @@
 .d-none {
   display: none !important;
 }
+
+.d-flex {
+  display: flex !important;
+}
+
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+
+.flex-normal {
+  justify-content: space-between;
+  align-content: start;
+  align-items: center;
+}
+
+.position-relative {
+  position: relative !important;
+}
+
+.top-auto {
+  top: auto !important;
+}
+
+.left-auto {
+  left: auto !important;
+}
+
+.box-func {
+  width: 50px;
+  height: 50px;
+  transform: translate(-50%, -50%) !important;
+}
+
+::placeholder {
+  color: #fff;
+}
+
+
+.scrollbar::-webkit-scrollbar {
+  width: 4px;
+  border-radius: 50%;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: #ffffff69; 
+  border-radius: 4px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background: #5d9cf1;
+  border-radius: 4px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #5d9cf8; 
+}

@@ -31,25 +31,28 @@ class BootDuel extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
         this.physics.pause()
 
-        const background = this.add.image(0, 0, 'bootDuel-background')
-        background.setOrigin(0)
+        const background = this.add.image(0, 0, 'bootDuel-background').setOrigin(0)
 
-        this.section = this.add.dom(0, 0, 'section')
+        this.section = this.add.dom(0, 0, 'section').setOrigin(0)
+
+        const sectionFuncBottomRight = this.add
+            .dom(1480, 700, 'section', {
+                'padding-right': '50px',
+            })
+            .setOrigin(1) // render from bottom-right to left
         const backButton = this.add
-            .dom(300, 400, 'div', {
+            .dom(0, -55, 'div', {
                 width: '50px',
                 height: '50px',
-                // background: 'red',
                 'background-image': `url(${CONSTANTS.goOut})`,
-                color: '#fff',
-                'font-size': '16px Arial',
             })
             .addListener('click')
             .on('click', () => {
                 this.section!.node.classList.add('d-none')
                 ;(this.scene.get('home') as any).visibleScene('bootDuel')
             })
-        this.section.node.appendChild(backButton.node)
+        sectionFuncBottomRight.node.appendChild(backButton.node)
+        this.section.node.appendChild(sectionFuncBottomRight.node)
     }
 
     update() {
