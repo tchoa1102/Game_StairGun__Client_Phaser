@@ -3,11 +3,9 @@ import { onMounted } from 'vue'
 import { useMainStore } from './stores'
 import { type Router, useRoute, useRouter, type RouteLocationNormalizedLoaded } from 'vue-router'
 import firebaseService from './services/firebase.service'
-import { authService } from './services'
-import { type User, onAuthStateChanged } from 'firebase/auth'
 
 const mainStore = useMainStore()
-onMounted(() => {
+onMounted(async () => {
     const route: RouteLocationNormalizedLoaded = useRoute()
     const router: Router = useRouter()
     console.log('Route: ', route)
@@ -20,7 +18,7 @@ onMounted(() => {
         console.log('Player: ', mainStore.player)
         console.groupEnd()
     })
-    firebaseService.autoSignIn(route, router)
+    await firebaseService.autoSignIn(route, router)
 })
 </script>
 

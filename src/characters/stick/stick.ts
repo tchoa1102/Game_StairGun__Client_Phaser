@@ -24,7 +24,7 @@ class Stick extends Character {
     private stickAnimation: IAnimation
     private eventListener: IEventListener
     private fileConfig: IStickAnimationConfig
-    public stickSprite: Phaser.Physics.Matter.Sprite | null
+    public stickSprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null
     private index: number
     private mainStore: any
     // #endregion
@@ -80,7 +80,7 @@ class Stick extends Character {
         // #endregion
 
         // #region init sprite
-        this.stickSprite = this.game.matter.add.sprite(this.x!, this.y!, this.name)
+        this.stickSprite = this.game.physics.add.sprite(this.x!, this.y!, this.name)
         // this.stickSprite = this.game.matter.add.gameObject(
         //     this.game.add.sprite(0, 600, this.name),
         // ) as Phaser.Physics.Matter.Sprite
@@ -156,11 +156,7 @@ class Stick extends Character {
         const vy = curVelocity?.y ? curVelocity.y * this.scale : 0
         // this.stickSprite?.setSize(width, height)
         // this.stickSprite?.setRectangle(width, height)
-        this.stickSprite?.setBody({
-            type: 'rectangle',
-            width,
-            height,
-        })
+        this.stickSprite?.setBodySize(width, height, true)
         this.stickSprite?.setPosition(this.locationX, this.locationY)
         // this.stickSprite?.setOriginFromFrame()
         // this.stickSprite?.setExistingBody(this.stickSprite.body as MatterJS.BodyType)

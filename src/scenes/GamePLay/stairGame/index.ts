@@ -1,8 +1,14 @@
 import { Stick } from '@/characters'
 import { useMainStore } from '@/stores'
-import './gamePlay.interface'
+import '../gamePlay.interface'
+
+const CONSTANTS = {
+    background:
+        'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
+}
 
 class StairGame extends Phaser.Scene {
+    // #region declarations
     public MAX_WIDTH = 1000
     public MAX_HEIGHT = 3500
     public staticGroup: Phaser.GameObjects.Group | undefined
@@ -18,6 +24,7 @@ class StairGame extends Phaser.Scene {
     private background: Phaser.GameObjects.Image | undefined
     private stairs: Array<IStair> | undefined
     private yourIndex: number | undefined
+    // #endregion
     constructor() {
         super('stair-game')
         this.mainStore = useMainStore()
@@ -39,27 +46,25 @@ class StairGame extends Phaser.Scene {
         this.mainStore = useMainStore()
         this.stairs = JSON.parse(stairs)
         players.forEach((player: any, index: number) => {
-            if (this.mainStore.player._id === player._id) {
-                this.yourIndex = index
-                this.sticks[index] = new Stick(
-                    this,
-                    index,
-                    'circleStick-' + index,
-                    0,
-                    this.MAX_HEIGHT - 100,
-                    fileConfigStick,
-                    0.5,
-                )
-            }
+            this.yourIndex = index
+            const stick = new Stick(
+                this,
+                index,
+                'circleStick-' + index,
+                0,
+                this.MAX_HEIGHT - 100,
+                fileConfigStick,
+                0.5,
+            )
+            this.sticks.push(stick)
+            // if (this.mainStore.player._id === player._id) {
+            // }
         })
     }
 
     preload() {
         this.sticks.forEach((stick: Stick) => stick.preload())
-        this.load.image(
-            'background',
-            'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
-        )
+        this.load.image('stairGame-background', CONSTANTS.background)
         const stairIsLoading: Array<string> = []
         this.stairs?.forEach((stair: IStair) => {
             const isLoaded = stairIsLoading.includes(stair.img)
@@ -71,26 +76,18 @@ class StairGame extends Phaser.Scene {
 
     create() {
         // #region config matter
-        this.matter.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
-        const marginTopRect = this.matter.add.rectangle(
-            this.MAX_WIDTH / 2,
-            1,
-            this.MAX_WIDTH + 100,
-            60,
-        )
-        marginTopRect.isStatic = true
-        // this.matter.world.setGravity(0, 9.8)
-        this.matter.pause()
+        this.physics.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
+        this.physics.pause()
         // #endregion
 
         // #region config background
-        this.background = this.add.image(0, 0, 'background')
+        this.background = this.add.image(0, 0, 'stairGame-background')
         this.background.setOrigin(0, 0)
         // #endregion
 
         // #region init stair
         this.stairs?.forEach((stair: IStair) => {
-            const obj = this.matter.add.image(stair.x, stair.y, stair.img)
+            const obj = this.add.image(stair.x, stair.y, stair.img)
             // obj.setStatic(true)
 
             obj.scaleX = stair.width / obj.width
@@ -155,7 +152,7 @@ class StairGame extends Phaser.Scene {
 
     receivingState() {
         this.mainStore.getSocket.on('stick-keyboard-event', (data: any) => {
-            console.log(data)
+            // console.log(data)
             this.sticks.forEach((stick: Stick, index: number) => {
                 if (data._id === this.mainStore.getPlayer._id) {
                     stick.updateData({ event: data.event })

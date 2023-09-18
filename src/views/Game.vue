@@ -14,17 +14,14 @@ export default {
     data() {
         return {}
     },
-    created() {
-        /**
-         * If you don't log in, then you will be redirected to Login Screen.
-         */
+    watch: {
+        'mainStore.player._id'() {
+            this.mainStore.init(document.getElementById('main').getBoundingClientRect().height, {
+                parent: 'game',
+            })
+        },
     },
-    mounted() {
-        console.log(document.getElementById('main').getBoundingClientRect().height)
-        this.mainStore.init(document.getElementById('main').getBoundingClientRect().height, {
-            parent: 'game',
-        })
-    },
+    mounted() {},
 }
 </script>
 

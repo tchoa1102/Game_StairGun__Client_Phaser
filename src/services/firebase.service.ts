@@ -59,7 +59,7 @@ class FirebaseService {
         return null
     }
 
-    autoSignIn(route: RouteLocationNormalizedLoaded, router: Router) {
+    async autoSignIn(route: RouteLocationNormalizedLoaded, router: Router) {
         onAuthStateChanged(
             this.auth,
             async (user: User | null) => {

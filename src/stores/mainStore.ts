@@ -2,9 +2,10 @@ import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
 
 import { type IIndicator, type IState } from '@/util/interface/index.interface'
-import { GamePlay } from '@/scenes/index'
+import { GamePlay, Home } from '@/scenes'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
+import BootDuel from '@/scenes/BootGame/bootDuel'
 
 const MIN_HEIGHT = 740
 
@@ -62,23 +63,26 @@ const useMainStore = defineStore('main', {
                 type: Phaser.AUTO,
                 width: this.width * this.zoom,
                 height: this.height * this.zoom,
-                scene: [GamePlay],
+                scene: [Home],
                 parent: initObject.parent || undefined,
                 physics: {
-                    default: 'matter',
-                    matter: {
+                    default: 'arcade',
+                    arcade: {
                         debug: true,
                     },
                 },
+                dom: {
+                    createContainer: true,
+                },
                 // backgroundColor: '#E5FB8E',
                 plugins: {
-                    scene: [
-                        {
-                            plugin: PhaserMatterCollisionPlugin,
-                            key: 'matterCollision',
-                            mapping: 'matterCollision',
-                        },
-                    ],
+                    // scene: [
+                    //     {
+                    //         plugin: PhaserMatterCollisionPlugin,
+                    //         key: 'matterCollision',
+                    //         mapping: 'matterCollision',
+                    //     },
+                    // ],
                 },
             }
 
