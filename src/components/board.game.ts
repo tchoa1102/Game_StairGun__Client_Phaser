@@ -4,31 +4,39 @@ const CONSTANTS = {
     exitBtn: 'src/assets/exit.png',
 }
 
-class Board {
-    private game: any
-    private name: string
+class Board extends Phaser.GameObjects.DOMElement {
+    public name: string
+    public callbackExit: CallableFunction
+
+    protected game: Home
+
     private contentBoard: Phaser.GameObjects.DOMElement | undefined
     private exitBtn: Phaser.GameObjects.DOMElement | undefined
-    public callbackExit: CallableFunction
-    constructor(game: any, name: string, callbackExit: CallableFunction) {
+    constructor(game: any, name: string, callbackExit?: CallableFunction) {
+        super(game, 0, 0, 'section', {
+            width: '900px',
+            height: '600px',
+            position: 'relative',
+            top: '40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'linear-gradient(180deg, #63390F 0%, #4E2905 8%)',
+            'border-radius': '20px',
+            border: '4px #A87123 solid',
+        })
+        this.setOrigin(0.5, 0)
         this.game = game
         this.name = name
-        this.callbackExit = callbackExit
+        console.log('name input: ', this.name, name)
+
+        if (callbackExit !== undefined) {
+            this.callbackExit = callbackExit
+        } else {
+            this.callbackExit = () => {}
+        }
     }
 
     create() {
-        const board = this.game.add
-            .dom(0, 0, 'section', {
-                width: '900px',
-                height: '600px',
-                position: 'relative',
-                top: '40px',
-                left: '50%',
-                background: 'linear-gradient(180deg, #63390F 0%, #4E2905 8%)',
-                'border-radius': '20px',
-                border: '4px #A87123 solid',
-            })
-            .setOrigin(0.5, 0)
         const nameBoard = this.game.add
             .dom(
                 24,
@@ -53,7 +61,7 @@ class Board {
             })
             .setOrigin(1, 0) // render from top - right
             .addListener('click')
-            .on('click', this.callbackExit)
+            .on('click', this.handleClickExit.bind(this))
         const boardPadding = this.game.add
             .dom(10, 45, 'section', {
                 width: '880px',
@@ -72,12 +80,36 @@ class Board {
             })
             .setOrigin(0)
         boardPadding.node.append(this.contentBoard!.node)
-        board.node.append(nameBoard.node, this.exitBtn!.node, boardPadding.node)
+        this.node.append(nameBoard.node, this.exitBtn!.node, boardPadding.node)
     }
 
     appendChildToContent(childNode: Element) {
         this.contentBoard?.node.append(childNode)
     }
+
+    // #region handle event
+    handleClickExit(e: Event) {
+        this.hidden()
+
+        this.callbackExit()
+    }
+    // #endregion handle event
+
+    // #region share functionality
+    hidden() {
+        this.node.classList.add('d-none')
+    }
+
+    show() {
+        try {
+            this.node.classList.remove('d-none')
+            return true
+        } catch (error) {
+            console.log(error)
+            return false
+        }
+    }
+    // #endregion share functionality
 }
 
 export default Board

@@ -6,12 +6,13 @@ import { GamePlay, Home } from '@/scenes'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
 import BootDuel from '@/scenes/BootGame/bootDuel'
+import { firebaseService } from '@/services'
 
 const MIN_HEIGHT = 740
 
 const state: IState = {
     game: undefined,
-    socket: io('http://localhost:4000'),
+    socket: null,
     zoom: 1,
     width: MIN_HEIGHT * 2,
     height: MIN_HEIGHT,
@@ -34,6 +35,8 @@ const state: IState = {
         skills: [],
         bag: [],
     },
+    currentRoom: undefined,
+    chatWorld: [],
 }
 const useMainStore = defineStore('main', {
     state: () => state,
@@ -53,8 +56,23 @@ const useMainStore = defineStore('main', {
         getGame(): typeof this.game {
             return this.game
         },
+        getRoom(): typeof this.currentRoom {
+            return this.currentRoom
+        },
+        getChatWorld(): typeof this.chatWorld {
+            return this.chatWorld
+        },
     },
     actions: {
+        connection() {
+            this.socket = io('http://localhost:4000', {
+                auth: async (cb) => {
+                    cb({
+                        token: await firebaseService.auth.currentUser?.getIdToken(),
+                    })
+                },
+            })
+        },
         init(heightScreen: number, initObject: IIndicator) {
             this.zoom = heightScreen / MIN_HEIGHT > 1 ? Math.floor(heightScreen / MIN_HEIGHT) : 1
             console.log('zoom: %d', this.zoom)

@@ -63,6 +63,7 @@ class FirebaseService {
         onAuthStateChanged(
             this.auth,
             async (user: User | null) => {
+                console.group('Authorization')
                 console.log('user: ', user)
                 console.log('auth: ', this.auth)
                 // user is not existing, then redirect to login page
@@ -79,6 +80,7 @@ class FirebaseService {
                 if (route.name === 'login') {
                     return router.push({ name: 'home' })
                 }
+                console.groupEnd()
             },
             (e: Error) => {
                 router.push({ name: 'login' })

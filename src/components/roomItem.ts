@@ -1,5 +1,5 @@
 import type { Home } from '@/scenes'
-
+import { roomService } from '@/services/socket'
 const CONSTANTS = {
     roomTypeBackground: 'src/assets/roomTypeBackground.png',
 }
@@ -18,6 +18,8 @@ class RoomItem extends Phaser.GameObjects.DOMElement {
             border: '1px solid #cccccc50',
             'box-shadow': '0px 3px 12px 0px rgba(0, 0, 0, 0.75)',
         })
+        this.node.setAttribute('data-id', roomData._id)
+        this.node.classList.add(`room-item-${roomData._id}`)
         this.roomData = roomData
         this.game = game
         this.setOrigin(0)
@@ -26,9 +28,7 @@ class RoomItem extends Phaser.GameObjects.DOMElement {
 
     create() {
         this.addListener('click')
-        this.on('click', () => {
-            console.log('go on room')
-        })
+        this.on('click', this.handleEventClickRoom)
         // #region elements
         const roomTypeBackground = this.game.add
             .dom(0, 0, 'div', {
@@ -53,6 +53,7 @@ class RoomItem extends Phaser.GameObjects.DOMElement {
                 this.roomData.type,
             )
             .setOrigin(0)
+        roomType.node.classList.add('room-item__type')
         const numberOf = this.game.add
             .dom(
                 230,
@@ -65,9 +66,10 @@ class RoomItem extends Phaser.GameObjects.DOMElement {
                     'font-weight': '400',
                     'word-wrap': 'break-word',
                 },
-                `${this.roomData.numberOf}/${this.roomData.max}`,
+                `${this.roomData.numberOf}/${this.roomData.maxNum}`,
             )
             .setOrigin(0)
+        numberOf.node.classList.add('room-item__num')
         const typeMap = this.game.add
             .dom(
                 115,
@@ -83,6 +85,7 @@ class RoomItem extends Phaser.GameObjects.DOMElement {
                 `${this.roomData.typeMap}`,
             )
             .setOrigin(0)
+        typeMap.node.classList.add('room-item__type-map')
         const idRoom = this.game.add
             .dom(
                 24,
@@ -107,6 +110,13 @@ class RoomItem extends Phaser.GameObjects.DOMElement {
             idRoom.node,
         )
         // #endregion
+    }
+
+    handleEventClickRoom(e: any) {
+        console.log('go on room')
+        const ele = e.currentTarget
+        const id: string = ele.dataset.id
+        roomService.addPlayer(id)
     }
 }
 

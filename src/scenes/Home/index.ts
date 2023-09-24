@@ -1,6 +1,8 @@
 import Board from '@/components/board.game'
 import BootDuel from '../BootGame/bootDuel'
 import BoardListRoom from '@/components/BoardListRoom'
+import GamePlay from '../GamePLay'
+import { roomService } from '@/services/socket'
 
 const CONSTANTS = {
     character: 'src/assets/character.png',
@@ -11,7 +13,8 @@ class Home extends Phaser.Scene {
     private section: Phaser.GameObjects.DOMElement | undefined
     constructor() {
         super('home')
-        this.statesScreen = []
+        this.statesScreen = ['listRoom']
+        this.listeningSocket()
     }
 
     preload() {
@@ -123,6 +126,14 @@ class Home extends Phaser.Scene {
         this.statesScreen.pop()
         this.scene.setVisible(false, key)
     }
+
+    // #region listening socket
+    listeningSocket() {
+        roomService.listeningAddToRoom((dataRoom: any) => {
+            console.log('Add player to room: ', dataRoom)
+        })
+    }
+    // #endregion listening socket
 }
 
 export default Home
