@@ -38,6 +38,19 @@ class RoomService {
             callback(data)
         })
     }
+
+    listeningAddToRoomError(callback: CallableFunction) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+        socket.on(
+            'rooms/players/add/res/error',
+            ({ status, message }: { status: number; message: string }) => {
+                console.log('error')
+
+                callback({ status, message })
+            },
+        )
+    }
     // #endregion on
 }
 

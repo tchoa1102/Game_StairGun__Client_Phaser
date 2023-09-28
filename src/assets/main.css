@@ -6,6 +6,7 @@
 }
 
 #game {
+  position: relative;
   margin-left: auto;
   margin-right: auto;
   border: 1px solid #ffffff60;
@@ -69,4 +70,55 @@
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
   background: #5d9cf8; 
+}
+
+.toast-component {
+    position: absolute;
+    top: 0px;
+    right: 100px;
+    z-index: 9999999999999999;
+}
+
+.toast-item {
+  display: flex;
+  min-width: 300px;
+  max-width: 500px;
+  font-size: 18px;
+  margin-top: 2px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  background-color: #c6c4c464;
+
+  animation-name: remove-toast;
+  animation-delay: 3s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  animation-duration: 0.5s;
+}
+
+.toast-icon {
+  width: 20px;
+}
+
+.toast-info {
+  /* background-color: rgb(182, 253, 229); */
+  color: #0ba70e;
+}
+.toast-warn {
+  /* background-color: #ecf56e; */
+  color: #869015;
+}
+.toast-error {
+  /* background-color: #f86464; */
+  color: #d30000;
+}
+
+/* key animation */
+@keyframes remove-toast {
+  from {
+    opacity: 1;
+  } to {
+    display: none;
+    opacity: 0;
+  }
 }

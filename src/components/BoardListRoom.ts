@@ -4,14 +4,15 @@ import RoomItem from './roomItem'
 import roomService from '@/services/socket/room.service'
 import { RoomService } from '@/services'
 import { useMainStore } from '@/stores'
+import { toast } from '@/util/shares'
 
 class BoardListRoom extends Board {
     public content: Phaser.GameObjects.DOMElement | undefined
     private listRoom: Phaser.GameObjects.DOMElement | undefined
-    constructor(game: any, callbackExit?: CallableFunction) {
-        super(game, 'Sảnh', callbackExit)
+    constructor(game: any) {
+        super(game, 'Sảnh')
         this.create()
-        this.listening()
+        this.listeningSocket()
     }
 
     async create() {
@@ -188,7 +189,7 @@ class BoardListRoom extends Board {
         this.appendChildToContent(this.content!.node)
     }
 
-    listening() {
+    listeningSocket() {
         roomService.listeningUpdateRooms(({ type, data }: { type: string; data: any }) => {
             const id = data._id
             console.log('receiving data room')
@@ -215,6 +216,11 @@ class BoardListRoom extends Board {
                 }
             }
         })
+        roomService.listeningAddToRoomError(
+            ({ status, message }: { status: number; message: string }) => {
+                toast({ message })
+            },
+        )
     }
 
     // #region functions handle other features

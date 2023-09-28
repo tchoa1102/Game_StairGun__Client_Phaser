@@ -1,5 +1,7 @@
 <template>
-    <section id="game"></section>
+    <section id="game">
+        <section class="toast-component"></section>
+    </section>
 </template>
 
 <script>

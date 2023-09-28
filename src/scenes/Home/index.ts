@@ -1,19 +1,21 @@
 import Board from '@/components/board.game'
-import BootDuel from '../BootGame/bootDuel'
 import BoardListRoom from '@/components/BoardListRoom'
 import GamePlay from '../GamePLay'
 import { roomService } from '@/services/socket'
+import PrepareDuel from '../BootGame/prepareDuel'
 
 const CONSTANTS = {
     character: 'src/assets/character.png',
 }
 
 class Home extends Phaser.Scene {
+    public boardListRoom: BoardListRoom | undefined
+
     private statesScreen: Array<string>
     private section: Phaser.GameObjects.DOMElement | undefined
     constructor() {
         super('home')
-        this.statesScreen = ['listRoom']
+        this.statesScreen = ['prepareDuel']
         this.listeningSocket()
     }
 
@@ -25,12 +27,19 @@ class Home extends Phaser.Scene {
         const background = this.add.image(0, 0, 'home-background')
         background.setOrigin(0)
         this.physics.pause()
-        const board = new BoardListRoom(this, () => console.log('Exit'))
 
-        // this.scene.add('bootDuel', BootDuel, true)
+        // #region create board
+        this.boardListRoom = new BoardListRoom(this)
+        this.boardListRoom.setCallbackExit(() => this.closeBoard(this.boardListRoom))
+        this.boardListRoom.hidden()
 
-        // #region create func
+        // #endregion create board
+
+        this.scene.add('prepareDuel', PrepareDuel, true)
+
+        // #region create button functionality
         this.section = this.add.dom(0, 0, 'section').setOrigin(0)
+        this.section.node.classList.add('list-btn-function')
 
         const sectionFuncBottomRight = this.add
             .dom(1480, 700, 'section', {
@@ -44,6 +53,7 @@ class Home extends Phaser.Scene {
         })
         sectionFuncBottomRight.node.appendChild(character.node)
         this.section.node.appendChild(sectionFuncBottomRight.node)
+        // #endregion create button functionality
 
         // #region create polygon building
         const duelBuilding = this.add.polygon(
@@ -82,8 +92,7 @@ class Home extends Phaser.Scene {
                 Phaser.Geom.Polygon.Contains(duelBuilding.geom, x, y)
             ) {
                 console.log('Duel building clicked!')
-
-                this.openScene('bootDuel')
+                this.openBoard(this.boardListRoom)
             }
             if (
                 this.statesScreen.length === 0 &&
@@ -99,11 +108,23 @@ class Home extends Phaser.Scene {
         // console.log('a')
     }
 
+    openBoard(board: any) {
+        board.show()
+        this.statesScreen.push(board.name)
+    }
+
+    closeBoard(board: any) {
+        board.hidden()
+        this.statesScreen = this.statesScreen.filter(
+            (state: string, index: number) => state !== board.name,
+        )
+    }
+
     openScene(key: string) {
         let sceneConfig: any = null
         switch (key) {
             case 'bootDuel': {
-                sceneConfig = BootDuel
+                sceneConfig = PrepareDuel
                 break
             }
         }
@@ -130,6 +151,7 @@ class Home extends Phaser.Scene {
     // #region listening socket
     listeningSocket() {
         roomService.listeningAddToRoom((dataRoom: any) => {
+            // show waiting room
             console.log('Add player to room: ', dataRoom)
         })
     }

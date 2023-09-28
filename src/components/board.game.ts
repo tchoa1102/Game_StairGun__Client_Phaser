@@ -6,13 +6,13 @@ const CONSTANTS = {
 
 class Board extends Phaser.GameObjects.DOMElement {
     public name: string
-    public callbackExit: CallableFunction
+    public callbackExit: CallableFunction | undefined
 
     protected game: Home
 
     private contentBoard: Phaser.GameObjects.DOMElement | undefined
     private exitBtn: Phaser.GameObjects.DOMElement | undefined
-    constructor(game: any, name: string, callbackExit?: CallableFunction) {
+    constructor(game: any, name: string) {
         super(game, 0, 0, 'section', {
             width: '900px',
             height: '600px',
@@ -28,12 +28,6 @@ class Board extends Phaser.GameObjects.DOMElement {
         this.game = game
         this.name = name
         console.log('name input: ', this.name, name)
-
-        if (callbackExit !== undefined) {
-            this.callbackExit = callbackExit
-        } else {
-            this.callbackExit = () => {}
-        }
     }
 
     create() {
@@ -89,9 +83,12 @@ class Board extends Phaser.GameObjects.DOMElement {
 
     // #region handle event
     handleClickExit(e: Event) {
-        this.hidden()
-
-        this.callbackExit()
+        if (this.callbackExit !== undefined) {
+            this.callbackExit()
+        }
+    }
+    setCallbackExit(callback: CallableFunction) {
+        this.callbackExit = callback
     }
     // #endregion handle event
 

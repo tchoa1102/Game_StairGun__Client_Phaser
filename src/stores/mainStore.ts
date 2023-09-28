@@ -5,7 +5,6 @@ import { type IIndicator, type IState } from '@/util/interface/index.interface'
 import { GamePlay, Home } from '@/scenes'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
-import BootDuel from '@/scenes/BootGame/bootDuel'
 import { firebaseService } from '@/services'
 
 const MIN_HEIGHT = 740

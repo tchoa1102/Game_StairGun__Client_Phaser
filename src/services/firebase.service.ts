@@ -1,4 +1,3 @@
-import { getToken } from '@/util/shares'
 import axios, { type AxiosResponse } from 'axios'
 import { initializeApp, type FirebaseApp } from 'firebase/app'
 import {

@@ -1,2 +1,7 @@
 @import './BootGame/index.css';
-@import './GamePLay/index.css'
+@import './GamePLay/index.css';
+
+.list-btn-function {
+    position: relative !important;
+    z-index: 99999 !important;
+}
