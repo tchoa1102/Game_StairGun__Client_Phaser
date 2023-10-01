@@ -1,0 +1,610 @@
+/* color palette from <https://github.com/vuejs/theme> */
+:root {
+  --vt-c-white: #ffffff;
+  --vt-c-white-soft: #f8f8f8;
+  --vt-c-white-mute: #f2f2f2;
+  --vt-c-black: #181818;
+  --vt-c-black-soft: #222222;
+  --vt-c-black-mute: #282828;
+  --vt-c-indigo: #2c3e50;
+  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
+  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
+  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
+  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
+  --vt-c-text-light-1: var(--vt-c-indigo);
+  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
+  --vt-c-text-dark-1: var(--vt-c-white);
+  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+}
+
+/* semantic color variables for this project */
+:root {
+  --color-background: var(--vt-c-white);
+  --color-background-soft: var(--vt-c-white-soft);
+  --color-background-mute: var(--vt-c-white-mute);
+  --color-border: var(--vt-c-divider-light-2);
+  --color-border-hover: var(--vt-c-divider-light-1);
+  --color-heading: var(--vt-c-text-light-1);
+  --color-text: var(--vt-c-text-light-1);
+  --section-gap: 160px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--vt-c-black);
+    --color-background-soft: var(--vt-c-black-soft);
+    --color-background-mute: var(--vt-c-black-mute);
+    --color-border: var(--vt-c-divider-dark-2);
+    --color-border-hover: var(--vt-c-divider-dark-1);
+    --color-heading: var(--vt-c-text-dark-1);
+    --color-text: var(--vt-c-text-dark-2);
+  }
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-background);
+  transition: color 0.5s, background-color 0.5s;
+  line-height: 1.6;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  margin: 0 auto;
+  font-weight: normal;
+}
+
+#game {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid rgba(255, 255, 255, 0.3764705882);
+}
+
+.d-none {
+  display: none !important;
+}
+
+.d-block {
+  display: block !important;
+}
+
+.d-inline {
+  display: inline !important;
+}
+
+.d-inline-block {
+  display: inline-block !important;
+}
+
+.d-flex {
+  display: flex !important;
+}
+
+.d-inline-flex {
+  display: inline-flex !important;
+}
+
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+
+.flex-normal {
+  justify-content: space-between;
+  align-content: start;
+  align-items: center;
+}
+
+.position-fixed {
+  position: fixed !important;
+}
+
+.position-relative {
+  position: relative !important;
+}
+
+.top-auto {
+  top: auto !important;
+}
+
+.left-auto {
+  left: auto !important;
+}
+
+.box-func {
+  width: 50px;
+  height: 50px;
+  transform: translate(-50%, -50%) !important;
+}
+
+::-moz-placeholder {
+  color: #fff;
+}
+
+::placeholder {
+  color: #fff;
+}
+
+.pad {
+  flex: 1 1 0%;
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 4px;
+  border-radius: 50%;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.4117647059);
+  border-radius: 4px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background: #5d9cf1;
+  border-radius: 4px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #5d9cf8;
+}
+
+.toast-component {
+  position: absolute;
+  top: 0px;
+  right: 100px;
+  z-index: 10000000000000000;
+}
+
+.toast-item {
+  display: flex;
+  min-width: 300px;
+  max-width: 500px;
+  font-size: 18px;
+  margin-top: 2px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  background-color: rgba(198, 196, 196, 0.3921568627);
+  animation-name: remove-toast;
+  animation-delay: 3s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  animation-duration: 0.5s;
+}
+
+.toast-icon {
+  width: 20px;
+}
+
+.toast-info {
+  /* background-color: rgb(182, 253, 229); */
+  color: #0ba70e;
+}
+
+.toast-warn {
+  /* background-color: #ecf56e; */
+  color: #869015;
+}
+
+.toast-error {
+  /* background-color: #f86464; */
+  color: #d30000;
+}
+
+/* key animation */
+@keyframes remove-toast {
+  from {
+    opacity: 1;
+  }
+  to {
+    display: none;
+    opacity: 0;
+  }
+}
+.prepareDuel__func-bottom-right {
+  top: 90%;
+  right: 10px;
+  z-index: 99999 !important;
+}
+.prepareDuel__func-bottom-right__back {
+  width: 50px;
+  height: 50px;
+}
+.prepareDuel__listPlayer {
+  width: 718px;
+  height: 482px;
+  margin: 5px;
+  margin-right: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 4px black solid;
+  flex-wrap: wrap;
+}
+.prepareDuel__listPlayer__team {
+  width: 692px;
+  height: 231px;
+  padding-bottom: 4px;
+  border-radius: 10px;
+  overflow: hidden;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+}
+.prepareDuel__listPlayer__player {
+  width: 224px;
+  height: 226px;
+  padding-bottom: 6px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.prepareDuel__listPlayer__player__header {
+  align-self: stretch;
+  height: 30px;
+  padding-top: 1px;
+  padding-bottom: 2px;
+  padding-left: 10px;
+  padding-right: 119px;
+  justify-content: flex-start;
+  align-items: center;
+}
+.prepareDuel__listPlayer__player__header-name {
+  width: 70%;
+  color: #f6d738;
+  font-size: 18px;
+  font-family: Inter;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prepareDuel__background-screen {
+  width: 374px;
+  height: 482px;
+  padding: 10px;
+  margin-top: 5px;
+  margin-right: 10px;
+  background: #643a1c;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.prepareDuel__background-screen__body {
+  width: 354px;
+  height: 462px;
+  align-self: stretch;
+  flex: 1 1 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.prepareDuel__background-screen__body__img {
+  width: 387px;
+  height: 462px;
+}
+.prepareDuel__items {
+  width: 338px;
+  height: 482px;
+  padding-top: 10px;
+  padding-bottom: 445px;
+  padding-left: 16px;
+  padding-right: 148px;
+  background: #ce9d45;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 4px black solid;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.prepareDuel__items__header {
+  width: 100%;
+  height: 27px;
+}
+.prepareDuel__items__header__text {
+  font-size: 18px;
+  font-family: Inter;
+  text-align: start;
+  font-weight: 700;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prepareDuel__chat {
+  width: 722px;
+  height: 224px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  flex-direction: column;
+  justify-content: start;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.prepareDuel__chat__header {
+  align-self: stretch;
+  height: 40px;
+  padding-right: 412px;
+  background: rgba(0, 0, 0, 0.3);
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 5px;
+}
+.prepareDuel__chat__header__btn {
+  width: 100px;
+  align-self: stretch;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-size: 20px;
+  font-family: Inter;
+  font-weight: 700;
+  word-wrap: break-word;
+  text-shadow: 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b, 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b, 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b;
+}
+.prepareDuel__chat__header__btn--public {
+  background: #0e8bb3;
+}
+.prepareDuel__chat__header__btn--public__text {
+  color: #efd5d5;
+}
+.prepareDuel__chat__header__btn--room {
+  background: #c5af3e;
+}
+.prepareDuel__chat__header__btn--room__text {
+  color: #efd5d5;
+}
+.prepareDuel__chat__header__btn--private {
+  background: #6a1aa9;
+}
+.prepareDuel__chat__header__btn--private__text {
+  color: #efd5d5;
+}
+.prepareDuel__chat__body-wrapper {
+  height: 143px;
+  overflow-y: auto;
+  flex-direction: column-reverse;
+}
+.prepareDuel__chat__body-wrapper__container {
+  background: rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  align-items: start;
+}
+.prepareDuel__chat__body-wrapper__container__message {
+  align-self: stretch;
+  padding-top: 6px;
+  padding-bottom: 2px;
+  padding-left: 14px;
+  padding-right: 6px;
+  justify-content: flex-start;
+  align-items: start;
+  gap: 8px;
+}
+.prepareDuel__chat__body-wrapper__container__message__area {
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: Inter;
+  font-weight: 700;
+  word-wrap: break-word;
+  color: #6a1aa9;
+}
+.prepareDuel__chat__body-wrapper__container__message__area--public {
+  color: #0e8bb3;
+}
+.prepareDuel__chat__body-wrapper__container__message__area--room {
+  color: #c5af3e;
+}
+.prepareDuel__chat__body-wrapper__container__message__block {
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: Inter;
+  font-weight: 700;
+  margin-right: 4px;
+  word-break: break-all;
+}
+.prepareDuel__chat__body-wrapper__container__message__block__from {
+  color: #d964b8;
+}
+.prepareDuel__chat__body-wrapper__container__message__block__text {
+  color: #cdcbcb;
+}
+.prepareDuel__chat__footer {
+  width: 100%;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.3);
+  justify-content: start;
+  align-items: center;
+}
+.prepareDuel__chat__footer__location {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: #2b2b2b;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 6px #857833 solid;
+  justify-content: center;
+  align-items: center;
+}
+.prepareDuel__chat__footer__location__text {
+  color: white;
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 700;
+  word-wrap: break-word;
+}
+.prepareDuel__chat__footer__input-container {
+  width: 542px;
+  height: 100%;
+  padding-left: 10px;
+  padding-right: 1px;
+  background: #3b3a3a;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px #672a2a solid;
+  align-items: center;
+  gap: 2px;
+}
+.prepareDuel__chat__footer__input-container__input {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0);
+  color: #fff;
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 700;
+  outline: none;
+  border: none;
+  border-right: 1px solid #969595;
+  padding-left: 10px;
+}
+.prepareDuel__chat__footer__input-container__btn-send {
+  width: 48px;
+  height: 40px;
+  position: relative;
+  background: #0066ff;
+  box-shadow: 1px 1px 1px;
+  filter: blur(1px);
+  justify-content: center;
+  align-items: center;
+}
+.prepareDuel__chat__footer__input-container__btn-send__icon {
+  font-size: 34px;
+  color: #000;
+}
+.prepareDuel__chat__footer__func {
+  flex: 1;
+  padding-left: 10px;
+  justify-content: space-around;
+  align-items: center;
+}
+.prepareDuel__chat__footer__func__friend {
+  font-size: 27px;
+  align-self: stretch;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  padding-left: 3px;
+  padding-right: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  color: #55e000;
+}
+.prepareDuel__chat__footer__func__icon {
+  align-self: stretch;
+  font-size: 32px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+}
+.prepareDuel__chat__footer__func__icon:first-child {
+  color: #fff;
+}
+.prepareDuel__map {
+  width: 374px;
+  height: 90px;
+  margin-left: 10px;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 10px;
+  background: rgba(2, 199, 116, 0.9019607843);
+  box-shadow: 0px 4px 20px rgba(11, 255, 6, 0.8), 0 0 30px rgba(11, 255, 6, 0.5019607843) inset;
+  border-radius: 5px;
+  overflow: hidden;
+  justify-content: space-between;
+  align-items: start;
+}
+.prepareDuel__map__text {
+  color: #b6eb45;
+  text-shadow: 0 1px 6px #000;
+  font-size: 22px;
+  font-family: Inter;
+  font-weight: 700;
+  word-wrap: break-word;
+}
+.prepareDuel__map__icon {
+  font-size: 26px;
+  color: #3a3a3a;
+}
+.prepareDuel__btn-func {
+  margin-top: 10px;
+  margin-left: auto;
+}
+.prepareDuel__btn-func__invite {
+  width: 200px;
+  height: 50px;
+  margin-right: 10px;
+  background: linear-gradient(180deg, #00e8e8 13.34%, rgba(101, 255, 181, 0) 162.11%);
+  justify-content: center;
+  align-items: center;
+}
+.prepareDuel__btn-func__invite__icon {
+  top: 14px;
+  left: 10px;
+  rotate: -20deg;
+  font-size: 40px;
+  background: -webkit-linear-gradient(red, #333);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.prepareDuel__btn-func__invite__text {
+  color: #fff;
+  font-weight: bold;
+  font-size: 22px;
+}
+.prepareDuel__btn-func__start {
+  width: 200px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(180deg, #e8b500 13.34%, rgba(255, 221, 101, 0) 162.11%);
+  color: #6a6fe3;
+  font-size: 22px;
+}
+
+.home {
+  z-index: 9999 !important;
+}
+.home__func-bottom-right {
+  top: 0;
+  right: 0;
+  z-index: 9999999999999 !important;
+}
+
+.list-btn-function {
+  z-index: 99999 !important;
+}/*# sourceMappingURL=main.css.map */

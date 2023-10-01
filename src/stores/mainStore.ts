@@ -34,6 +34,13 @@ const state: IState = {
         skills: [],
         bag: [],
     },
+    chatInput: {
+        to: {
+            name: 'Chung',
+            _id: '',
+        },
+        message: '',
+    },
     currentRoom: undefined,
     chatWorld: [],
 }

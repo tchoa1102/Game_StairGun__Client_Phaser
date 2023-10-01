@@ -3,12 +3,13 @@ import BoardListRoom from '@/components/BoardListRoom'
 import GamePlay from '../GamePLay'
 import { roomService } from '@/services/socket'
 import PrepareDuel from '../BootGame/prepareDuel'
+import BaseScene from '../baseScene'
 
 const CONSTANTS = {
     character: 'src/assets/character.png',
 }
 
-class Home extends Phaser.Scene {
+class Home extends BaseScene {
     public boardListRoom: BoardListRoom | undefined
 
     private statesScreen: Array<string>
@@ -38,15 +39,13 @@ class Home extends Phaser.Scene {
         this.scene.add('prepareDuel', PrepareDuel, true)
 
         // #region create button functionality
-        this.section = this.add.dom(0, 0, 'section').setOrigin(0)
-        this.section.node.classList.add('list-btn-function')
+        this.section = this.createContainer('section', {}).setOrigin(0)
+        this.section.node.classList.add('home')
 
-        const sectionFuncBottomRight = this.add
-            .dom(1480, 700, 'section', {
-                'padding-right': '50px',
-            })
-            .setOrigin(1)
-        const character = this.add.dom(0, 0, 'div', {
+        const sectionFuncBottomRight = this.add.dom(0, 0, 'section').setOrigin(0)
+        sectionFuncBottomRight.node.classList.add('position-fixed')
+        sectionFuncBottomRight.node.classList.add('home__func-bottom-right')
+        const character = this.createContainer('div', {
             width: '50px',
             height: '50px',
             'background-image': `url(${CONSTANTS.character})`,

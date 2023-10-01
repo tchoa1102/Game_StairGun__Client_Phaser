@@ -7,6 +7,13 @@ export default interface IState {
     width: number
     height: number
     player: IPlayer
+    chatInput: {
+        to: {
+            name: string
+            _id: string
+        }
+        message: string
+    }
     currentRoom:
         | undefined
         | {

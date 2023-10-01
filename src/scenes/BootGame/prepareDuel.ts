@@ -1,14 +1,19 @@
 import { useMainStore } from '@/stores'
 import Phaser from 'phaser'
+import BaseScene from '../baseScene'
 
 const CONSTANTS = {
     keyScene: 'prepareDuel',
     goOut: 'src/assets/bye.png',
     background:
         'https://res.cloudinary.com/dyhfvkzag/image/upload/v1694967915/StairGunGame/gunGame/boot/bootDuel-background-2.png',
+    areas: {
+        public: 'Chung',
+        room: 'Phòng',
+    },
 }
 
-class PrepareDuel extends Phaser.Scene {
+class PrepareDuel extends BaseScene {
     public MAX_WIDTH: number
     public MAX_HEIGHT: number
 
@@ -39,15 +44,11 @@ class PrepareDuel extends Phaser.Scene {
         this.createInterfaceDOM()
         // #endregion dom
         // #region create button functionality
-        const sectionFuncBottomRight = this.add
-            .dom(1480, 700, 'section', {
-                'padding-right': '50px',
-            })
-            .setOrigin(1) // render from bottom-right to left
+        const sectionFuncBottomRight = this.add.dom(0, 0, 'section', {}).setOrigin(0) // render from bottom-right to left
+        sectionFuncBottomRight.node.classList.add('position-fixed')
+        sectionFuncBottomRight.node.classList.add('prepareDuel__func-bottom-right')
         const backButton = this.add
-            .dom(0, -55, 'div', {
-                width: '50px',
-                height: '50px',
+            .dom(0, 0, 'div', {
                 'background-image': `url(${CONSTANTS.goOut})`,
             })
             .addListener('click')
@@ -55,6 +56,8 @@ class PrepareDuel extends Phaser.Scene {
                 this.section!.node.classList.add('d-none')
                 ;(this.scene.get('home') as any).visibleScene(`${CONSTANTS.keyScene}`)
             })
+        backButton.node.classList.add('position-relative')
+        backButton.node.classList.add('prepareDuel__func-bottom-right__back')
         sectionFuncBottomRight.node.appendChild(backButton.node)
         this.section.node.appendChild(sectionFuncBottomRight.node)
         // #endregion create button functionality
@@ -71,39 +74,33 @@ class PrepareDuel extends Phaser.Scene {
     }
 
     createInterfaceDOM() {
-        const section = this.add
-            .dom(0, 0, 'section', {
-                width: '1480px',
-                height: '740px',
-                background: 'linear-gradient(180deg, #63390F 0%, #4E2905 8%)',
-                border: '4px #A87123 solid',
-            })
-            .setOrigin(0)
-        const createPlayerDom = () => {}
-        const divBackground = this.add
-            .dom(0, 0, 'div', {
-                width: '1460px',
-                height: '720px',
-                margin: 'calc(10px - 4px)', // subtract border section
-                background: 'linear-gradient(0deg, #424D73 0%, #424D73 100%)',
-                'box-shadow': '0px 0px 50px rgba(0, 0, 0, 0.90) inset',
-                'border-radius': '10px',
-            })
-            .setOrigin(0)
-        const content = this.add
-            .dom(0, 0, 'div', {
-                width: '1460px',
-                height: '720px',
-            })
-            .setOrigin(0)
-        const listPlayerContainer = this.add
-            .dom(0, 0, 'div', {
-                background: '#986641',
-            })
-            .setOrigin(0)
-        listPlayerContainer.node.classList.add('listPlayer')
-        listPlayerContainer.node.classList.add('position-relative')
-        listPlayerContainer.node.classList.add('d-flex')
+        // this.add.image(0, 0, `${CONSTANTS.keyScene}-background`)
+        // #region create base
+        const section = this.createContainer('section', {
+            width: '1480px',
+            height: '740px',
+            background: 'linear-gradient(180deg, #63390F 0%, #4E2905 8%)',
+            border: '4px #A87123 solid',
+        })
+        const divBackground = this.createContainer('div', {
+            width: '1460px',
+            height: '720px',
+            margin: 'calc(10px - 4px)', // subtract border section
+            background: 'linear-gradient(0deg, #424D73 0%, #424D73 100%)',
+            'box-shadow': '0px 0px 50px rgba(0, 0, 0, 0.90) inset',
+            'border-radius': '10px',
+        })
+        const content = this.createContainer('div', {
+            width: '1460px',
+            height: '720px',
+            'flex-wrap': 'wrap',
+        })
+        // #endregion create base
+        // #region create listPlayerContainer
+        const listPlayerContainer = this.createContainer('div', {
+            background: '#986641',
+        })
+        listPlayerContainer.node.classList.add('prepareDuel__listPlayer')
         const teamA = this.createTeamDOM('rgba(255, 0, 0, 0.50)')
         const teamB = this.createTeamDOM('rgba(0, 132.60, 255, 0.50)')
 
@@ -111,54 +108,376 @@ class PrepareDuel extends Phaser.Scene {
             const player = this.createPlayerDOM()
             teamA.node.append(player.node)
         }
-
+        for (let i of [1, 2, 3]) {
+            const player = this.createPlayerDOM()
+            teamB.node.append(player.node)
+        }
         listPlayerContainer.node.append(teamA.node, teamB.node)
-        content.node.appendChild(listPlayerContainer.node)
+        // #endregion create listPlayerContainer
+
+        // #region create background screen
+        const backgroundScreen = this.createBackgroundScreen()
+        // #endregion create background screen
+
+        // #region create items
+        const items = this.createItemsDOM()
+        // #endregion create items
+
+        // #region create chat
+        const chat = this.createChat()
+        // #endregion create chat
+
+        const mapAndBtnFuncWrapper = this.createContainer('section', {
+            flex: '1',
+            'flex-direction': 'column',
+            'padding-right': '10px',
+        })
+        // #region create map
+        const map = this.createMap()
+        // #endregion create map
+        // #region create map
+        const btnFunc = this.createBtnFunc()
+        // #endregion create map
+
+        mapAndBtnFuncWrapper.node.append(map.node, btnFunc.node)
+
+        content.node.append(
+            listPlayerContainer.node,
+            backgroundScreen.node,
+            items.node,
+            chat.node,
+            mapAndBtnFuncWrapper.node,
+        )
+        // #region append
         divBackground.node.appendChild(content.node)
         section.node.appendChild(divBackground.node)
         this.section?.node.append(section.node)
+        // #endregion append
     }
 
     // #region create DOM
+    // #region create team dom
     createTeamDOM(background: string) {
-        const team = this.add
-            .dom(0, 0, 'div', {
-                background,
-            })
-            .setOrigin(0)
-        team.node.classList.add('listPlayer__team')
-        team.node.classList.add('position-relative')
-        team.node.classList.add('d-flex')
+        const team = this.createContainer('section', {
+            background,
+        })
+        team.node.classList.add('prepareDuel__listPlayer__team')
         return team
     }
 
     createPlayerDOM() {
-        const player = this.add
+        const player = this.createContainer('div', {
+            background:
+                'linear-gradient(180deg, rgba(254.79, 211.58, 58.39, 0.50) 0%, #9A7B2B 97%)',
+        })
+        player.node.classList.add('prepareDuel__listPlayer__player')
+
+        // #region header
+        const header = this.add.dom(0, 0, 'div').setOrigin(0)
+        header.node.classList.add('position-relative')
+        header.node.classList.add('prepareDuel__listPlayer__player__header')
+        const playerName = this.add
+            .dom(0, 0, 'div', {}, 'ABCBABAaasbcccccccccccccsccccccccccccccccccc')
+            .setOrigin(0)
+        playerName.node.classList.add('prepareDuel__listPlayer__player__header-name')
+
+        header.node.append(playerName.node)
+        // #endregion header
+
+        // #region body
+        const body = this.add
             .dom(0, 0, 'div', {
-                background:
-                    'linear-gradient(180deg, rgba(254.79, 211.58, 58.39, 0.50) 0%, #9A7B2B 97%)',
+                width: '204px',
+                height: '190px',
+                position: 'relative',
+                background: '#F7E7C9',
+                'border-radius': '10px',
             })
             .setOrigin(0)
-        player.node.classList.add('d-flex')
-        player.node.classList.add('player')
-        player.node.classList.add('position-relative')
-
-        const header = this.add.dom(0, 0, 'div').setOrigin(0)
-        header.node.classList.add('player__header')
-        const playerName = this.add.dom(0, 0, 'div', {}, 'ABCBABA')
-        playerName.node.classList.add('player__header-name')
-
-        const body = this.add.dom(0, 0, 'div', {
-            width: '204px',
-            height: '190px',
-            position: 'relative',
-            background: '#F7E7C9',
-            'border-radius': '10px',
-        })
+        body.node.classList.add('position-relative')
+        // #endregion body
 
         player.node.append(header.node, body.node)
         return player
     }
+    // #endregion create team dom
+    // #region create background screen
+    createBackgroundScreen() {
+        const section = this.createContainer('section', {})
+        section.node.classList.add('prepareDuel__background-screen')
+
+        const body = this.createContainer('div', {
+            'background-color': '#000',
+        })
+        body.node.classList.add('prepareDuel__background-screen__body')
+
+        const sourceImg: any = this.textures
+            .get(CONSTANTS.keyScene + '-background')
+            .getSourceImage()
+        body.node.append(sourceImg)
+
+        section.node.append(body.node)
+        return section
+    }
+    // #endregion create background screen
+    // #region create items
+    createItemsDOM() {
+        const section = this.createContainer('section', {})
+        section.node.classList.add('prepareDuel__items')
+        // #region header
+        const header = this.createContainer('div', {})
+        header.node.classList.add('prepareDuel__items__header')
+
+        const idRoom = this.add.dom(0, 0, 'div', {}, `ID: 1234567890`).setOrigin(0)
+        idRoom.node.classList.add('position-relative')
+        idRoom.node.classList.add('prepareDuel__items__header__text')
+        // #endregion header
+
+        header.node.append(idRoom.node)
+        section.node.append(header.node)
+        return section
+    }
+    // #endregion create items
+    // #region create chat
+    createChat() {
+        const section = this.createContainer('section', {})
+        section.node.classList.add('prepareDuel__chat')
+
+        // #region header
+        const header = this.createContainer('div', {})
+        header.node.classList.add('prepareDuel__chat__header')
+
+        const btnPublic = this.createChatAreaBtn('public', 'Chung')
+        const btnRoom = this.createChatAreaBtn('room', 'Phòng')
+        const btnPrivate = this.createChatAreaBtn('private', 'Riêng')
+        header.node.append(btnPublic.node, btnRoom.node, btnPrivate.node)
+        // #endregion header
+
+        // #region body
+        const body = this.createContainer('div', {})
+        body.node.classList.add('prepareDuel__chat__body-wrapper')
+        body.node.classList.add('scrollbar')
+        const pad = this.add.dom(0, 0, 'span').setOrigin(0)
+        pad.node.classList.add('position-relative')
+        pad.node.classList.add('pad')
+        const bodyContainer = this.createContainer('div', {})
+        bodyContainer.node.classList.add('prepareDuel__chat__body-wrapper__container')
+        for (let i of [1, 2]) {
+            const message = this.createChatMessage(
+                'public',
+                'ABCasasdasfasasdasdasdasdasdasdasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                'Hhahahahhahahahahahahahahaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbb1',
+            )
+            bodyContainer.node.append(message.node)
+        }
+
+        // let i = 2
+        // setInterval(() => {
+        //     const message = this.createChatMessage(
+        //         'public',
+        //         'ABC',
+        //         'Hhahahahhahahahahahahahahaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbb' +
+        //             i++,
+        //     )
+        //     body.node.append(message.node)
+        // }, 3000)
+        body.node.append(pad.node, bodyContainer.node)
+        // #endregion body
+
+        // #region footer
+        const footer = this.createChatFooter()
+        footer.node.classList.add('prepareDuel__chat__footer')
+        // #endregion footer
+        section.node.append(header.node, body.node, footer.node)
+        return section
+    }
+
+    createChatAreaBtn(area: string, text: string) {
+        const btn = this.createContainer('div', {})
+        btn.node.classList.add('prepareDuel__chat__header__btn')
+        btn.node.classList.add(`prepareDuel__chat__header__btn--${area}`)
+        const btnText = this.add.dom(0, 0, 'div', {}, text).setOrigin(0)
+        btnText.node.classList.add('position-relative')
+        btnText.node.classList.add('prepareDuel__chat__header__btn--public__text')
+
+        btn.node.append(btnText.node)
+
+        return btn
+    }
+
+    createChatMessage(area: string, from: string, message: string) {
+        const section = this.createContainer('div', {})
+        section.node.classList.add('d-block')
+        section.node.classList.add('prepareDuel__chat__body-wrapper__container__message')
+
+        // area
+        const areaText = this.add
+            .dom(0, 0, 'span', {}, `[${(CONSTANTS.areas as any)[area] || area}]`)
+            .setOrigin(0)
+        areaText.node.classList.add('position-relative')
+        areaText.node.classList.add('prepareDuel__chat__body-wrapper__container__message__area')
+        if (area === 'public' || area === 'room') {
+            areaText.node.classList.add(
+                `prepareDuel__chat__body-wrapper__container__message__area--${area}`,
+            )
+        }
+        // message
+        const messageBlock = this.add.dom(0, 0, 'div', {}).setOrigin(0)
+        messageBlock.node.classList.add('position-relative')
+        messageBlock.node.classList.add(
+            'prepareDuel__chat__body-wrapper__container__message__block',
+        )
+
+        // whoSend
+        const whoSend = this.add.dom(0, 0, 'span', {}, `[${from}]: `).setOrigin(0)
+        whoSend.node.classList.add('position-relative')
+        whoSend.node.classList.add('d-inline')
+        whoSend.node.classList.add(
+            'prepareDuel__chat__body-wrapper__container__message__block__from',
+        )
+        // text
+        const text = this.add.dom(0, 0, 'span', {}, `${message}`).setOrigin(0)
+        text.node.classList.add('position-relative')
+        text.node.classList.add('d-inline')
+        text.node.classList.add('prepareDuel__chat__body-wrapper__container__message__block__text')
+
+        messageBlock.node.append(whoSend.node, text.node)
+        section.node.append(areaText.node, messageBlock.node)
+
+        return section
+    }
+
+    createChatFooter() {
+        const className = 'prepareDuel__chat__footer'
+        const section = this.createContainer('section', {})
+
+        const location = this.createContainer('div', {})
+        location.node.classList.add(`${className}__location`)
+        const locationText = this.createText('span', {}, 'Chung')
+        locationText.node.classList.add(className + '__location__text')
+        location.node.append(locationText.node)
+
+        // #region inputContainer
+        const inputContainer = this.createContainer('form', {})
+        inputContainer.node.classList.add(className + '__input-container')
+        inputContainer.addListener('submit').on('submit', (e: any) => {
+            e.preventDefault()
+            console.log('Send Message')
+        })
+
+        const inputWrapper = this.add.dom(0, 0, 'div', { height: '100%', flex: 1 }).setOrigin(0)
+        inputWrapper.node.classList.add('position-relative')
+        const input = this.add.dom(0, 0, 'input', {}).setOrigin(0)
+        input.node.classList.add('position-relative')
+        input.node.classList.add('d-block')
+        input.node.setAttribute('value', 'aaaaaaaaaaaa')
+        input.node.classList.add(className + '__input-container__input')
+        inputWrapper.node.append(input.node)
+
+        const btnSend = this.createContainer('button', {})
+        btnSend.node.classList.add(className + '__input-container__btn-send')
+
+        // #region icon send
+        const iconSend = this.add.dom(0, 0, 'iconify-icon', {}).setOrigin(0)
+        iconSend.node.classList.add('position-relative')
+        iconSend.node.classList.add(className + '__input-container__btn-send__icon')
+        iconSend.node.setAttribute('icon', 'bi:send')
+        const iconSendFillBackground = this.add
+            .dom(0, 0, 'iconify-icon', { color: '#fff', 'font-size': '24px' })
+            .setOrigin(0)
+        iconSendFillBackground.node.classList.add(className + '__input-container__btn-send__icon')
+        iconSendFillBackground.node.setAttribute('icon', 'teenyicons:send-solid')
+        // #endregion icon send
+
+        btnSend.node.append(iconSend.node, iconSendFillBackground.node)
+
+        inputContainer.node.append(inputWrapper.node, btnSend.node)
+        // #endregion inputContainer
+
+        // #region other functionality
+        const functionContainer = this.createContainer('div', {})
+        functionContainer.node.classList.add(className + '__func')
+
+        const friend = this.createContainer('div', {})
+            .addListener('click')
+            .on('click', (e: any) => {
+                console.log('Func friend')
+            })
+        const friendIcon = this.add.dom(0, 0, 'iconify-icon').setOrigin(0)
+        friendIcon.node.classList.add('position-relative')
+        friendIcon.node.setAttribute('icon', 'fa6-solid:user')
+        friendIcon.node.classList.add(className + '__func__friend')
+        friend.node.append(friendIcon.node)
+
+        const icon = this.createContainer('div', {})
+            .addListener('click')
+            .on('click', (e: any) => {
+                console.log('Func icon')
+            })
+        const iconIcon = this.add.dom(0, 0, 'iconify-icon').setOrigin(0)
+        iconIcon.node.classList.add('position-relative')
+        iconIcon.node.setAttribute('icon', 'carbon:face-add')
+        iconIcon.node.classList.add(className + '__func__icon')
+        icon.node.append(iconIcon.node)
+
+        functionContainer.node.append(friend.node, icon.node)
+        // #endregion other functionality
+
+        section.node.append(location.node, inputContainer.node, functionContainer.node)
+        return section
+    }
+    // #endregion create chat
+    // #region create map
+    createMap() {
+        const className = 'prepareDuel__map'
+        const section = this.createContainer('section', {})
+        section.addListener('click').on('click', () => {
+            console.log('Click map')
+        })
+        section.node.classList.add(className)
+
+        const text = this.createText('span', {}, 'Bản đồ ngẫu nhiên')
+        text.node.classList.add(className + '__text')
+
+        const icon = this.add.dom(0, 0, 'iconify-icon').setOrigin(0)
+        icon.node.setAttribute('icon', 'uiw:setting')
+        icon.node.classList.add('position-relative')
+        icon.node.classList.add(className + '__icon')
+
+        section.node.append(text.node, icon.node)
+        return section
+    }
+    // #endregion create map
+
+    // #region button functions
+    createBtnFunc() {
+        const className = 'prepareDuel__btn-func'
+        const section = this.createContainer('section', {})
+        section.node.classList.add('d-inline-flex')
+        section.node.classList.add(className)
+
+        const btnInvite = this.createContainer('div', {})
+        btnInvite.node.classList.add(className + '__invite')
+
+        const icon = this.add.dom(0, 0, 'iconify-icon').setOrigin(0)
+        icon.node.setAttribute('icon', 'bi:flag-fill')
+        icon.node.classList.add(className + '__invite__icon')
+
+        const inviteText = this.createText('span', {}, 'Mời')
+        inviteText.node.classList.add(className + '__invite__text')
+
+        btnInvite.node.append(icon.node, inviteText.node)
+
+        const btnStart = this.createContainer('div', {})
+        btnStart.node.classList.add(className + '__start')
+        const startText = this.createText('span', { 'font-weight': '700' }, 'Bắt đầu')
+        btnStart.node.append(startText.node)
+
+        section.node.append(btnInvite.node, btnStart.node)
+        return section
+    }
+    // #endregion button functions
+
     // #endregion create DOM
 
     render() {

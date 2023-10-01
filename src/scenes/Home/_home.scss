@@ -1,0 +1,8 @@
+.home {
+    z-index: 9999 !important;
+    &__func-bottom-right {
+        top: 0;
+        right: 0;
+        z-index: 9999999999999 !important;
+    }
+}
