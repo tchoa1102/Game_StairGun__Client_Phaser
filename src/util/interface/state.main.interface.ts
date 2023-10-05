@@ -49,15 +49,25 @@ export interface IRoom {
     _id: string
     type: string
     typeMap: string
-    players: Array<{
-        player: IPlayer
-        isOnRoom: boolean
-        isRoomMaster: boolean
-    }>
+    players: Array<IPlayerOnRoom>
     chatRoom: Array<{
         type: string | undefined
         value: string
         from: IPlayer
     }>
     maxNum: number
+}
+
+export interface IPlayerOnRoom {
+    player: IPlayer
+    isOnRoom: boolean
+    isRoomMaster: boolean
+    position: number
+    updatedAt: string
+    createdAt: string
+}
+
+export interface IPlayerRemoved {
+    player: string
+    position: number
 }

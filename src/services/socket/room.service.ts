@@ -1,5 +1,5 @@
 import { useMainStore } from '@/stores'
-import type { IRoom } from '@/util/interface/state.main.interface'
+import type { IPlayerOnRoom, IRoom } from '@/util/interface/state.main.interface'
 
 class RoomService {
     constructor() {}
@@ -37,11 +37,11 @@ class RoomService {
         })
     }
 
-    listeningAddToRoom(callback: (data: { data: IRoom }) => void) {
+    listeningAddToRoom(callback: (data: IRoom) => void) {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket
 
-        socket.on('rooms/players/add/res', (data: any) => {
+        socket.on('rooms/players/add/res', ({ data }: { data: IRoom }) => {
             console.log('Adding....')
             callback(data)
         })
@@ -55,6 +55,16 @@ class RoomService {
             console.log('Go out...')
             mainStore.setCurrentRoom(undefined)
             callback()
+        })
+    }
+
+    listeningRemovePlayerOnRoom(callback: CallableFunction) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+
+        socket.on('rooms/players/remove/res', ({ data }: { data: any }) => {
+            console.log('Removing players...')
+            callback(data)
         })
     }
 

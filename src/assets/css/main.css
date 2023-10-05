@@ -319,6 +319,13 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.prepareDuel__listPlayer__player__body {
+  width: 204px;
+  height: 190px;
+  position: relative;
+  background: #f7e7c9;
+  border-radius: 10px;
+}
 .prepareDuel__background-screen {
   width: 374px;
   height: 482px;

@@ -5,6 +5,30 @@ export function regexResponse(res: any) {
     return null
 }
 
+export const initKeyAnimation = (name: string, key: string) => `animation_${name}_${key}`
+export function createAnimation(game: any, name: string, animations: any) {
+    const animationsInstances: IAnimation = {}
+    for (const key in animations) {
+        if (animations.hasOwnProperty(key)) {
+            const instance = animations[key]
+            const keyAnim = initKeyAnimation(name, instance.key as string)
+
+            // init animation
+            // console.group('Animation: ' + key)
+            // console.log('instance: ', instance)
+            animationsInstances[keyAnim] = game.anims.create({
+                ...instance,
+                // defaultTextureKey: game.name,
+                key: keyAnim,
+                frames: instance.frames,
+            })
+            // console.groupEnd()
+        }
+    }
+
+    return animationsInstances
+}
+
 export function toast({ type, message }: { type?: string; message?: string }) {
     const toast: { [key: string]: any } = {
         info: {

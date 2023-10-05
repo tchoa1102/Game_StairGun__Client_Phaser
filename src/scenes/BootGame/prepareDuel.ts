@@ -3,7 +3,15 @@ import Phaser from 'phaser'
 import BaseScene from '../baseScene'
 import BtnFunc from '@/components/btnFunc'
 import CONSTANT_HOME from '../Home/CONSTANT'
-import type { IPlayer } from '@/util/interface/state.main.interface'
+import type {
+    IPlayer,
+    IPlayerOnRoom,
+    IPlayerRemoved,
+    IRoom,
+} from '@/util/interface/state.main.interface'
+import { roomService } from '@/services/socket'
+import type Home from '../Home'
+import { initKeyAnimation } from '@/util/shares'
 
 const CONSTANTS = {
     keyScene: CONSTANT_HOME.key.prepareDuel,
@@ -27,6 +35,7 @@ class PrepareDuel extends BaseScene {
         const mainStore: any = useMainStore()
         this.MAX_WIDTH = mainStore.getWidth * mainStore.zoom
         this.MAX_HEIGHT = mainStore.getHeight * mainStore.zoom
+        this.listeningSocket()
     }
 
     init() {}
@@ -102,6 +111,10 @@ class PrepareDuel extends BaseScene {
 
         this.listPlayerDOM = this.createContainer('section', {})
         this.listPlayerDOM.node.classList.add(`${this.className}__listPlayer__team__container`)
+        for (let i = 0; i < 6; i += 1) {
+            const playerContainer = this.createPlayerDOMContainer()
+            this.listPlayerDOM.node.appendChild(playerContainer.node)
+        }
         listPlayerContainer.node.append(listPlayerBackground.node, this.listPlayerDOM.node)
         // #endregion create listPlayerContainer
 
@@ -147,12 +160,16 @@ class PrepareDuel extends BaseScene {
 
     // #region create DOM
     // #region manager add player
-    addPlayer(data: any) {
-        const player = this.createPlayerDOM(data)
-        this.listPlayerDOM?.node.append(player.node)
+    addPlayer(data: IPlayerOnRoom | IPlayerRemoved) {
+        const container = this.listPlayerDOM?.node.children
+        if (container) {
+            if (data as IPlayerOnRoom) {
+                this.editPlayerDOM(container[data.position], data as IPlayerOnRoom)
+            } else {
+                this.editPlayerDOM(container[data.position], undefined)
+            }
+        }
     }
-
-    editPlayer() {}
     // #endregion manager add player
     // #region create team dom
     createTeamDOMBackground() {
@@ -173,39 +190,63 @@ class PrepareDuel extends BaseScene {
         return team
     }
 
-    createPlayerDOM(data: any) {
+    createPlayerDOMContainer() {
         const player = this.createContainer('div', {
             background:
                 'linear-gradient(180deg, rgba(254.79, 211.58, 58.39, 0.50) 0%, #9A7B2B 97%)',
         })
         player.node.classList.add(`${this.className}__listPlayer__player`)
 
-        // #region header
-        const header = this.add.dom(0, 0, 'div').setOrigin(0)
-        header.node.classList.add('position-relative')
-        header.node.classList.add(`${this.className}__listPlayer__player__header`)
-        const playerName = this.add.dom(0, 0, 'div', {}, data.name).setOrigin(0)
-        playerName.node.classList.add(`${this.className}__listPlayer__player__header-name`)
-
-        header.node.append(playerName.node)
-        // #endregion header
-
-        // #region body
-        const body = this.add
-            .dom(0, 0, 'div', {
-                width: '204px',
-                height: '190px',
-                position: 'relative',
-                background: '#F7E7C9',
-                'border-radius': '10px',
-            })
-            .setOrigin(0)
-        body.node.classList.add('position-relative')
-        // #endregion body
-
-        player.node.append(header.node, body.node)
         return player
     }
+
+    editPlayerDOM(player: Element, data?: IPlayerOnRoom) {
+        const className = `${this.className}__listPlayer__player`
+        if (data) {
+            player.innerHTML = ''
+            const playerData = data.player
+            player.setAttribute('id', `${this.className}__player--${playerData._id}`)
+
+            // #region header
+            const header = this.add.dom(0, 0, 'div').setOrigin(0)
+            header.node.classList.add('position-relative')
+            header.node.classList.add(`${className}__header`)
+            const playerName = this.add.dom(0, 0, 'div', {}, playerData.name).setOrigin(0)
+            playerName.node.classList.add(`${className}__header-name`)
+
+            header.node.append(playerName.node)
+            // #endregion header
+
+            // #region body
+            const body = this.createContainer('div', {})
+            body.node.classList.add(`${className}__body`)
+            const bodyContainer = body.node.getBoundingClientRect()
+
+            const x = bodyContainer.x - bodyContainer.width / 2
+            const y = bodyContainer.x - bodyContainer.width / 2
+            const faceSprite = this.physics.add.sprite(
+                x,
+                y,
+                `${playerData._id}`,
+                'looks.face.default',
+            )
+
+            faceSprite.anims.play(initKeyAnimation('default', 'show'))
+
+            // body.node.append(face)
+            // #endregion body
+
+            // #region other element
+            if (data.isRoomMaster) {
+            }
+            // #endregion other element
+
+            player.append(header.node, body.node)
+        } else {
+            player.innerHTML = ''
+        }
+    }
+
     // #endregion create team dom
     // #region create background screen
     createBackgroundScreen() {
@@ -494,20 +535,45 @@ class PrepareDuel extends BaseScene {
     // #endregion handle events
 
     // #region listening socket
-    // listeningRoom() {
-    //     if (playersOnRoom) {
-    //         const numOfPlayers = playersOnRoom.length
-    //         playersOnRoom.forEach((dataPlayer: any, i: number) => {
-    //             if (i < 3) {
-    //                 const player = this.createPlayerDOM(dataPlayer)
-    //                 teamA.node.append(player.node)
-    //             } else {
-    //                 const player = this.createPlayerDOM(dataPlayer)
-    //                 teamB.node.append(player.node)
-    //             }
-    //         })
-    //     }
-    // }
+    listeningSocket() {
+        roomService.listeningAddToRoom((data: IRoom) => {
+            // show waiting room
+            const mainStore: any = useMainStore()
+            mainStore.setCurrentRoom({
+                ...data,
+                players: data.players.filter((pl: IPlayerOnRoom) => {
+                    return pl.isOnRoom
+                }),
+            })
+            // sort ascending for updatedAt
+            mainStore.getRoom.players.sort(
+                (pl1: IPlayerOnRoom, pl2: IPlayerOnRoom) => pl1.position - pl2.position,
+            )
+            console.log('Add player to room: ', mainStore.getRoom)
+
+            // add player
+            mainStore.getRoom.players.forEach((p: IPlayerOnRoom) => {
+                this.addPlayer(p)
+            })
+
+            // show prepare screen
+            const homeScene: any = this.scene.get(CONSTANT_HOME.key.home)
+            homeScene.openScene(CONSTANT_HOME.key.prepareDuel)
+        })
+
+        roomService.listeningRemovePlayerOnRoom((data: any) => {
+            const mainStore: any = useMainStore()
+            mainStore.getRoom.players.filter((p: IPlayerOnRoom) => {
+                if (p.player._id !== data._id) {
+                    this.addPlayer(p)
+                    return true
+                } else {
+                    this.addPlayer(data)
+                    return false
+                }
+            })
+        })
+    }
     // #endregion listening socket
     render() {
         console.log('%c\nRendering...\n', 'color: #363; font-size: 16px;')

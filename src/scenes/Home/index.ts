@@ -4,32 +4,35 @@ import { roomService } from '@/services/socket'
 import PrepareDuel from '../BootGame/prepareDuel'
 import BaseScene from '../baseScene'
 import BtnFunc from '@/components/btnFunc'
-import CONSTANTS_HOME from './CONSTANT'
+import CONSTANT_HOME from './CONSTANT'
 import { useMainStore } from '@/stores'
 import type { IRoom } from '@/util/interface/state.main.interface'
 import FETCH from '@/services/fetchConfig.service'
+import { createAnimation } from '@/util/shares'
 
 class Home extends BaseScene {
     public DOMElement: {
         boardListRoom: BoardListRoom | undefined
     }
 
+    private configDefault: Array<any>
+
     // public boardListRoom: BoardListRoom | undefined
 
     private statesScreen: Array<string>
     private section: Phaser.GameObjects.DOMElement | undefined
     constructor() {
-        super(CONSTANTS_HOME.key.home)
+        super(CONSTANT_HOME.key.home)
         this.statesScreen = []
-        this.listeningSocket()
         this.DOMElement = {
             boardListRoom: undefined,
         }
+        this.configDefault = []
     }
 
     async preload() {
         const mainStore: any = useMainStore()
-        this.load.image(CONSTANTS_HOME.background.key, CONSTANTS_HOME.background.src)
+        this.load.image(CONSTANT_HOME.background.key, CONSTANT_HOME.background.src)
 
         // #region load skin
         const looks: { [key: string]: string } = mainStore.getPlayer.looks
@@ -37,6 +40,7 @@ class Home extends BaseScene {
             if (looks.hasOwnProperty(key)) {
                 const srcConfig = looks[key]
                 const config: any = await FETCH(srcConfig)
+                this.configDefault.push(config)
 
                 this.load.atlas(`looks.${key}.default`, config.src[0], config)
             }
@@ -44,9 +48,19 @@ class Home extends BaseScene {
     }
 
     create() {
-        const background = this.add.image(0, 0, CONSTANTS_HOME.background.key)
+        const background = this.add.image(0, 0, CONSTANT_HOME.background.key)
         background.setOrigin(0)
         this.physics.pause()
+
+        // #region create body default
+        this.configDefault.forEach((config) => {
+            console.log('config: ', config)
+
+            createAnimation(this, config.meta.image, config.animations)
+        })
+        // #endregion create body default
+
+        // DOM
         this.section = this.createContainer('section', {}).setOrigin(0)
         this.section.node.classList.remove('d-flex')
         this.section.node.classList.add('home')
@@ -112,10 +126,10 @@ class Home extends BaseScene {
         })
         // #endregion
 
-        const prepareDuelScene = this.scene.add(CONSTANTS_HOME.key.prepareDuel, PrepareDuel, true)
-        // if (prepareDuelScene) {
-        //     this.visibleScene(prepareDuelScene.scene.key)
-        // }
+        const prepareDuelScene = this.scene.add(CONSTANT_HOME.key.prepareDuel, PrepareDuel, true)
+        if (prepareDuelScene) {
+            this.visibleScene(prepareDuelScene.scene.key)
+        }
     }
 
     update() {
@@ -146,7 +160,7 @@ class Home extends BaseScene {
     openScene(key: string) {
         let sceneConfig: any = null
         switch (key) {
-            case CONSTANTS_HOME.key.prepareDuel: {
+            case CONSTANT_HOME.key.prepareDuel: {
                 sceneConfig = PrepareDuel
                 break
             }
@@ -173,15 +187,6 @@ class Home extends BaseScene {
     }
 
     // #region listening socket
-    listeningSocket() {
-        roomService.listeningAddToRoom((data: { data: IRoom }) => {
-            // show waiting room
-            const mainStore: any = useMainStore()
-            mainStore.setCurrentRoom(data.data)
-            console.log('Add player to room: ', mainStore.getRoom)
-            this.openScene(CONSTANTS_HOME.key.prepareDuel)
-        })
-    }
     // #endregion listening socket
 
     // #region handle events

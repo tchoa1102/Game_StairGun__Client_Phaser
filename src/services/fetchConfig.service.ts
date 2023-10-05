@@ -4,7 +4,7 @@ export default async function FETCH(url: string) {
         method: 'GET',
     })
     const data = await res.json()
-    console.log(data)
+    console.log('FETCH DATA: ', data)
 
     return data
 }
