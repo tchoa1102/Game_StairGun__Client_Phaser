@@ -14,24 +14,7 @@ export default interface IState {
         }
         message: string
     }
-    currentRoom:
-        | undefined
-        | {
-              _id: string
-              type: string
-              typeMap: string
-              players: Array<{
-                  player: IPlayer
-                  isOnRoom: boolean
-                  isRoomMaster: boolean
-              }>
-              chatRoom: Array<{
-                  type: string | undefined
-                  value: string
-                  from: IPlayer
-              }>
-              max: number
-          }
+    currentRoom: IRoom | undefined
     chatWorld: Array<{
         type: string | undefined
         value: string
@@ -39,7 +22,7 @@ export default interface IState {
     }>
 }
 
-interface IPlayer {
+export interface IPlayer {
     _id: string | undefined
     uid: string | undefined
     socketId: string | undefined
@@ -47,6 +30,7 @@ interface IPlayer {
     name: string | undefined
     email: string | undefined
     picture: string | undefined
+    looks: { [key: string]: string }
     level: number | undefined
     HP: number | undefined
     STA: number | undefined
@@ -59,4 +43,21 @@ interface IPlayer {
     }
     skills: Array<any>
     bag: Array<any>
+}
+
+export interface IRoom {
+    _id: string
+    type: string
+    typeMap: string
+    players: Array<{
+        player: IPlayer
+        isOnRoom: boolean
+        isRoomMaster: boolean
+    }>
+    chatRoom: Array<{
+        type: string | undefined
+        value: string
+        from: IPlayer
+    }>
+    maxNum: number
 }

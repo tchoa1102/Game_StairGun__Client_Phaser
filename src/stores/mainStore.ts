@@ -1,3 +1,4 @@
+import { type IRoom } from './../util/interface/state.main.interface'
 import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
 
@@ -23,6 +24,7 @@ const state: IState = {
         name: undefined,
         email: undefined,
         picture: undefined,
+        looks: {},
         level: undefined,
         HP: undefined,
         STA: undefined,
@@ -120,6 +122,9 @@ const useMainStore = defineStore('main', {
             } catch (error) {
                 console.log('%cERROR', 'color: red; font-size: 20px')
             }
+        },
+        setCurrentRoom(data: IRoom | undefined) {
+            this.currentRoom = data
         },
     },
 })

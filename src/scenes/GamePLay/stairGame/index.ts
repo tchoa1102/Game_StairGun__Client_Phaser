@@ -3,8 +3,10 @@ import { useMainStore } from '@/stores'
 import '../gamePlay.interface'
 
 const CONSTANTS = {
-    background:
-        'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
+    background: {
+        key: 'stairGame-background',
+        src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
+    },
 }
 
 class StairGame extends Phaser.Scene {
@@ -64,7 +66,7 @@ class StairGame extends Phaser.Scene {
 
     preload() {
         this.sticks.forEach((stick: Stick) => stick.preload())
-        this.load.image('stairGame-background', CONSTANTS.background)
+        this.load.image(CONSTANTS.background.key, CONSTANTS.background.src)
         const stairIsLoading: Array<string> = []
         this.stairs?.forEach((stair: IStair) => {
             const isLoaded = stairIsLoading.includes(stair.img)
@@ -81,7 +83,7 @@ class StairGame extends Phaser.Scene {
         // #endregion
 
         // #region config background
-        this.background = this.add.image(0, 0, 'stairGame-background')
+        this.background = this.add.image(0, 0, CONSTANTS.background.key)
         this.background.setOrigin(0, 0)
         // #endregion
 

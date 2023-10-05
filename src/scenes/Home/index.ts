@@ -1,56 +1,66 @@
-import Board from '@/components/board.game'
-import BoardListRoom from '@/components/BoardListRoom'
+import BoardListRoom from '@/components/boards/listRoom.board'
 import GamePlay from '../GamePLay'
 import { roomService } from '@/services/socket'
 import PrepareDuel from '../BootGame/prepareDuel'
 import BaseScene from '../baseScene'
-
-const CONSTANTS = {
-    character: 'src/assets/character.png',
-}
+import BtnFunc from '@/components/btnFunc'
+import CONSTANTS_HOME from './CONSTANT'
+import { useMainStore } from '@/stores'
+import type { IRoom } from '@/util/interface/state.main.interface'
+import FETCH from '@/services/fetchConfig.service'
 
 class Home extends BaseScene {
-    public boardListRoom: BoardListRoom | undefined
+    public DOMElement: {
+        boardListRoom: BoardListRoom | undefined
+    }
+
+    // public boardListRoom: BoardListRoom | undefined
 
     private statesScreen: Array<string>
     private section: Phaser.GameObjects.DOMElement | undefined
     constructor() {
-        super('home')
-        this.statesScreen = ['prepareDuel']
+        super(CONSTANTS_HOME.key.home)
+        this.statesScreen = []
         this.listeningSocket()
+        this.DOMElement = {
+            boardListRoom: undefined,
+        }
     }
 
-    preload() {
-        this.load.image('home-background', 'src/assets/home-1480x740.png')
+    async preload() {
+        const mainStore: any = useMainStore()
+        this.load.image(CONSTANTS_HOME.background.key, CONSTANTS_HOME.background.src)
+
+        // #region load skin
+        const looks: { [key: string]: string } = mainStore.getPlayer.looks
+        for (const key in looks) {
+            if (looks.hasOwnProperty(key)) {
+                const srcConfig = looks[key]
+                const config: any = await FETCH(srcConfig)
+
+                this.load.atlas(`looks.${key}.default`, config.src[0], config)
+            }
+        }
     }
 
     create() {
-        const background = this.add.image(0, 0, 'home-background')
+        const background = this.add.image(0, 0, CONSTANTS_HOME.background.key)
         background.setOrigin(0)
         this.physics.pause()
-
-        // #region create board
-        this.boardListRoom = new BoardListRoom(this)
-        this.boardListRoom.setCallbackExit(() => this.closeBoard(this.boardListRoom))
-        this.boardListRoom.hidden()
-
-        // #endregion create board
-
-        this.scene.add('prepareDuel', PrepareDuel, true)
-
-        // #region create button functionality
         this.section = this.createContainer('section', {}).setOrigin(0)
+        this.section.node.classList.remove('d-flex')
         this.section.node.classList.add('home')
 
-        const sectionFuncBottomRight = this.add.dom(0, 0, 'section').setOrigin(0)
-        sectionFuncBottomRight.node.classList.add('position-fixed')
-        sectionFuncBottomRight.node.classList.add('home__func-bottom-right')
-        const character = this.createContainer('div', {
-            width: '50px',
-            height: '50px',
-            'background-image': `url(${CONSTANTS.character})`,
-        })
-        sectionFuncBottomRight.node.appendChild(character.node)
+        // #region create board
+        this.DOMElement.boardListRoom = new BoardListRoom(this)
+        this.DOMElement.boardListRoom.setCallbackExit(() =>
+            this.closeBoard(this.DOMElement.boardListRoom),
+        )
+        this.DOMElement.boardListRoom.hidden()
+        // #endregion create board
+
+        // #region create button functionality
+        const sectionFuncBottomRight = new BtnFunc(this).createFuncMain()
         this.section.node.appendChild(sectionFuncBottomRight.node)
         // #endregion create button functionality
 
@@ -91,7 +101,7 @@ class Home extends BaseScene {
                 Phaser.Geom.Polygon.Contains(duelBuilding.geom, x, y)
             ) {
                 console.log('Duel building clicked!')
-                this.openBoard(this.boardListRoom)
+                this.openBoard(this.DOMElement.boardListRoom)
             }
             if (
                 this.statesScreen.length === 0 &&
@@ -101,10 +111,24 @@ class Home extends BaseScene {
             }
         })
         // #endregion
+
+        const prepareDuelScene = this.scene.add(CONSTANTS_HOME.key.prepareDuel, PrepareDuel, true)
+        // if (prepareDuelScene) {
+        //     this.visibleScene(prepareDuelScene.scene.key)
+        // }
     }
 
     update() {
         // console.log('a')
+        // console.log(this.statesScreen)
+        if (this.statesScreen.length === 0) {
+            this.section?.node.classList.remove('d-none')
+            for (let dom in this.DOMElement) {
+                if (this.DOMElement.hasOwnProperty(dom)) {
+                    ;(this.DOMElement as any)[dom].update()
+                }
+            }
+        }
     }
 
     openBoard(board: any) {
@@ -122,7 +146,7 @@ class Home extends BaseScene {
     openScene(key: string) {
         let sceneConfig: any = null
         switch (key) {
-            case 'bootDuel': {
+            case CONSTANTS_HOME.key.prepareDuel: {
                 sceneConfig = PrepareDuel
                 break
             }
@@ -136,6 +160,7 @@ class Home extends BaseScene {
 
                 this.scene.setVisible(true, key)
             }
+            // this.scene.get(sceneConfig.scene.key)?.section?.node.classList.add('d-flex')
             // this.scene.bringToTop(key)
         }
     }
@@ -149,12 +174,18 @@ class Home extends BaseScene {
 
     // #region listening socket
     listeningSocket() {
-        roomService.listeningAddToRoom((dataRoom: any) => {
+        roomService.listeningAddToRoom((data: { data: IRoom }) => {
             // show waiting room
-            console.log('Add player to room: ', dataRoom)
+            const mainStore: any = useMainStore()
+            mainStore.setCurrentRoom(data.data)
+            console.log('Add player to room: ', mainStore.getRoom)
+            this.openScene(CONSTANTS_HOME.key.prepareDuel)
         })
     }
     // #endregion listening socket
+
+    // #region handle events
+    // #endregion handle events
 }
 
 export default Home

@@ -1,4 +1,5 @@
 import { useMainStore } from '@/stores'
+import type { IRoom } from '@/util/interface/state.main.interface'
 
 class RoomService {
     constructor() {}
@@ -16,6 +17,13 @@ class RoomService {
 
         socket.emit('rooms/players/add', { idRoom })
     }
+
+    goOut() {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+
+        socket.emit('rooms/players/goOut')
+    }
     // #endregion emit
 
     // #region on
@@ -29,13 +37,24 @@ class RoomService {
         })
     }
 
-    listeningAddToRoom(callback: CallableFunction) {
+    listeningAddToRoom(callback: (data: { data: IRoom }) => void) {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket
 
-        console.log('Adding....')
         socket.on('rooms/players/add/res', (data: any) => {
+            console.log('Adding....')
             callback(data)
+        })
+    }
+
+    listeningGoOutRoom(callback: CallableFunction) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+
+        socket.on('rooms/players/goOut/res', () => {
+            console.log('Go out...')
+            mainStore.setCurrentRoom(undefined)
+            callback()
         })
     }
 

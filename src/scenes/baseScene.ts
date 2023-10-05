@@ -15,4 +15,10 @@ export default class BaseScene extends Phaser.Scene {
         text.node.classList.add('position-relative')
         return text
     }
+
+    createBtn(tag: string, style: { [key: string]: string }) {
+        const btn = this.add.dom(0, 0, tag, style).setOrigin(0)
+        btn.node.classList.add('position-relative')
+        return btn
+    }
 }

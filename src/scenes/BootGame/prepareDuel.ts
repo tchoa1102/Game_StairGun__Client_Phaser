@@ -1,10 +1,12 @@
 import { useMainStore } from '@/stores'
 import Phaser from 'phaser'
 import BaseScene from '../baseScene'
+import BtnFunc from '@/components/btnFunc'
+import CONSTANT_HOME from '../Home/CONSTANT'
+import type { IPlayer } from '@/util/interface/state.main.interface'
 
 const CONSTANTS = {
-    keyScene: 'prepareDuel',
-    goOut: 'src/assets/bye.png',
+    keyScene: CONSTANT_HOME.key.prepareDuel,
     background:
         'https://res.cloudinary.com/dyhfvkzag/image/upload/v1694967915/StairGunGame/gunGame/boot/bootDuel-background-2.png',
     areas: {
@@ -16,8 +18,10 @@ const CONSTANTS = {
 class PrepareDuel extends BaseScene {
     public MAX_WIDTH: number
     public MAX_HEIGHT: number
+    public className = 'prepareDuel'
 
-    private section: Phaser.GameObjects.DOMElement | undefined
+    public section: Phaser.GameObjects.DOMElement | undefined
+    private listPlayerDOM: Phaser.GameObjects.DOMElement | undefined
     constructor() {
         super(CONSTANTS.keyScene)
         const mainStore: any = useMainStore()
@@ -40,40 +44,33 @@ class PrepareDuel extends BaseScene {
         // const background = this.add.image(0, 0, `${CONSTANTS.keyScene}-background`).setOrigin(0)
 
         // #region dom
-        this.section = this.add.dom(0, 0, 'section').setOrigin(0)
-        this.createInterfaceDOM()
+        this.section = this.createContainer('section', {})
+        const interfaceDOM = this.createInterfaceDOM()
         // #endregion dom
         // #region create button functionality
-        const sectionFuncBottomRight = this.add.dom(0, 0, 'section', {}).setOrigin(0) // render from bottom-right to left
-        sectionFuncBottomRight.node.classList.add('position-fixed')
-        sectionFuncBottomRight.node.classList.add('prepareDuel__func-bottom-right')
-        const backButton = this.add
-            .dom(0, 0, 'div', {
-                'background-image': `url(${CONSTANTS.goOut})`,
-            })
-            .addListener('click')
-            .on('click', () => {
-                this.section!.node.classList.add('d-none')
-                ;(this.scene.get('home') as any).visibleScene(`${CONSTANTS.keyScene}`)
-            })
-        backButton.node.classList.add('position-relative')
-        backButton.node.classList.add('prepareDuel__func-bottom-right__back')
-        sectionFuncBottomRight.node.appendChild(backButton.node)
-        this.section.node.appendChild(sectionFuncBottomRight.node)
+        const sectionFuncBottomRight = new BtnFunc(this).createFuncRoom()
+        this.section.node.append(interfaceDOM.node, sectionFuncBottomRight.node)
         // #endregion create button functionality
     }
 
     update() {
         // console.log('bootGame')
         if (
-            this.scene.isVisible(`${CONSTANTS.keyScene}`) &&
-            this.section!.node.className.includes('d-none')
+            this.scene.isVisible(CONSTANTS.keyScene)
+            //  &&
+            // this.section!.node.className.includes('d-none')
         ) {
             this.section!.node.classList.remove('d-none')
+            this.section!.node.classList.add('d-flex')
+        } else {
+            if (!this.section!.node.className.includes('d-none')) {
+                this.section?.node.classList.add('d-none')
+            }
+            this.section?.node.classList.remove('d-flex')
         }
     }
 
-    createInterfaceDOM() {
+    createInterfaceDOM(): Phaser.GameObjects.DOMElement {
         // this.add.image(0, 0, `${CONSTANTS.keyScene}-background`)
         // #region create base
         const section = this.createContainer('section', {
@@ -100,19 +97,12 @@ class PrepareDuel extends BaseScene {
         const listPlayerContainer = this.createContainer('div', {
             background: '#986641',
         })
-        listPlayerContainer.node.classList.add('prepareDuel__listPlayer')
-        const teamA = this.createTeamDOM('rgba(255, 0, 0, 0.50)')
-        const teamB = this.createTeamDOM('rgba(0, 132.60, 255, 0.50)')
+        listPlayerContainer.node.classList.add(`${this.className}__listPlayer`)
+        const listPlayerBackground = this.createTeamDOMBackground()
 
-        for (let i of [1, 2, 3]) {
-            const player = this.createPlayerDOM()
-            teamA.node.append(player.node)
-        }
-        for (let i of [1, 2, 3]) {
-            const player = this.createPlayerDOM()
-            teamB.node.append(player.node)
-        }
-        listPlayerContainer.node.append(teamA.node, teamB.node)
+        this.listPlayerDOM = this.createContainer('section', {})
+        this.listPlayerDOM.node.classList.add(`${this.className}__listPlayer__team__container`)
+        listPlayerContainer.node.append(listPlayerBackground.node, this.listPlayerDOM.node)
         // #endregion create listPlayerContainer
 
         // #region create background screen
@@ -151,35 +141,51 @@ class PrepareDuel extends BaseScene {
         // #region append
         divBackground.node.appendChild(content.node)
         section.node.appendChild(divBackground.node)
-        this.section?.node.append(section.node)
+        return section
         // #endregion append
     }
 
     // #region create DOM
+    // #region manager add player
+    addPlayer(data: any) {
+        const player = this.createPlayerDOM(data)
+        this.listPlayerDOM?.node.append(player.node)
+    }
+
+    editPlayer() {}
+    // #endregion manager add player
     // #region create team dom
-    createTeamDOM(background: string) {
-        const team = this.createContainer('section', {
-            background,
+    createTeamDOMBackground() {
+        const team = this.createContainer('section', {})
+        team.node.classList.add('position-absolute')
+        const teamA = this.createContainer('div', {
+            width: '100%',
+            height: '50%',
+            background: 'rgba(255, 0, 0, 0.50)',
         })
-        team.node.classList.add('prepareDuel__listPlayer__team')
+        const teamB = this.createContainer('div', {
+            width: '100%',
+            height: '50%',
+            background: 'rgba(0, 132.60, 255, 0.50)',
+        })
+        team.node.append(teamA.node, teamB.node)
+        team.node.classList.add(`${this.className}__listPlayer__team__background`)
         return team
     }
 
-    createPlayerDOM() {
+    createPlayerDOM(data: any) {
         const player = this.createContainer('div', {
             background:
                 'linear-gradient(180deg, rgba(254.79, 211.58, 58.39, 0.50) 0%, #9A7B2B 97%)',
         })
-        player.node.classList.add('prepareDuel__listPlayer__player')
+        player.node.classList.add(`${this.className}__listPlayer__player`)
 
         // #region header
         const header = this.add.dom(0, 0, 'div').setOrigin(0)
         header.node.classList.add('position-relative')
-        header.node.classList.add('prepareDuel__listPlayer__player__header')
-        const playerName = this.add
-            .dom(0, 0, 'div', {}, 'ABCBABAaasbcccccccccccccsccccccccccccccccccc')
-            .setOrigin(0)
-        playerName.node.classList.add('prepareDuel__listPlayer__player__header-name')
+        header.node.classList.add(`${this.className}__listPlayer__player__header`)
+        const playerName = this.add.dom(0, 0, 'div', {}, data.name).setOrigin(0)
+        playerName.node.classList.add(`${this.className}__listPlayer__player__header-name`)
 
         header.node.append(playerName.node)
         // #endregion header
@@ -204,12 +210,12 @@ class PrepareDuel extends BaseScene {
     // #region create background screen
     createBackgroundScreen() {
         const section = this.createContainer('section', {})
-        section.node.classList.add('prepareDuel__background-screen')
+        section.node.classList.add(`${this.className}__background-screen`)
 
         const body = this.createContainer('div', {
             'background-color': '#000',
         })
-        body.node.classList.add('prepareDuel__background-screen__body')
+        body.node.classList.add(`${this.className}__background-screen__body`)
 
         const sourceImg: any = this.textures
             .get(CONSTANTS.keyScene + '-background')
@@ -223,14 +229,14 @@ class PrepareDuel extends BaseScene {
     // #region create items
     createItemsDOM() {
         const section = this.createContainer('section', {})
-        section.node.classList.add('prepareDuel__items')
+        section.node.classList.add(`${this.className}__items`)
         // #region header
         const header = this.createContainer('div', {})
-        header.node.classList.add('prepareDuel__items__header')
+        header.node.classList.add(`${this.className}__items__header`)
 
         const idRoom = this.add.dom(0, 0, 'div', {}, `ID: 1234567890`).setOrigin(0)
         idRoom.node.classList.add('position-relative')
-        idRoom.node.classList.add('prepareDuel__items__header__text')
+        idRoom.node.classList.add(`${this.className}__items__header__text`)
         // #endregion header
 
         header.node.append(idRoom.node)
@@ -241,11 +247,11 @@ class PrepareDuel extends BaseScene {
     // #region create chat
     createChat() {
         const section = this.createContainer('section', {})
-        section.node.classList.add('prepareDuel__chat')
+        section.node.classList.add(`${this.className}__chat`)
 
         // #region header
         const header = this.createContainer('div', {})
-        header.node.classList.add('prepareDuel__chat__header')
+        header.node.classList.add(`${this.className}__chat__header`)
 
         const btnPublic = this.createChatAreaBtn('public', 'Chung')
         const btnRoom = this.createChatAreaBtn('room', 'Phòng')
@@ -255,13 +261,13 @@ class PrepareDuel extends BaseScene {
 
         // #region body
         const body = this.createContainer('div', {})
-        body.node.classList.add('prepareDuel__chat__body-wrapper')
+        body.node.classList.add(`${this.className}__chat__body-wrapper`)
         body.node.classList.add('scrollbar')
         const pad = this.add.dom(0, 0, 'span').setOrigin(0)
         pad.node.classList.add('position-relative')
         pad.node.classList.add('pad')
         const bodyContainer = this.createContainer('div', {})
-        bodyContainer.node.classList.add('prepareDuel__chat__body-wrapper__container')
+        bodyContainer.node.classList.add(`${this.className}__chat__body-wrapper__container`)
         for (let i of [1, 2]) {
             const message = this.createChatMessage(
                 'public',
@@ -286,7 +292,7 @@ class PrepareDuel extends BaseScene {
 
         // #region footer
         const footer = this.createChatFooter()
-        footer.node.classList.add('prepareDuel__chat__footer')
+        footer.node.classList.add(`${this.className}__chat__footer`)
         // #endregion footer
         section.node.append(header.node, body.node, footer.node)
         return section
@@ -294,11 +300,11 @@ class PrepareDuel extends BaseScene {
 
     createChatAreaBtn(area: string, text: string) {
         const btn = this.createContainer('div', {})
-        btn.node.classList.add('prepareDuel__chat__header__btn')
+        btn.node.classList.add(`${this.className}__chat__header__btn`)
         btn.node.classList.add(`prepareDuel__chat__header__btn--${area}`)
         const btnText = this.add.dom(0, 0, 'div', {}, text).setOrigin(0)
         btnText.node.classList.add('position-relative')
-        btnText.node.classList.add('prepareDuel__chat__header__btn--public__text')
+        btnText.node.classList.add(`${this.className}__chat__header__btn--public__text`)
 
         btn.node.append(btnText.node)
 
@@ -308,14 +314,16 @@ class PrepareDuel extends BaseScene {
     createChatMessage(area: string, from: string, message: string) {
         const section = this.createContainer('div', {})
         section.node.classList.add('d-block')
-        section.node.classList.add('prepareDuel__chat__body-wrapper__container__message')
+        section.node.classList.add(`${this.className}__chat__body-wrapper__container__message`)
 
         // area
         const areaText = this.add
             .dom(0, 0, 'span', {}, `[${(CONSTANTS.areas as any)[area] || area}]`)
             .setOrigin(0)
         areaText.node.classList.add('position-relative')
-        areaText.node.classList.add('prepareDuel__chat__body-wrapper__container__message__area')
+        areaText.node.classList.add(
+            `${this.className}__chat__body-wrapper__container__message__area`,
+        )
         if (area === 'public' || area === 'room') {
             areaText.node.classList.add(
                 `prepareDuel__chat__body-wrapper__container__message__area--${area}`,
@@ -325,7 +333,7 @@ class PrepareDuel extends BaseScene {
         const messageBlock = this.add.dom(0, 0, 'div', {}).setOrigin(0)
         messageBlock.node.classList.add('position-relative')
         messageBlock.node.classList.add(
-            'prepareDuel__chat__body-wrapper__container__message__block',
+            `${this.className}__chat__body-wrapper__container__message__block`,
         )
 
         // whoSend
@@ -333,13 +341,15 @@ class PrepareDuel extends BaseScene {
         whoSend.node.classList.add('position-relative')
         whoSend.node.classList.add('d-inline')
         whoSend.node.classList.add(
-            'prepareDuel__chat__body-wrapper__container__message__block__from',
+            `${this.className}__chat__body-wrapper__container__message__block__from`,
         )
         // text
         const text = this.add.dom(0, 0, 'span', {}, `${message}`).setOrigin(0)
         text.node.classList.add('position-relative')
         text.node.classList.add('d-inline')
-        text.node.classList.add('prepareDuel__chat__body-wrapper__container__message__block__text')
+        text.node.classList.add(
+            `${this.className}__chat__body-wrapper__container__message__block__text`,
+        )
 
         messageBlock.node.append(whoSend.node, text.node)
         section.node.append(areaText.node, messageBlock.node)
@@ -348,7 +358,7 @@ class PrepareDuel extends BaseScene {
     }
 
     createChatFooter() {
-        const className = 'prepareDuel__chat__footer'
+        const className = `${this.className}__chat__footer`
         const section = this.createContainer('section', {})
 
         const location = this.createContainer('div', {})
@@ -429,7 +439,7 @@ class PrepareDuel extends BaseScene {
     // #endregion create chat
     // #region create map
     createMap() {
-        const className = 'prepareDuel__map'
+        const className = `${this.className}__map`
         const section = this.createContainer('section', {})
         section.addListener('click').on('click', () => {
             console.log('Click map')
@@ -451,7 +461,7 @@ class PrepareDuel extends BaseScene {
 
     // #region button functions
     createBtnFunc() {
-        const className = 'prepareDuel__btn-func'
+        const className = `${this.className}__btn-func`
         const section = this.createContainer('section', {})
         section.node.classList.add('d-inline-flex')
         section.node.classList.add(className)
@@ -480,6 +490,25 @@ class PrepareDuel extends BaseScene {
 
     // #endregion create DOM
 
+    // #region handle events
+    // #endregion handle events
+
+    // #region listening socket
+    // listeningRoom() {
+    //     if (playersOnRoom) {
+    //         const numOfPlayers = playersOnRoom.length
+    //         playersOnRoom.forEach((dataPlayer: any, i: number) => {
+    //             if (i < 3) {
+    //                 const player = this.createPlayerDOM(dataPlayer)
+    //                 teamA.node.append(player.node)
+    //             } else {
+    //                 const player = this.createPlayerDOM(dataPlayer)
+    //                 teamB.node.append(player.node)
+    //             }
+    //         })
+    //     }
+    // }
+    // #endregion listening socket
     render() {
         console.log('%c\nRendering...\n', 'color: #363; font-size: 16px;')
     }

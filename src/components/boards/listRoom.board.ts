@@ -228,7 +228,10 @@ class BoardListRoom extends Board {
         const roomItem = new RoomItem(this.game, {
             type: data.type,
             typeMap: data.typeMap,
-            numberOf: data.players.length,
+            numberOf: data.players.reduce((total: number, p: any) => {
+                if (p.isOnRoom) total += 1
+                return total
+            }, 0),
             maxNum: data.maxNum,
             _id: data._id,
         })
@@ -244,12 +247,21 @@ class BoardListRoom extends Board {
         const num = 'room-item__num'
         const typeMap = 'room-item__type-map'
         console.log(data, data.players.length)
+        const sumPlayerOnRoom = data.players.reduce((total: number, p: any) => {
+            if (p.isOnRoom) total += 1
+            return total
+        }, 0)
 
         const roomItem = this.listRoom?.node.querySelector('.' + roomClass) as Element
+        if (sumPlayerOnRoom === 0) {
+            roomItem.classList.add('d-none')
+            return
+        }
+
         const roomType = roomItem.querySelector('.' + type) as Element
         roomType.textContent = data.type
         const roomNum = roomItem.querySelector('.' + num) as Element
-        roomNum.textContent = `${data.players.length}/${data.maxNum}`
+        roomNum.textContent = `${sumPlayerOnRoom}/${data.maxNum}`
         const roomTypeMap = roomItem.querySelector('.' + typeMap) as Element
         roomTypeMap.textContent = data.typeMap
     }

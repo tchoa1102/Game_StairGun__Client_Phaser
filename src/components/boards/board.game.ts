@@ -77,6 +77,16 @@ class Board extends Phaser.GameObjects.DOMElement {
         this.node.append(nameBoard.node, this.exitBtn!.node, boardPadding.node)
     }
 
+    update() {
+        // if (
+        //     // add role to if clause run true
+        //     // this.game.scene.isVisible(`${this.game.scene.key}`) &&
+        //     this!.node.className.includes('d-none')
+        // ) {
+        //     this!.node.classList.remove('d-none')
+        // }
+    }
+
     appendChildToContent(childNode: Element) {
         this.contentBoard?.node.append(childNode)
     }
