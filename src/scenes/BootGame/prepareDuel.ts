@@ -7,11 +7,11 @@ import type {
     IPlayer,
     IPlayerOnRoom,
     IPlayerRemoved,
+    IReadyRes,
     IRoom,
 } from '@/util/interface/state.main.interface'
 import { roomService } from '@/services/socket'
-import type Home from '../Home'
-import { initKeyAnimation } from '@/util/shares'
+import ShowCharacter from '@/characters/avatars/show'
 
 const CONSTANTS = {
     keyScene: CONSTANT_HOME.key.prepareDuel,
@@ -27,14 +27,16 @@ class PrepareDuel extends BaseScene {
     public MAX_WIDTH: number
     public MAX_HEIGHT: number
     public className = 'prepareDuel'
-
     public section: Phaser.GameObjects.DOMElement | undefined
+
     private listPlayerDOM: Phaser.GameObjects.DOMElement | undefined
+    private listCharacterShow: { [key: string]: Phaser.Game }
     constructor() {
         super(CONSTANTS.keyScene)
         const mainStore: any = useMainStore()
         this.MAX_WIDTH = mainStore.getWidth * mainStore.zoom
         this.MAX_HEIGHT = mainStore.getHeight * mainStore.zoom
+        this.listCharacterShow = {}
         this.listeningSocket()
     }
 
@@ -54,21 +56,30 @@ class PrepareDuel extends BaseScene {
 
         // #region dom
         this.section = this.createContainer('section', {})
+        this.section.node.classList.add('prepareDuel-dom')
         const interfaceDOM = this.createInterfaceDOM()
         // #endregion dom
         // #region create button functionality
         const sectionFuncBottomRight = new BtnFunc(this).createFuncRoom()
         this.section.node.append(interfaceDOM.node, sectionFuncBottomRight.node)
         // #endregion create button functionality
+
+        // const config: Phaser.Types.Core.GameConfig = {
+        //     type: Phaser.AUTO,
+        //     width: 270,
+        //     height: 190,
+        //     parent: 'game',
+        //     transparent: true,
+        // }
+        // const game = new Phaser.Game(config)
+        // game.scene.add(`character-show`, ShowCharacter, true, {
+        //     gameObject: this,
+        // })
     }
 
     update() {
         // console.log('bootGame')
-        if (
-            this.scene.isVisible(CONSTANTS.keyScene)
-            //  &&
-            // this.section!.node.className.includes('d-none')
-        ) {
+        if (this.scene.isVisible(CONSTANTS.keyScene)) {
             this.section!.node.classList.remove('d-none')
             this.section!.node.classList.add('d-flex')
         } else {
@@ -76,6 +87,7 @@ class PrepareDuel extends BaseScene {
                 this.section?.node.classList.add('d-none')
             }
             this.section?.node.classList.remove('d-flex')
+            // this
         }
     }
 
@@ -160,14 +172,17 @@ class PrepareDuel extends BaseScene {
 
     // #region create DOM
     // #region manager add player
-    addPlayer(data: IPlayerOnRoom | IPlayerRemoved) {
+    addPlayer(data: IPlayerOnRoom) {
         const container = this.listPlayerDOM?.node.children
         if (container) {
-            if (data as IPlayerOnRoom) {
-                this.editPlayerDOM(container[data.position], data as IPlayerOnRoom)
-            } else {
-                this.editPlayerDOM(container[data.position], undefined)
-            }
+            this.editPlayerDOM(container[data.position], data as IPlayerOnRoom)
+        }
+    }
+
+    removePlayer(data: IPlayerRemoved) {
+        const container = this.listPlayerDOM?.node.children
+        if (container) {
+            this.removePlayerDOM(container[data.position], data)
         }
     }
     // #endregion manager add player
@@ -200,51 +215,87 @@ class PrepareDuel extends BaseScene {
         return player
     }
 
-    editPlayerDOM(player: Element, data?: IPlayerOnRoom) {
+    editPlayerDOM(player: Element, data: IPlayerOnRoom): void {
         const className = `${this.className}__listPlayer__player`
-        if (data) {
-            player.innerHTML = ''
-            const playerData = data.player
-            player.setAttribute('id', `${this.className}__player--${playerData._id}`)
 
-            // #region header
-            const header = this.add.dom(0, 0, 'div').setOrigin(0)
-            header.node.classList.add('position-relative')
-            header.node.classList.add(`${className}__header`)
-            const playerName = this.add.dom(0, 0, 'div', {}, playerData.name).setOrigin(0)
-            playerName.node.classList.add(`${className}__header-name`)
+        console.log('Render: ', data.player)
+        const playerData = data.player
+        const playerIdName = `${this.className}__player--${playerData?._id}`
+        if (player.id === playerIdName) return
 
-            header.node.append(playerName.node)
-            // #endregion header
+        // #region init characteristics
+        player.innerHTML = ''
+        player.setAttribute('id', playerIdName)
 
-            // #region body
-            const body = this.createContainer('div', {})
-            body.node.classList.add(`${className}__body`)
-            const bodyContainer = body.node.getBoundingClientRect()
+        // #region header
+        const header = this.add.dom(0, 0, 'div').setOrigin(0)
+        header.node.classList.add('position-relative')
+        header.node.classList.add(`${className}__header`)
+        const playerName = this.add.dom(0, 0, 'div', {}, playerData.name).setOrigin(0)
+        playerName.node.classList.add(`${className}__header-name`)
 
-            const x = bodyContainer.x - bodyContainer.width / 2
-            const y = bodyContainer.x - bodyContainer.width / 2
-            const faceSprite = this.physics.add.sprite(
-                x,
-                y,
-                `${playerData._id}`,
-                'looks.face.default',
-            )
+        header.node.append(playerName.node)
+        // #endregion header
 
-            faceSprite.anims.play(initKeyAnimation('default', 'show'))
+        // #region body
+        const body = this.createContainer('div', {})
+        body.node.classList.add(`${className}__body`)
 
-            // body.node.append(face)
-            // #endregion body
+        const game = this.createElementShowCharacter(data, body)
+        this.listCharacterShow[playerData._id!] = game
+        // #endregion body
 
-            // #region other element
-            if (data.isRoomMaster) {
-            }
-            // #endregion other element
-
-            player.append(header.node, body.node)
-        } else {
-            player.innerHTML = ''
+        // #region other element
+        if (data.isRoomMaster) {
         }
+        // #endregion other element
+
+        player.append(header.node, body.node)
+        // #endregion init characteristics
+        // if (data && data.player) {
+        // } else {
+        //     player.innerHTML = ''
+        // }
+    }
+
+    removePlayerDOM(player: Element, data: IPlayerRemoved) {
+        const mainStore: any = useMainStore()
+        console.log('Removing player')
+
+        player.setAttribute('id', '')
+        player.innerHTML = ''
+
+        mainStore.setCurrentRoom({
+            ...mainStore.getRoom.players.reduce(
+                (result: Array<IPlayerOnRoom>, p: IPlayerOnRoom) => {
+                    if (p.player._id === data.newMaster) {
+                        p.isRoomMaster = true
+                        // update UI
+                    }
+
+                    if (p.player._id !== data.player) result.push(p)
+                    return result
+                },
+                [],
+            ),
+        })
+        // free memory
+        this.listCharacterShow[data.player].destroy(true)
+        delete this.listCharacterShow[data.player]
+    }
+
+    createElementShowCharacter(data: IPlayerOnRoom, body: Phaser.GameObjects.DOMElement) {
+        const bodyContainer = body.node.getBoundingClientRect()
+        const config: Phaser.Types.Core.GameConfig = {
+            type: Phaser.AUTO,
+            width: bodyContainer.width,
+            height: bodyContainer.height,
+            parent: body.node as HTMLElement,
+            transparent: true,
+        }
+        const game = new Phaser.Game(config)
+        game.scene.add(`character-show-${data.position}`, ShowCharacter, true)
+        return game
     }
 
     // #endregion create team dom
@@ -269,13 +320,14 @@ class PrepareDuel extends BaseScene {
     // #endregion create background screen
     // #region create items
     createItemsDOM() {
+        const mainStore: any = useMainStore()
         const section = this.createContainer('section', {})
         section.node.classList.add(`${this.className}__items`)
         // #region header
         const header = this.createContainer('div', {})
         header.node.classList.add(`${this.className}__items__header`)
 
-        const idRoom = this.add.dom(0, 0, 'div', {}, `ID: 1234567890`).setOrigin(0)
+        const idRoom = this.add.dom(0, 0, 'div', {}, `ID: ${mainStore.getPlayer._id}`).setOrigin(0)
         idRoom.node.classList.add('position-relative')
         idRoom.node.classList.add(`${this.className}__items__header__text`)
         // #endregion header
@@ -507,7 +559,9 @@ class PrepareDuel extends BaseScene {
         section.node.classList.add('d-inline-flex')
         section.node.classList.add(className)
 
-        const btnInvite = this.createContainer('div', {})
+        const btnInvite = this.createContainer('button', {})
+            .addListener('click')
+            .on('click', this.handleClickInvite.bind(this))
         btnInvite.node.classList.add(className + '__invite')
 
         const icon = this.add.dom(0, 0, 'iconify-icon').setOrigin(0)
@@ -519,12 +573,23 @@ class PrepareDuel extends BaseScene {
 
         btnInvite.node.append(icon.node, inviteText.node)
 
-        const btnStart = this.createContainer('div', {})
+        const btnStart = this.createBtn('button', {})
+            .addListener('click')
+            .on('click', this.handleClickStart.bind(this))
         btnStart.node.classList.add(className + '__start')
         const startText = this.createText('span', { 'font-weight': '700' }, 'Bắt đầu')
         btnStart.node.append(startText.node)
 
-        section.node.append(btnInvite.node, btnStart.node)
+        const btnDestroy = this.createBtn('button', {})
+            .addListener('click')
+            .on('click', this.handleClickDestroy.bind(this))
+        btnDestroy.node.classList.add('d-none')
+        btnDestroy.node.classList.add(className + '__destroy')
+        const destroyText = this.createText('span', { 'font-weight': '700' }, 'Huy')
+        btnDestroy.node.append(destroyText.node)
+        btnDestroy.node.setAttribute('disabled', '')
+
+        section.node.append(btnInvite.node, btnStart.node, btnDestroy.node)
         return section
     }
     // #endregion button functions
@@ -532,24 +597,49 @@ class PrepareDuel extends BaseScene {
     // #endregion create DOM
 
     // #region handle events
+    handleClickInvite(e: any) {
+        e.target.setAttribute('disabled', 'disabled')
+        setTimeout(() => {
+            console.log('active')
+
+            e.target.removeAttribute('disabled')
+        }, 5000)
+    }
+    handleClickStart(e: any) {
+        const btnStart: Element = e.currentTarget
+        btnStart.setAttribute('disabled', '')
+
+        roomService.ready(true)
+    }
+    handleClickDestroy(e: any) {
+        const btnDestroy: Element = e.currentTarget
+        btnDestroy.setAttribute('disabled', '')
+
+        roomService.ready(false)
+    }
     // #endregion handle events
+
+    // #region other
+    changeDisplayBtn(btnBefore: Element, btnAfter: Element) {
+        btnBefore.classList.add('d-none')
+        btnAfter.removeAttribute('disabled')
+        btnAfter.classList.remove('d-none')
+    }
+    // #endregion other
 
     // #region listening socket
     listeningSocket() {
         roomService.listeningAddToRoom((data: IRoom) => {
             // show waiting room
             const mainStore: any = useMainStore()
+            console.log('Players: ', data.players)
+
             mainStore.setCurrentRoom({
                 ...data,
                 players: data.players.filter((pl: IPlayerOnRoom) => {
                     return pl.isOnRoom
                 }),
             })
-            // sort ascending for updatedAt
-            mainStore.getRoom.players.sort(
-                (pl1: IPlayerOnRoom, pl2: IPlayerOnRoom) => pl1.position - pl2.position,
-            )
-            console.log('Add player to room: ', mainStore.getRoom)
 
             // add player
             mainStore.getRoom.players.forEach((p: IPlayerOnRoom) => {
@@ -557,21 +647,28 @@ class PrepareDuel extends BaseScene {
             })
 
             // show prepare screen
-            const homeScene: any = this.scene.get(CONSTANT_HOME.key.home)
-            homeScene.openScene(CONSTANT_HOME.key.prepareDuel)
+            const homeScene: any = this.scene?.get(CONSTANT_HOME.key.home)
+            homeScene?.openScene(CONSTANT_HOME.key.prepareDuel)
         })
 
         roomService.listeningRemovePlayerOnRoom((data: any) => {
             const mainStore: any = useMainStore()
-            mainStore.getRoom.players.filter((p: IPlayerOnRoom) => {
-                if (p.player._id !== data._id) {
-                    this.addPlayer(p)
-                    return true
-                } else {
-                    this.addPlayer(data)
-                    return false
-                }
-            })
+            this.removePlayer(data)
+        })
+
+        roomService.listeningReady((data: IReadyRes) => {
+            const mainStore: any = useMainStore()
+            const btnStart: Element = this.section?.node.querySelector(
+                `.${this.className}__btn-func__start`,
+            ) as Element
+            const btnDestroy: Element = this.section?.node.querySelector(
+                `.${this.className}__btn-func__destroy`,
+            ) as Element
+            if (data.player._id === mainStore.getPlayer._id && data.player.isReady) {
+                this.changeDisplayBtn(btnStart, btnDestroy)
+            } else if (data.player._id === mainStore.getPlayer._id && !data.player.isReady) {
+                this.changeDisplayBtn(btnDestroy, btnStart)
+            }
         })
     }
     // #endregion listening socket

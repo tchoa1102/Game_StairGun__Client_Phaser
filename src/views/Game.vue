@@ -1,6 +1,10 @@
 <template>
     <section id="game">
         <section class="toast-component"></section>
+        <section
+            id="game-temp"
+            style="position: fixed; top: 0; left: 0; z-index: 100000000"
+        ></section>
     </section>
 </template>
 

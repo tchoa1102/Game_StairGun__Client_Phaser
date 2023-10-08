@@ -1,26 +1,25 @@
 import BoardListRoom from '@/components/boards/listRoom.board'
-import GamePlay from '../GamePLay'
-import { roomService } from '@/services/socket'
+import { siteService } from '@/services/socket'
 import PrepareDuel from '../BootGame/prepareDuel'
 import BaseScene from '../baseScene'
 import BtnFunc from '@/components/btnFunc'
 import CONSTANT_HOME from './CONSTANT'
 import { useMainStore } from '@/stores'
-import type { IRoom } from '@/util/interface/state.main.interface'
 import FETCH from '@/services/fetchConfig.service'
-import { createAnimation } from '@/util/shares'
+import { createAnimation, initKeyAnimation, toast } from '@/util/shares'
 
 class Home extends BaseScene {
+    // #region declarations
     public DOMElement: {
         boardListRoom: BoardListRoom | undefined
     }
 
     private configDefault: Array<any>
-
-    // public boardListRoom: BoardListRoom | undefined
-
     private statesScreen: Array<string>
     private section: Phaser.GameObjects.DOMElement | undefined
+    private duelBuilding: Phaser.GameObjects.Polygon | undefined
+    private shoppingBuilding: Phaser.GameObjects.Polygon | undefined
+    // #endregion declarations
     constructor() {
         super(CONSTANT_HOME.key.home)
         this.statesScreen = []
@@ -41,10 +40,12 @@ class Home extends BaseScene {
                 const srcConfig = looks[key]
                 const config: any = await FETCH(srcConfig)
                 this.configDefault.push(config)
+                localStorage.setItem(config.meta.name, JSON.stringify(config))
 
-                this.load.atlas(`looks.${key}.default`, config.src[0], config)
+                this.load.atlas(config.meta.name, config.src[0], config)
             }
         }
+        // #endregion load skin
     }
 
     create() {
@@ -52,15 +53,17 @@ class Home extends BaseScene {
         background.setOrigin(0)
         this.physics.pause()
 
+        // #region listening socket
+        this.listeningSocket()
+        // #endregion listening socket
+
         // #region create body default
         this.configDefault.forEach((config) => {
-            console.log('config: ', config)
-
-            createAnimation(this, config.meta.image, config.animations)
+            createAnimation(this, config.meta.name, config.animations)
         })
         // #endregion create body default
 
-        // DOM
+        // #region DOM
         this.section = this.createContainer('section', {}).setOrigin(0)
         this.section.node.classList.remove('d-flex')
         this.section.node.classList.add('home')
@@ -77,53 +80,17 @@ class Home extends BaseScene {
         const sectionFuncBottomRight = new BtnFunc(this).createFuncMain()
         this.section.node.appendChild(sectionFuncBottomRight.node)
         // #endregion create button functionality
+        // #endregion DOM
 
         // #region create polygon building
-        const duelBuilding = this.add.polygon(
-            0,
-            0,
-            [
-                890, 191, 964, 166, 1026, 170, 1106, 192, 1127, 297, 1104, 346, 898, 349, 861, 293,
-                867, 202,
-            ],
-            // 0xfff0,
-        )
-        duelBuilding.setOrigin(0)
-        const shoppingBuilding = this.add.polygon(
-            0,
-            0,
-            [
-                296, 211, 357, 187, 395, 247, 430, 170, 470, 226, 514, 241, 521, 264, 569, 182, 529,
-                156, 504, 120, 507, 91, 542, 67, 623, 86, 643, 122, 615, 168, 574, 173, 598, 201,
-                636, 201, 617, 241, 699, 297, 734, 347, 451, 458, 209, 350, 236, 302, 312, 245, 298,
-                210,
-            ],
-            // 0xfff0,
-        )
-        shoppingBuilding.setOrigin(0)
+        this.duelBuilding = this.add.polygon(0, 0, CONSTANT_HOME.building.duel).setOrigin(0)
+        this.shoppingBuilding = this.add.polygon(0, 0, CONSTANT_HOME.building.shopping).setOrigin(0)
         // #endregion
 
         // #region add event
         var zone = this.add.zone(0, 0, 2960, 1480)
         zone.setInteractive()
-        zone.on('pointerdown', (pointer: any) => {
-            var x = pointer.x
-            var y = pointer.y
-            // console.log(x, y)
-            if (
-                this.statesScreen.length === 0 &&
-                Phaser.Geom.Polygon.Contains(duelBuilding.geom, x, y)
-            ) {
-                console.log('Duel building clicked!')
-                this.openBoard(this.DOMElement.boardListRoom)
-            }
-            if (
-                this.statesScreen.length === 0 &&
-                Phaser.Geom.Polygon.Contains(shoppingBuilding.geom, x, y)
-            ) {
-                console.log('Shopping building clicked!')
-            }
-        })
+        zone.on('pointerdown', this.handleClickBuilding.bind(this))
         // #endregion
 
         const prepareDuelScene = this.scene.add(CONSTANT_HOME.key.prepareDuel, PrepareDuel, true)
@@ -133,7 +100,6 @@ class Home extends BaseScene {
     }
 
     update() {
-        // console.log('a')
         // console.log(this.statesScreen)
         if (this.statesScreen.length === 0) {
             this.section?.node.classList.remove('d-none')
@@ -158,6 +124,9 @@ class Home extends BaseScene {
     }
 
     openScene(key: string) {
+        console.log(this.scene.get(key).scene.isVisible(key))
+
+        if (this.scene.get(key).scene.isVisible(key)!) return
         let sceneConfig: any = null
         switch (key) {
             case CONSTANT_HOME.key.prepareDuel: {
@@ -174,8 +143,6 @@ class Home extends BaseScene {
 
                 this.scene.setVisible(true, key)
             }
-            // this.scene.get(sceneConfig.scene.key)?.section?.node.classList.add('d-flex')
-            // this.scene.bringToTop(key)
         }
     }
 
@@ -187,9 +154,32 @@ class Home extends BaseScene {
     }
 
     // #region listening socket
+    listeningSocket() {
+        siteService.listeningError(({ status, message }: { status: number; message: string }) => {
+            toast({ message, status })
+        })
+    }
     // #endregion listening socket
 
     // #region handle events
+    handleClickBuilding(pointer: any) {
+        var x = pointer.x
+        var y = pointer.y
+        // console.log(x, y)
+        if (
+            this.statesScreen.length === 0 &&
+            Phaser.Geom.Polygon.Contains(this.duelBuilding!.geom, x, y)
+        ) {
+            console.log('Duel building clicked!')
+            this.openBoard(this.DOMElement.boardListRoom)
+        }
+        if (
+            this.statesScreen.length === 0 &&
+            Phaser.Geom.Polygon.Contains(this.shoppingBuilding!.geom, x, y)
+        ) {
+            console.log('Shopping building clicked!')
+        }
+    }
     // #endregion handle events
 }
 

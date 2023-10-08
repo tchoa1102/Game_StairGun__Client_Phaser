@@ -63,6 +63,7 @@ export interface IPlayerOnRoom {
     isOnRoom: boolean
     isRoomMaster: boolean
     position: number
+    isReady: boolean
     updatedAt: string
     createdAt: string
 }
@@ -70,4 +71,18 @@ export interface IPlayerOnRoom {
 export interface IPlayerRemoved {
     player: string
     position: number
+    newMaster: string | undefined
+}
+
+export interface IReadyRes {
+    _id: string
+    player: {
+        _id: string
+        isOnRoom: boolean
+        isRoomMaster: boolean
+        position: number
+        isReady: boolean
+        updatedAt: string
+        createdAt: string
+    }
 }

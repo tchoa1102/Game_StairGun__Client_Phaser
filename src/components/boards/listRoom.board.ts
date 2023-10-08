@@ -4,7 +4,6 @@ import RoomItem from './roomItem'
 import roomService from '@/services/socket/room.service'
 import { RoomService } from '@/services'
 import { useMainStore } from '@/stores'
-import { toast } from '@/util/shares'
 
 class BoardListRoom extends Board {
     public content: Phaser.GameObjects.DOMElement | undefined
@@ -192,21 +191,21 @@ class BoardListRoom extends Board {
     listeningSocket() {
         roomService.listeningUpdateRooms(({ type, data }: { type: string; data: any }) => {
             const id = data._id
-            console.log('receiving data room')
+            // console.log('receiving data room')
 
             switch (type) {
                 case 'create': {
-                    console.log('creating room')
+                    // console.log('creating room')
                     this.createRoom(data)
                     break
                 }
                 case 'update': {
-                    console.log('updating room')
+                    // console.log('updating room')
                     this.editRoom(data)
                     break
                 }
                 case 'delete': {
-                    console.log('deleting room')
+                    // console.log('deleting room')
                     const item = this.listRoom?.getChildByProperty(
                         'class',
                         `room-item-${id}`,
@@ -216,11 +215,6 @@ class BoardListRoom extends Board {
                 }
             }
         })
-        roomService.listeningAddToRoomError(
-            ({ status, message }: { status: number; message: string }) => {
-                toast({ message })
-            },
-        )
     }
 
     // #region functions handle other features

@@ -85,9 +85,9 @@ export default class BtnFunc extends BaseDOM {
     // #endregion listeners
     // #region handle listeners socket
     goOut() {
-        console.log(this.game.scene.key, this.game.scene.isVisible())
+        // console.log(this.game.scene.key, this.game.scene.isVisible())
         ;(this.game.scene.get(CONSTANT_HOME.key.home) as any).visibleScene(this.game.scene.key)
-        console.log(this.game.scene.isVisible())
+        // console.log(this.game.scene.isVisible())
     }
     // #endregion handle listeners socket
 }

@@ -1,5 +1,5 @@
 import { useMainStore } from '@/stores'
-import type { IPlayerOnRoom, IRoom } from '@/util/interface/state.main.interface'
+import type { IPlayerOnRoom, IReadyRes, IRoom } from '@/util/interface/state.main.interface'
 
 class RoomService {
     constructor() {}
@@ -24,6 +24,13 @@ class RoomService {
 
         socket.emit('rooms/players/goOut')
     }
+
+    ready(isReady: boolean) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+
+        socket.emit('rooms/players/ready', { idRoom: mainStore.getRoom._id, isReady })
+    }
     // #endregion emit
 
     // #region on
@@ -32,7 +39,7 @@ class RoomService {
         const socket = mainStore.getSocket
 
         socket.on('rooms', ({ type, data }: { type: string; data: any }) => {
-            console.log('Receiving....')
+            // console.log('Receiving....')
             callback({ type, data })
         })
     }
@@ -68,17 +75,20 @@ class RoomService {
         })
     }
 
-    listeningAddToRoomError(callback: CallableFunction) {
+    listeningReady(callback: (data: IReadyRes) => void) {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket
-        socket.on(
-            'rooms/players/add/res/error',
-            ({ status, message }: { status: number; message: string }) => {
-                console.log('error')
 
-                callback({ status, message })
-            },
-        )
+        socket.on('rooms/players/ready/res', (data: IReadyRes) => {
+            for (const p of mainStore.getRoom.players) {
+                const plyer: IPlayerOnRoom = p
+                if (plyer.player._id === data.player._id) {
+                    plyer.isReady = data.player.isReady
+                    break
+                }
+            }
+            callback(data)
+        })
     }
     // #endregion on
 }

@@ -18,7 +18,7 @@ export function createAnimation(game: any, name: string, animations: any) {
             // console.log('instance: ', instance)
             animationsInstances[keyAnim] = game.anims.create({
                 ...instance,
-                // defaultTextureKey: game.name,
+                defaultTextureKey: name,
                 key: keyAnim,
                 frames: instance.frames,
             })
@@ -29,7 +29,15 @@ export function createAnimation(game: any, name: string, animations: any) {
     return animationsInstances
 }
 
-export function toast({ type, message }: { type?: string; message?: string }) {
+export function toast({
+    type,
+    message,
+    status,
+}: {
+    type?: string
+    message?: string
+    status?: number
+}) {
     const toast: { [key: string]: any } = {
         info: {
             message: message || 'Thành công!',
@@ -38,12 +46,18 @@ export function toast({ type, message }: { type?: string; message?: string }) {
             message: message || 'Có lỗi xảy ra! Vui lòng thử lại.',
         },
         error: {
-            message: message || 'Có lỗi xảy ra! Vui longf thử lại.',
+            message: message || 'Có lỗi xảy ra! Vui lòng thử lại.',
         },
     }
 
-    const defaultType = type || 'error'
-    const toastDOM = createToast({ type: defaultType, message: toast[defaultType].message })
+    let defaultType = type || 'error'
+    if (status && status < 400) {
+        defaultType = 'info'
+    }
+    const toastDOM = createToast({
+        type: defaultType,
+        message: message || toast[defaultType].message,
+    })
     // setTimeout(() => {
     //     toastDOM.remove()
     // }, 20000)

@@ -2,23 +2,15 @@ import { useMainStore } from '@/stores'
 
 class SiteService {
     constructor() {}
+    listeningError(callback: CallableFunction) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+        socket.on('res/error', ({ status, message }: { status: number; message: string }) => {
+            console.log('error')
 
-    // async receivingRoomData() {
-    //     const mainStore: any = useMainStore()
-    //     const socket = mainStore.getSocket
-    //     socket.on('receive-data', (data: { [key: string]: any }) => {
-    //         for (const key in data) {
-    //             if (data.hasOwnProperty(key)) {
-    //                 const element = data[key]
-    //                 switch (key) {
-    //                     case 'listRooms': {
-    //                         break
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     })
-    // }
+            callback({ status, message })
+        })
+    }
 }
 
 export default new SiteService()

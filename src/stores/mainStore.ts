@@ -7,6 +7,7 @@ import { GamePlay, Home } from '@/scenes'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
 import { firebaseService } from '@/services'
+import PrepareDuel from '@/scenes/BootGame/prepareDuel'
 
 const MIN_HEIGHT = 740
 
@@ -100,7 +101,6 @@ const useMainStore = defineStore('main', {
                 dom: {
                     createContainer: true,
                 },
-                // backgroundColor: '#E5FB8E',
                 plugins: {
                     // scene: [
                     //     {
