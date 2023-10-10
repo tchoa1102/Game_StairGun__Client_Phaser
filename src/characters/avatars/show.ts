@@ -29,19 +29,19 @@ const CONSTANT = {
 
 export default class ShowCharacter extends Phaser.Scene {
     private gameObject: any
-    private configDefault: Array<any>
+    private keys: Array<any>
     constructor() {
         super({
             key: 'character-show',
         })
-        this.configDefault = []
+        this.keys = []
     }
 
     init() {
         // this.gameObject = mainStore.getGame.scene.getScene(CONSTANT_HOME.key.home)
     }
 
-    create() {
+    preload() {
         const mainStore: any = useMainStore()
         this.gameObject = mainStore.getGame.scene.getScene(CONSTANT_HOME.key.home)
 
@@ -58,10 +58,21 @@ export default class ShowCharacter extends Phaser.Scene {
                 )
                 // this.anims.createFromAseprite()
 
+                // this.keys.push(element.key)
                 const sprite = this.add
                     .sprite(+this.game.config.width / 2, element.positionY, element.key)
                     .setOrigin(0.5, 0)
             }
         }
+    }
+
+    create() {}
+
+    rerender() {
+        console.log('Rerendering')
+        this.scene.restart()
+        // this.scene.stop()
+        // this.scene.start(this)
+        // this.sys.game.renderer.render(this, this.sys.displayList.getChildren(), this.cameras.main)
     }
 }

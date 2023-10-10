@@ -1,43 +1,54 @@
+import { useMainStore } from '@/stores'
+
 class StickService {
     constructor() {}
 
-    stand(socket: any, data: any, event: string) {
+    // emit
+    stand(event: string) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
         socket.emit('stick-stand', {
-            _id: data._id,
-            socketId: data.socketId,
             event,
         })
     }
 
-    runLeft(socket: any, data: any, event: string) {
+    runLeft(event: string) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
         socket.emit('stick-left', {
-            _id: data._id,
-            socketId: data.socketId,
             event,
         })
     }
 
-    runRight(socket: any, data: any, event: string) {
+    runRight(event: string) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
         socket.emit('stick-right', {
-            _id: data._id,
-            socketId: data.socketId,
             event,
         })
     }
 
-    jumpLeft(socket: any, data: any, event: string) {
+    jumpLeft(event: string) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
         socket.emit('stick-jump-left', {
-            _id: data._id,
-            socketId: data.socketId,
             event,
         })
     }
 
-    jumpRight(socket: any, data: any, event: string) {
+    jumpRight(event: string) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
         socket.emit('stick-jump-right', {
-            _id: data._id,
-            socketId: data.socketId,
             event,
+        })
+    }
+
+    // on
+    listeningAnimation(callback: (data: any) => void) {
+        const mainStore: any = useMainStore()
+        mainStore.getSocket.on('stick-keyboard-event', (data: any) => {
+            callback(data)
         })
     }
 }

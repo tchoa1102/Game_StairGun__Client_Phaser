@@ -12,6 +12,9 @@ import type {
 } from '@/util/interface/state.main.interface'
 import { roomService } from '@/services/socket'
 import ShowCharacter from '@/characters/avatars/show'
+import matchService from '@/services/socket/match.service'
+import type { IChangePosition, IMatchRes } from '@/util/interface/index.interface'
+import GamePlay from '../GamePLay'
 
 const CONSTANTS = {
     keyScene: CONSTANT_HOME.key.prepareDuel,
@@ -48,7 +51,7 @@ class PrepareDuel extends BaseScene {
     }
 
     create() {
-        console.log('%c\nCreate...\n', 'color: red; font-size: 16px;')
+        console.log('%c\nCreate Prepare game...\n', 'color: red; font-size: 16px;')
         this.physics.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
         this.physics.pause()
 
@@ -179,6 +182,25 @@ class PrepareDuel extends BaseScene {
         }
     }
 
+    changePositionPlayer(data: IChangePosition, oldPosition: number) {
+        const container = this.listPlayerDOM?.node.children
+        const mainStore: any = useMainStore()
+        if (container) {
+            const oldPositionDOM = container[oldPosition]
+            const newPositionDOM = container[data.position]
+            // newPositionDOM.innerHTML = oldPositionDOM.innerHTML
+            // newPositionDOM.setAttribute('id', data.player)
+            oldPositionDOM.innerHTML = ''
+            oldPositionDOM.setAttribute('id', '')
+
+            this.freeCharacter(data.player)
+            const dataPlayer: IPlayerOnRoom = mainStore.getRoom.players.find(
+                (p: IPlayerOnRoom) => p.player._id === data.player,
+            )
+            this.editPlayerDOM(newPositionDOM, dataPlayer)
+        }
+    }
+
     removePlayer(data: IPlayerRemoved) {
         const container = this.listPlayerDOM?.node.children
         if (container) {
@@ -210,7 +232,10 @@ class PrepareDuel extends BaseScene {
             background:
                 'linear-gradient(180deg, rgba(254.79, 211.58, 58.39, 0.50) 0%, #9A7B2B 97%)',
         })
+            .addListener('click')
+            .on('click', this.handleClickChangePosition.bind(this))
         player.node.classList.add(`${this.className}__listPlayer__player`)
+        player.node.setAttribute('data-index', `${this.listPlayerDOM!.node.children.length}`)
 
         return player
     }
@@ -280,8 +305,7 @@ class PrepareDuel extends BaseScene {
             ),
         })
         // free memory
-        this.listCharacterShow[data.player].destroy(true)
-        delete this.listCharacterShow[data.player]
+        this.freeCharacter(data.player)
     }
 
     createElementShowCharacter(data: IPlayerOnRoom, body: Phaser.GameObjects.DOMElement) {
@@ -294,8 +318,13 @@ class PrepareDuel extends BaseScene {
             transparent: true,
         }
         const game = new Phaser.Game(config)
-        game.scene.add(`character-show-${data.position}`, ShowCharacter, true)
+        game.scene.add(`character-show-${data.player}`, ShowCharacter, true)
         return game
+    }
+
+    freeCharacter(idPlayer: string) {
+        this.listCharacterShow[idPlayer].destroy(true)
+        delete this.listCharacterShow[idPlayer]
     }
 
     // #endregion create team dom
@@ -597,23 +626,36 @@ class PrepareDuel extends BaseScene {
     // #endregion create DOM
 
     // #region handle events
+    handleClickChangePosition(e: any) {
+        const element: any = e.currentTarget
+        const position = Number.parseInt(element.dataset.index)
+
+        roomService.changePosition(position)
+    }
     handleClickInvite(e: any) {
-        e.target.setAttribute('disabled', 'disabled')
+        const btnInvite: Element = e.currentTarget
+        btnInvite.setAttribute('disabled', 'disabled')
         setTimeout(() => {
             console.log('active')
 
-            e.target.removeAttribute('disabled')
+            btnInvite.removeAttribute('disabled')
         }, 5000)
     }
     handleClickStart(e: any) {
         const btnStart: Element = e.currentTarget
         btnStart.setAttribute('disabled', '')
+        setTimeout(() => {
+            btnStart.removeAttribute('disabled')
+        }, 5000)
 
         roomService.ready(true)
     }
     handleClickDestroy(e: any) {
         const btnDestroy: Element = e.currentTarget
         btnDestroy.setAttribute('disabled', '')
+        setTimeout(() => {
+            btnDestroy.removeAttribute('disabled')
+        }, 5000)
 
         roomService.ready(false)
     }
@@ -669,6 +711,10 @@ class PrepareDuel extends BaseScene {
             } else if (data.player._id === mainStore.getPlayer._id && !data.player.isReady) {
                 this.changeDisplayBtn(btnDestroy, btnStart)
             }
+        })
+
+        roomService.listeningChangePosition((data: IChangePosition, oldPosition: number) => {
+            this.changePositionPlayer(data, oldPosition)
         })
     }
     // #endregion listening socket

@@ -1,4 +1,5 @@
 import { useMainStore } from '@/stores'
+import type { IChangePosition } from '@/util/interface/index.interface'
 import type { IPlayerOnRoom, IReadyRes, IRoom } from '@/util/interface/state.main.interface'
 
 class RoomService {
@@ -8,28 +9,43 @@ class RoomService {
     create() {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket
-        socket.emit('rooms/create')
+        return socket.emit('rooms/create')
     }
 
     addPlayer(idRoom: string) {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket
 
-        socket.emit('rooms/players/add', { idRoom })
+        return socket.emit('rooms/players/add', { idRoom })
     }
 
     goOut() {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket
 
-        socket.emit('rooms/players/goOut')
+        return socket.emit('rooms/players/goOut')
     }
 
     ready(isReady: boolean) {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket
 
-        socket.emit('rooms/players/ready', { idRoom: mainStore.getRoom._id, isReady })
+        return socket.emit('rooms/players/ready', { idRoom: mainStore.getRoom._id, isReady })
+    }
+
+    changePosition(position: number) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+
+        const isNotEmptyPosition = mainStore.getRoom.players.some(
+            (p: IPlayerOnRoom) => p.isOnRoom && p.position === position,
+        )
+        if (isNotEmptyPosition) return
+
+        return socket.emit('rooms/players/change-position', {
+            idRoom: mainStore.getRoom._id,
+            position,
+        })
     }
     // #endregion emit
 
@@ -88,6 +104,25 @@ class RoomService {
                 }
             }
             callback(data)
+        })
+    }
+
+    listeningChangePosition(callback: (data: IChangePosition, oldPosition: number) => void) {
+        const mainStore: any = useMainStore()
+        const socket = mainStore.getSocket
+
+        socket.on('rooms/players/change-position/res', (data: IChangePosition) => {
+            const players: Array<IPlayerOnRoom> = mainStore.getRoom.players
+            players.some((p: IPlayerOnRoom) => {
+                if (p.isOnRoom && p.player._id === data.player) {
+                    let oldPosition: number = p.position
+                    p.position = data.position
+
+                    callback(data, oldPosition)
+                    return true
+                }
+                return false
+            })
         })
     }
     // #endregion on

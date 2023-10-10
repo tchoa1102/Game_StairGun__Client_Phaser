@@ -16,6 +16,7 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
   --z-index-btn: 99999;
+  --z-index-game: 100000;
 }
 
 /* semantic color variables for this project */
@@ -72,6 +73,12 @@ body {
   margin-left: auto;
   margin-right: auto;
   border: 1px solid rgba(255, 255, 255, 0.3764705882);
+}
+
+#game-container {
+  z-index: var(--z-index-game) !important;
+  top: 0;
+  left: 0;
 }
 
 .btn-func {

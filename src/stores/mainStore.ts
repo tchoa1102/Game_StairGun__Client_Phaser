@@ -94,9 +94,9 @@ const useMainStore = defineStore('main', {
                 parent: initObject.parent || undefined,
                 physics: {
                     default: 'arcade',
-                    arcade: {
-                        debug: true,
-                    },
+                    // arcade: {
+                    //     debug: false,
+                    // },
                 },
                 dom: {
                     createContainer: true,

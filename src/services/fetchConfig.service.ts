@@ -4,7 +4,9 @@ export default async function FETCH(url: string) {
         method: 'GET',
     })
     const data = await res.json()
-    console.log('FETCH DATA: ', data)
+    console.group('%cFETCH DATA: ', 'color: orange; font-size: 16px;')
+    console.log(data)
+    console.groupEnd()
 
     return data
 }

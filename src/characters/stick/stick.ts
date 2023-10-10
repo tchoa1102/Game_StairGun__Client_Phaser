@@ -3,7 +3,7 @@ import { Character } from '..'
 import { useMainStore } from '@/stores'
 import './interface'
 import type StairGame from '@/scenes/GamePLay/stairGame'
-import { StickService } from '@/services/socket'
+import { stickService } from '@/services/socket'
 
 const initKeyAnimation = (name: string, key: string) => `animation_${name}_${key}`
 
@@ -16,17 +16,16 @@ class Stick extends Character {
         jumpRight: 'jumpRight',
         jumpLeft: 'jumpLeft',
     }
-    private locationX = 600
-    private locationY = 3400
     private vy = 200
     private vx = 8
     private scale: number
     private stickAnimation: IAnimation
     private eventListener: IEventListener
-    private fileConfig: IStickAnimationConfig
+    private configStick: IStickAnimationConfig
     public stickSprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null
     private index: number
     private mainStore: any
+    private curY: number
     // #endregion
 
     constructor(
@@ -35,12 +34,13 @@ class Stick extends Character {
         name: string,
         x: number,
         y: number,
-        fileConfig: string,
+        configStick: string,
         scale: number,
     ) {
-        super(_this, name, x, y)
-        this.fileConfig = JSON.parse(fileConfig)
-        // console.log(this.fileConfig)
+        super(_this, name, x, y - 100)
+        this.configStick = JSON.parse(configStick)
+        this.curY = y
+        // console.log('config stick: ', this.configStick)
 
         this.stickAnimation = {}
         this.stickSprite = null
@@ -51,28 +51,40 @@ class Stick extends Character {
     }
 
     preload() {
-        this.game.load.atlas(this.name, this.fileConfig.src[this.index], this.fileConfig)
+        console.log(`%c\Preload ${this.name}...\n`, 'color: blue; font-size: 16px;')
+        const textureUrl = this.configStick.src[this.index]
+        console.log('Preload: file config: ', this.configStick)
+
+        this.game.load.atlas({
+            key: this.name,
+            textureURL: textureUrl,
+            atlasURL: this.configStick,
+        })
     }
 
     create() {
         console.log(`%c\nCreate ${this.name}...\n`, 'color: red; font-size: 16px;')
         const mainStore = useMainStore()
         // #region init animation from config json
-        const animations = this.fileConfig.animations
+        console.log('file config: ', this.configStick)
+
+        const animations = this.configStick.animations
         for (const key in animations) {
             if (animations.hasOwnProperty(key)) {
-                const instance = animations[key]
-                const keyAnim = initKeyAnimation(this.name, instance.key as string)
+                const instance: IAnimationItem = animations[key]
+                const keyAnim: string = initKeyAnimation(this.name, instance.key as string)
 
                 // init animation
                 // console.group('Animation: ' + key)
                 // console.log('instance: ', instance)
-                this.stickAnimation[keyAnim] = this.game.anims.create({
+                const configAnimation: Phaser.Types.Animations.Animation = {
                     ...instance,
                     defaultTextureKey: this.name,
+                    frames: instance.frames as Array<Phaser.Types.Animations.AnimationFrame>,
+                    duration: 1,
                     key: keyAnim,
-                    frames: instance.frames,
-                })
+                }
+                this.stickAnimation[keyAnim] = this.game.anims.create(configAnimation)
                 // console.log(this.stickAnimation[keyAnim])
                 // console.groupEnd()
             }
@@ -81,11 +93,13 @@ class Stick extends Character {
 
         // #region init sprite
         this.stickSprite = this.game.physics.add.sprite(this.x!, this.y!, this.name)
-        // this.stickSprite = this.game.matter.add.gameObject(
-        //     this.game.add.sprite(0, 600, this.name),
-        // ) as Phaser.Physics.Matter.Sprite
         // this.stickSprite.setVelocityY(9.8)
-        this.stickSprite.anims.play(initKeyAnimation(this.name, this.keyActivities.stand))
+        const keyDefault = initKeyAnimation(this.name, this.keyActivities.stand)
+        // console.group('Start animation')
+        // console.log(keyDefault)
+        // console.log(this.stickAnimation[keyDefault])
+        this.stickSprite.anims.play(keyDefault)
+        // console.groupEnd()
         // #endregion
 
         // #region listeners collision
@@ -106,6 +120,9 @@ class Stick extends Character {
     }
 
     update(): void {
+        if (this.y && this.y < this.curY) {
+            this.setLocation({ y: this.y + 1 })
+        }
         // to keep sprite stand
         this.stickSprite?.setAngle(0)
         this.updateSpriteSize()
@@ -116,23 +133,19 @@ class Stick extends Character {
         this.updateAnimation(event!)
     }
 
-    checkAnimation(event: string): boolean {
-        const e = event || this.keyActivities.stand
-        const cur = this.stickSprite?.anims.currentAnim
-        const key = initKeyAnimation(this.name, this.keyActivities[e])
-
-        if (cur !== this.stickAnimation[key]) return false
-        return true
+    isOldAnimation(event: string): boolean {
+        const curKey = this.stickSprite?.anims.currentAnim?.key
+        const key = initKeyAnimation(this.name, this.keyActivities[event])
+        return curKey === key
     }
 
     updateAnimation(event?: string): boolean {
         const e = event || this.keyActivities.stand
-        const cur = this.stickSprite?.anims.currentAnim
         const key = initKeyAnimation(this.name, this.keyActivities[e])
         // flip
-        this.stickSprite?.setFlipX(this.fileConfig?.animations[e]?.frames[0].flipX || false)
+        this.stickSprite?.setFlipX(this.configStick?.animations[e]?.frames[0].flipX || false)
 
-        if (cur !== this.stickAnimation[key]) {
+        if (!this.isOldAnimation(e)) {
             this.stickSprite?.anims.play(key)
             return true
         }
@@ -143,25 +156,25 @@ class Stick extends Character {
     setLocation({ x, y }: { x?: number; y?: number }) {
         x && this.stickSprite?.setX(x)
         y && this.stickSprite?.setY(y)
-        this.locationX = this.stickSprite?.x || 200
-        this.locationY = this.stickSprite?.y || 200
+        this.x = this.stickSprite?.x || 200
+        this.y = this.stickSprite?.y || 200
+        // console.log('location Y: ', this.stickSprite?.y)
     }
 
     updateSpriteSize() {
-        const curVelocity = this.stickSprite?.body?.velocity
-        const curFrame = this.stickSprite?.anims.currentFrame
-        const width = curFrame?.frame.width ? curFrame?.frame.width * this.scale : 0
-        const height = curFrame?.frame.height ? curFrame?.frame.height * this.scale : 0
-        const vx = curVelocity?.x ? curVelocity.x * this.scale : 0
-        const vy = curVelocity?.y ? curVelocity.y * this.scale : 0
-        // this.stickSprite?.setSize(width, height)
-        // this.stickSprite?.setRectangle(width, height)
-        this.stickSprite?.setBodySize(width, height, true)
-        this.stickSprite?.setPosition(this.locationX, this.locationY)
-        // this.stickSprite?.setOriginFromFrame()
-        // this.stickSprite?.setExistingBody(this.stickSprite.body as MatterJS.BodyType)
+        this.stickSprite?.refreshBody()
+        this.stickSprite?.setOrigin(1)
         this.stickSprite?.setScale(this.scale)
-        this.stickSprite?.setVelocity(vx, vy)
+        // const curVelocity = this.stickSprite?.body?.velocity
+        const curFrame = this.stickSprite?.anims.currentFrame
+        const width = curFrame?.frame.width!
+        const height = curFrame?.frame.height!
+        // const vx = curVelocity?.x ? curVelocity.x * this.scale : 0
+        // const vy = curVelocity?.y ? curVelocity.y * this.scale : 0
+        this.stickSprite?.setBodySize(width, height, true)
+        // this.stickSprite?.setBounce(this.x!, this.y)
+        // this.stickSprite?.setPosition(this.x, this.y)
+        // this.stickSprite?.setVelocity(vx, vy)
 
         // this.stickSprite?.setFixedRotation()
     }
@@ -176,7 +189,7 @@ class Stick extends Character {
     }
 
     async handleKeyEvent() {
-        // console.log(`%c\nUpdating stick ${this.name}...\n`, 'color: blue; font-size: 16px;');
+        // console.log(`%c\nUpdating stick ${this.name}...\n`, 'color: blue; font-size: 16px;')
         let isEventKeyDown = false
         // key animation default
         let keyAnim = this.keyActivities.stand
@@ -200,9 +213,9 @@ class Stick extends Character {
         }
 
         // check key up and animation isn't stand
-        if (!isEventKeyDown && !this.checkAnimation(this.keyActivities.stand)) {
+        if (!isEventKeyDown && !this.isOldAnimation(keyAnim)) {
             // console.log('stand')
-            StickService.stand(this.mainStore.getSocket, this.mainStore.getPlayer, keyAnim)
+            stickService.stand(keyAnim)
         }
 
         if (isEventKeyDown) {
@@ -215,12 +228,8 @@ class Stick extends Character {
     }
 
     sendEvent(keyEvent: string) {
-        if (typeof StickService[keyEvent as keyof typeof StickService] === 'function') {
-            StickService[keyEvent as keyof typeof StickService](
-                this.mainStore.getSocket,
-                this.mainStore.getPlayer,
-                keyEvent,
-            )
+        if (typeof stickService[keyEvent as keyof typeof stickService] === 'function') {
+            stickService[keyEvent as keyof typeof stickService](keyEvent as any)
         }
     }
 }

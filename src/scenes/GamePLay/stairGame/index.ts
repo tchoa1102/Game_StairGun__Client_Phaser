@@ -1,6 +1,9 @@
 import { Stick } from '@/characters'
 import { useMainStore } from '@/stores'
 import '../gamePlay.interface'
+import type { IPlayerOnMatch } from '@/util/interface/index.interface'
+import FETCH from '@/services/fetchConfig.service'
+import { stickService } from '@/services/socket'
 
 const CONSTANTS = {
     background: {
@@ -16,6 +19,7 @@ class StairGame extends Phaser.Scene {
     public staticGroup: Phaser.GameObjects.Group | undefined
 
     private CAMERA_WIDTH: number
+    private CAMERA_HEIGHT: number
     private MARGIN_WIDTH: number
     private MARGIN_HEIGHT: number
     private CAMERA_V_X = 0
@@ -24,48 +28,64 @@ class StairGame extends Phaser.Scene {
     private mainStore: any
     private sticks: Array<Stick>
     private background: Phaser.GameObjects.Image | undefined
+    private yourPosition: number = 0
+    private yourIndex: number = 0
     private stairs: Array<IStair> | undefined
-    private yourIndex: number | undefined
+    private players: Array<IPlayerOnMatch> | undefined
     // #endregion
     constructor() {
         super('stair-game')
         this.mainStore = useMainStore()
         this.CAMERA_WIDTH = ((this.mainStore.width * this.mainStore.zoom) / 24) * 6
+        this.CAMERA_HEIGHT = this.mainStore.height * this.mainStore.zoom
         this.MARGIN_WIDTH = this.CAMERA_WIDTH / 2
         this.MARGIN_HEIGHT = this.mainStore.height / 2
         this.sticks = []
     }
 
-    init({
+    async init({
         players,
         stairs,
-        fileConfigStick,
+        configStick,
     }: {
-        players: Array<any>
+        players: Array<IPlayerOnMatch>
         stairs: string
-        fileConfigStick: string
+        configStick: IStickAnimationConfig
     }) {
-        this.mainStore = useMainStore()
+        const mainStore: any = useMainStore()
         this.stairs = JSON.parse(stairs)
-        players.forEach((player: any, index: number) => {
-            this.yourIndex = index
+        this.players = players
+        console.log('Players received for stairGame: ', players)
+
+        // const index = 0
+        // const player = this.players[index]
+        this.players!.forEach((player: IPlayerOnMatch, index: number) => {
+            console.log(
+                'Location: ',
+                Number.parseFloat(player.stairGame.x),
+                ', ',
+                Number.parseFloat(player.stairGame.y),
+            )
+            if (player.target._id === this.mainStore.getPlayer._id) {
+                this.yourPosition = player.position
+                this.yourIndex = index
+            }
             const stick = new Stick(
                 this,
-                index,
-                'circleStick-' + index,
-                0,
-                this.MAX_HEIGHT - 100,
-                fileConfigStick,
+                player.position,
+                'circleStick-' + player.position,
+                Number.parseFloat(player.stairGame.x),
+                Number.parseFloat(player.stairGame.y),
+                JSON.stringify(configStick),
                 0.5,
             )
             this.sticks.push(stick)
-            // if (this.mainStore.player._id === player._id) {
-            // }
         })
     }
 
     preload() {
         this.sticks.forEach((stick: Stick) => stick.preload())
+
         this.load.image(CONSTANTS.background.key, CONSTANTS.background.src)
         const stairIsLoading: Array<string> = []
         this.stairs?.forEach((stair: IStair) => {
@@ -105,6 +125,8 @@ class StairGame extends Phaser.Scene {
         this.sticks.forEach((stick: Stick, index: number) => {
             stick.create()
             if (this.yourIndex === index) {
+                console.log(index)
+
                 stick.addEvent()
             }
         })
@@ -113,24 +135,20 @@ class StairGame extends Phaser.Scene {
 
         // #region config camera
         this.cameraGame = this.cameras.main
-        this.cameraGame.setViewport(
-            0,
-            0,
-            this.CAMERA_WIDTH,
-            this.mainStore.height * this.mainStore.zoom,
-        )
+        this.cameraGame.setViewport(0, 0, this.CAMERA_WIDTH, this.CAMERA_HEIGHT)
         // #endregion
     }
 
-    async update() {
-        this.sticks[this.yourIndex || 0].handleKeyEvent()
+    update() {
+        // console.log(this.yourIndex!)
+        this.sticks[this.yourIndex].handleKeyEvent()
         this.sticks.forEach((stick: Stick, index: number) => {
             stick.update()
         })
 
         // #region init game'params, again
         this.cameraGame!.startFollow(
-            this.sticks[this.yourIndex || 0].stickSprite!,
+            this.sticks[this.yourIndex].stickSprite!,
             true,
             this.CAMERA_V_X,
             this.CAMERA_V_Y,
@@ -153,13 +171,10 @@ class StairGame extends Phaser.Scene {
     }
 
     receivingState() {
-        this.mainStore.getSocket.on('stick-keyboard-event', (data: any) => {
+        stickService.listeningAnimation((data: any) => {
             // console.log(data)
-            this.sticks.forEach((stick: Stick, index: number) => {
-                if (data._id === this.mainStore.getPlayer._id) {
-                    stick.updateData({ event: data.event })
-                }
-            })
+            const index = this.players?.findIndex((p, index) => p.target._id === data._id) || 0
+            this.sticks[index].updateData({ event: data.event })
             // this.updateData({ event: data.event, x: data.x, y: data.y })
         })
     }
