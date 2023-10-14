@@ -1,4 +1,5 @@
 import type { Socket } from 'socket.io-client'
+import type { IMatchRes } from './index.interface'
 
 export default interface IState {
     game: Phaser.Game | undefined
@@ -15,11 +16,19 @@ export default interface IState {
         message: string
     }
     currentRoom: IRoom | undefined
-    chatWorld: Array<{
-        type: string | undefined
-        value: string
-        from: IPlayer
-    }>
+    chatWorld: Array<IChat>
+    match: IMatchRes | undefined
+    watches: {
+        currentRoom: Array<CallableFunction>
+        chatWorld: Array<CallableFunction>
+        match: Array<CallableFunction>
+    }
+}
+
+export interface IChat {
+    type: string | undefined
+    value: string
+    from: IPlayer
 }
 
 export interface IPlayer {

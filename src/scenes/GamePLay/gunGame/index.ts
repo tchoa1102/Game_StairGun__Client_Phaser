@@ -7,6 +7,7 @@ class GunGame extends Phaser.Scene {
     public MAX_HEIGHT = 1000
     public CAMERA_WIDTH: number
     public CAMERA_HEIGHT: number
+    public isPlay: boolean = false
     public x: number
 
     private mainStore: any
@@ -25,19 +26,22 @@ class GunGame extends Phaser.Scene {
     }
 
     init({ tiledMapConfig }: { tiledMapConfig: any }) {
-        console.log('init')
         this.tiledMapConfig = tiledMapConfig
     }
 
     preload() {
-        console.log('pre')
-
         this.load.image('background-gun', this.tiledMapConfig.background)
         this.load.tilemapTiledJSON('tilemap', this.tiledMapConfig)
         this.load.image(this.tiledMapConfig.tilesets[0].name, this.tiledMapConfig.tilesets[0].image)
     }
 
     create() {
+        // ;(this.game.scene.getScene('game-play-scene') as any).loaded()
+        this.createGameObject(true)
+    }
+
+    createGameObject(isCreate: boolean = true) {
+        if (!isCreate) return
         // #region config world
         console.log('create')
         this.physics.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
@@ -77,9 +81,11 @@ class GunGame extends Phaser.Scene {
         const layer = this.map.createLayer(this.tiledMapConfig.layers[0].name, tileSet!)
         layer?.setSkipCull(true)
         // #endregion
+        this.isPlay = true
     }
 
     update(time: any, delta: any) {
+        if (!this.isPlay) return
         this.controls.update(delta)
         // fixed camera static
         this.cameraGame!.scrollX = Phaser.Math.Clamp(

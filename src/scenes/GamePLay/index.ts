@@ -2,19 +2,28 @@ import Phaser from 'phaser'
 import StairGame from './stairGame'
 import GunGame from './gunGame'
 import { useMainStore } from '@/stores'
-import { matchService } from '@/services'
 import FETCH from '@/services/fetchConfig.service'
 import type { IMatchRes } from '@/util/interface/index.interface'
+import CONSTANT_HOME from '../Home/CONSTANT'
+import matchService from '@/services/socket/match.service'
 
 class GamePlay extends Phaser.Scene {
+    public numOfLoaded: number = 0
+    public maxLoaded: number = 2
+
     private dataGame: IMatchRes | null
-    private stairGame: Phaser.Scene | null
-    private gunGame: Phaser.Scene | null
+    private stairGame: any | null
+    private gunGame: any | null
+    private loadings: Array<any> = []
     constructor() {
         super('game-play-scene')
         this.dataGame = null
         this.stairGame = null
         this.gunGame = null
+    }
+
+    getLoading(): Array<any> {
+        return this.loadings || []
     }
 
     init({ data }: { data: IMatchRes }) {
@@ -26,29 +35,47 @@ class GamePlay extends Phaser.Scene {
     async preload() {
         console.log('%c\nLoading Game Play...\n', 'color: yellow; font-size: 16px;')
         const mainStore = useMainStore()
+        this.load.spritesheet(CONSTANT_HOME.loading.key, CONSTANT_HOME.loading.src, {
+            frameWidth: 159,
+            frameHeight: 308,
+        })
 
         const configStick: IStickAnimationConfig = await FETCH(this.dataGame!.stickConfig)
+        const tiledMap = await FETCH(this.dataGame!.tiledMapConfig)
+
         this.stairGame = this.scene.add('stair-game', StairGame, true, {
             players: this.dataGame!.players,
             stairs: JSON.stringify(this.dataGame!.stairs),
             configStick: configStick,
         })
-        // const gameData = await matchService.create({})
-        // console.log('GameData: ', gameData)
-        // const tiledMap = await FETCH(gameData.data.tiledMapConfig)
 
-        // this.stairGame = this.scene.add('stair-game', StairGame, true, {
-        //     players: gameData.data.players,
-        //     stairs: JSON.stringify(gameData.data.stairs),
-        //     fileConfigStick: JSON.stringify(gameData.data.stickConfig),
-        // })
-        // this.gunGame = this.scene.add('gun-game', GunGame, true, {
-        //     tiledMapConfig: tiledMap,
-        // })
+        console.log('%cLoaded!', 'color: red; font-size: 16px;')
+        this.gunGame = this.scene.add('gun-game', GunGame, true, {
+            tiledMapConfig: tiledMap,
+        })
     }
 
     create() {
-        // console.log('%c\nCreate Game Play...\n', 'color: red; font-size: 16px;')
+        // const mainStore: any = useMainStore()
+        // const w = mainStore.getWidth * mainStore.getZoom
+        // const h = mainStore.getHeight * mainStore.getZoom
+
+        // const rect = this.add.rectangle(0, 0, w, h, 0xffffff, 0.2).setOrigin(0)
+        // const loading = this.add.sprite(w / 2, h / 2, CONSTANT_HOME.loading.key)
+        // this.anims.create({
+        //     key: 'animation__' + CONSTANT_HOME.loading.key,
+        //     frames: this.anims.generateFrameNumbers(CONSTANT_HOME.loading.key, {
+        //         start: 0,
+        //         end: 4,
+        //     }),
+        //     frameRate: 6,
+        //     repeat: -1,
+        // })
+        // loading.anims.play('animation__' + CONSTANT_HOME.loading.key)
+        // this.loadings.push(rect)
+        // this.loadings.push(loading)
+        console.log('%c\nCreate Game Play...\n', 'color: red; font-size: 16px;')
+        this.listeningSocket()
     }
 
     update(time: number, delta: number) {
@@ -58,6 +85,27 @@ class GamePlay extends Phaser.Scene {
     render() {
         console.log('%c\nRendering...\n', 'color: #363; font-size: 16px;')
     }
+
+    loaded() {
+        this.numOfLoaded += 1
+        console.log(this.numOfLoaded)
+
+        if (this.numOfLoaded < this.maxLoaded) return
+        matchService.loaded()
+    }
+
+    playGame() {
+        this.getLoading().forEach((child) => child.setVisible(false))
+        ;(this.game.scene.getScene('stair-game') as any).createGameObject(true)
+        ;(this.game.scene.getScene('gun-game') as any).createGameObject(true)
+        console.log('%cPlay!', 'color: red; font-size: 20px')
+    }
+
+    // #region listening socket
+    listeningSocket() {
+        matchService.listeningStartGame(() => this.playGame())
+    }
+    // #endregion listening socket
 }
 
 export default GamePlay

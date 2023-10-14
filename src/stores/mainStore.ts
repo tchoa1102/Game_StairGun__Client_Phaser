@@ -1,8 +1,8 @@
-import { type IRoom } from './../util/interface/state.main.interface'
+import { type IChat, type IRoom } from './../util/interface/state.main.interface'
 import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
 
-import { type IIndicator, type IState } from '@/util/interface/index.interface'
+import { type IIndicator, type IMatchRes, type IState } from '@/util/interface/index.interface'
 import { GamePlay, Home } from '@/scenes'
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
@@ -12,6 +12,11 @@ import PrepareDuel from '@/scenes/BootGame/prepareDuel'
 const MIN_HEIGHT = 740
 
 const state: IState = {
+    watches: {
+        chatWorld: [],
+        currentRoom: [],
+        match: [],
+    },
     game: undefined,
     socket: null,
     zoom: 1,
@@ -46,6 +51,7 @@ const state: IState = {
     },
     currentRoom: undefined,
     chatWorld: [],
+    match: undefined,
 }
 const useMainStore = defineStore('main', {
     state: () => state,
@@ -62,6 +68,9 @@ const useMainStore = defineStore('main', {
         getHeight(): number {
             return this.height
         },
+        getZoom(): number {
+            return this.zoom
+        },
         getGame(): typeof this.game {
             return this.game
         },
@@ -70,6 +79,9 @@ const useMainStore = defineStore('main', {
         },
         getChatWorld(): typeof this.chatWorld {
             return this.chatWorld
+        },
+        getMatch(): IMatchRes {
+            return this.match!
         },
     },
     actions: {
@@ -123,8 +135,17 @@ const useMainStore = defineStore('main', {
                 console.log('%cERROR', 'color: red; font-size: 20px')
             }
         },
+        pushChatWorld(data: IChat) {
+            this.chatWorld.push(data)
+            this.watches.chatWorld.forEach((callback: CallableFunction) => callback())
+        },
         setCurrentRoom(data: IRoom | undefined) {
             this.currentRoom = data
+            this.watches.currentRoom.forEach((callback: CallableFunction) => callback())
+        },
+        setMatch(data?: IMatchRes) {
+            this.match = data
+            this.watches.match.forEach((callback: CallableFunction) => callback())
         },
     },
 })

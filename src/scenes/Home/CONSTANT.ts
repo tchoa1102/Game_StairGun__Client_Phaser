@@ -7,6 +7,10 @@ const CONSTANT_HOME = {
         key: 'home-background',
         src: 'src/assets/home-1480x740.png',
     },
+    loading: {
+        key: 'loading',
+        src: 'src/assets/loading.png',
+    },
     building: {
         duel: [
             890, 191, 964, 166, 1026, 170, 1106, 192, 1127, 297, 1104, 346, 898, 349, 861, 293, 867,
