@@ -246,6 +246,25 @@ body {
     opacity: 0;
   }
 }
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.noReady {
+  --angle: 0deg;
+  border: 4px solid transparent;
+  -o-border-image: conic-gradient(from var(--angle), #4200fa 10deg, #856cba 50deg, rgba(255, 0, 0, 0) 70deg, rgba(255, 0, 0, 0) 64.8deg, #4200fa 172.8deg, #856cba 208.8deg, rgba(255, 0, 0, 0) 295.2deg, rgba(255, 0, 0, 0) 270deg, #4200fa 330deg) 1;
+     border-image: conic-gradient(from var(--angle), #4200fa 10deg, #856cba 50deg, rgba(255, 0, 0, 0) 70deg, rgba(255, 0, 0, 0) 64.8deg, #4200fa 172.8deg, #856cba 208.8deg, rgba(255, 0, 0, 0) 295.2deg, rgba(255, 0, 0, 0) 270deg, #4200fa 330deg) 1;
+  animation: 1.75s anim linear infinite;
+  animation-delay: 1.25s;
+}
+
+@keyframes anim {
+  100% {
+    --angle: 360deg;
+  }
+}
 .component__btn-func {
   right: 0;
 }

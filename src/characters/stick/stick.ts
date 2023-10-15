@@ -117,9 +117,14 @@ class Stick extends Character {
         //     })
         // })
         // #endregion
+
+        // this.updateSpriteSize()
+        // this.stickSprite?.setAngle(0)
     }
 
-    update(): void {
+    update(time: any, delta: any): void {
+        // console.log(time, new Date(time))
+
         if (this.y && this.y < this.curY) {
             this.setLocation({ y: this.y + 1 })
         }
@@ -154,10 +159,11 @@ class Stick extends Character {
     }
 
     setLocation({ x, y }: { x?: number; y?: number }) {
-        x && this.stickSprite?.setX(x)
-        y && this.stickSprite?.setY(y)
-        this.x = this.stickSprite?.x || 200
-        this.y = this.stickSprite?.y || 200
+        // console.log(x, y)
+        x && this.stickSprite!.setX(x)
+        y && this.stickSprite!.setY(y)
+        this.x = this.stickSprite!.x
+        this.y = this.stickSprite!.y
         // console.log('location Y: ', this.stickSprite?.y)
     }
 

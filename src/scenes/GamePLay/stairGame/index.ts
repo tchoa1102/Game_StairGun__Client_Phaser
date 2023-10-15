@@ -147,12 +147,12 @@ class StairGame extends Phaser.Scene {
         this.isPlay = true
     }
 
-    update() {
+    update(time: any, delta: any) {
         if (!this.isPlay) return
         // console.log(this.yourIndex!)
         this.sticks[this.yourIndex].handleKeyEvent()
         this.sticks.forEach((stick: Stick, index: number) => {
-            stick.update()
+            stick.update(time, delta)
         })
 
         // #region init game'params, again
@@ -182,7 +182,7 @@ class StairGame extends Phaser.Scene {
         stickService.listeningAnimation((data: any) => {
             // console.log(data)
             const index = this.players?.findIndex((p, index) => p.target._id === data._id) || 0
-            this.sticks[index].updateData({ event: data.event })
+            this.sticks[index].updateData({ event: data.event, x: data.x, y: data.y })
             // this.updateData({ event: data.event, x: data.x, y: data.y })
         })
     }

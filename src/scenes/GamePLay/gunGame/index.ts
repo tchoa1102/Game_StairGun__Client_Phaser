@@ -31,8 +31,8 @@ class GunGame extends Phaser.Scene {
 
     preload() {
         this.load.image('background-gun', this.tiledMapConfig.background)
-        this.load.tilemapTiledJSON('tilemap', this.tiledMapConfig)
-        this.load.image(this.tiledMapConfig.tilesets[0].name, this.tiledMapConfig.tilesets[0].image)
+        // this.load.tilemapTiledJSON('tilemap', this.tiledMapConfig)
+        // this.load.image(this.tiledMapConfig.tilesets[0].name, this.tiledMapConfig.tilesets[0].image)
     }
 
     create() {
@@ -75,11 +75,11 @@ class GunGame extends Phaser.Scene {
         // #endregion
 
         // #region config tiled
-        this.map = this.make.tilemap({ key: 'tilemap' })
+        // this.map = this.make.tilemap({ key: 'tilemap' })
 
-        const tileSet = this.map.addTilesetImage(this.tiledMapConfig.tilesets[0].name)
-        const layer = this.map.createLayer(this.tiledMapConfig.layers[0].name, tileSet!)
-        layer?.setSkipCull(true)
+        // const tileSet = this.map.addTilesetImage(this.tiledMapConfig.tilesets[0].name)
+        // const layer = this.map.createLayer(this.tiledMapConfig.layers[0].name, tileSet!)
+        // layer?.setSkipCull(true)
         // #endregion
         this.isPlay = true
     }

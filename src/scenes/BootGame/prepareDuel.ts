@@ -43,6 +43,10 @@ class PrepareDuel extends BaseScene {
         this.listeningSocket()
     }
 
+    getListPlayer(): Phaser.GameObjects.DOMElement | undefined {
+        return this.listPlayerDOM
+    }
+
     init() {}
 
     preload() {
@@ -192,6 +196,7 @@ class PrepareDuel extends BaseScene {
             // newPositionDOM.setAttribute('id', data.player)
             oldPositionDOM.innerHTML = ''
             oldPositionDOM.setAttribute('id', '')
+            oldPositionDOM.classList.remove('noReady')
 
             this.freeCharacter(data.player)
             const dataPlayer: IPlayerOnRoom = mainStore.getRoom.players.find(
@@ -251,6 +256,7 @@ class PrepareDuel extends BaseScene {
         // #region init characteristics
         player.innerHTML = ''
         player.setAttribute('id', playerIdName)
+        !data.isReady && player.classList.add('noReady')
 
         // #region header
         const header = this.add.dom(0, 0, 'div').setOrigin(0)
@@ -276,11 +282,6 @@ class PrepareDuel extends BaseScene {
         // #endregion other element
 
         player.append(header.node, body.node)
-        // #endregion init characteristics
-        // if (data && data.player) {
-        // } else {
-        //     player.innerHTML = ''
-        // }
     }
 
     removePlayerDOM(player: Element, data: IPlayerRemoved) {
@@ -289,6 +290,7 @@ class PrepareDuel extends BaseScene {
 
         player.setAttribute('id', '')
         player.innerHTML = ''
+        player.classList.remove('noReady')
 
         mainStore.setCurrentRoom({
             ...mainStore.getRoom.players.reduce(
@@ -700,6 +702,10 @@ class PrepareDuel extends BaseScene {
 
         roomService.listeningReady((data: IReadyRes) => {
             const mainStore: any = useMainStore()
+            const player: Element | undefined | null = document.getElementById(
+                `prepareDuel__player--${data.player._id}`,
+            )
+
             const btnStart: Element = this.section?.node.querySelector(
                 `.${this.className}__btn-func__start`,
             ) as Element
@@ -710,6 +716,10 @@ class PrepareDuel extends BaseScene {
                 this.changeDisplayBtn(btnStart, btnDestroy)
             } else if (data.player._id === mainStore.getPlayer._id && !data.player.isReady) {
                 this.changeDisplayBtn(btnDestroy, btnStart)
+            }
+            if (player) {
+                !data.player.isReady && player.classList.add('noReady')
+                data.player.isReady && player.classList.remove('noReady')
             }
         })
 
