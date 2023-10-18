@@ -58,12 +58,12 @@ class StairGame extends Phaser.Scene {
         // const index = 0
         // const player = this.players[index]
         this.players!.forEach((player: IPlayerOnMatch, index: number) => {
-            console.log(
-                'Location: ',
-                Number.parseFloat(player.stairGame.x),
-                ', ',
-                Number.parseFloat(player.stairGame.y),
-            )
+            // console.log(
+            //     'Location: ',
+            //     Number.parseFloat(player.stairGame.x),
+            //     ', ',
+            //     Number.parseFloat(player.stairGame.y),
+            // )
             if (player.target._id === this.mainStore.getPlayer._id) {
                 this.yourPosition = player.position
                 this.yourIndex = index
@@ -116,12 +116,19 @@ class StairGame extends Phaser.Scene {
         // #region init stair
         this.stairs?.forEach((stair: IStair) => {
             const obj = this.add.image(stair.x, stair.y, stair.img).setOrigin(0)
-            // obj.setStatic(true)
 
             obj.scaleX = stair.width / obj.width
             obj.scaleY = stair.height / obj.height
 
             this.staticGroup = this.add.group()
+            const text = this.add.text(
+                stair.x,
+                stair.y,
+                `(${Math.floor(stair.x)}, ${Math.floor(stair.y)}, ${Math.floor(stair.width)}, ${
+                    stair.height
+                })`,
+                { color: 'red', backgroundColor: '#fff' },
+            )
             this.staticGroup.add(obj)
         })
 

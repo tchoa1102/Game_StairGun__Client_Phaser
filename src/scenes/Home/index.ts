@@ -607,29 +607,29 @@ class Home extends BaseScene {
             this.visibleScene(prepareDuelScene.scene.key)
         }
 
-        // const section = this.createContainer('section', {})
-        // section.node.setAttribute('id', 'game-container')
-        // section.node.classList.add('position-absolute')
-        // const main = document.querySelector('#game')
-        // main?.append(section.node)
-        // const mainStore: any = useMainStore()
-        // const config: Phaser.Types.Core.GameConfig = {
-        //     type: Phaser.AUTO,
-        //     width: mainStore.getWidth * mainStore.zoom,
-        //     height: mainStore.getHeight * mainStore.zoom,
-        //     parent: section.node as HTMLElement,
-        //     // transparent: true,
-        //     physics: {
-        //         default: 'arcade',
-        //         arcade: {
-        //             debug: true,
-        //         },
-        //     },
-        // }
-        // const game = new Phaser.Game(config)
-        // this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {
-        //     data: dataRes,
-        // }) as GamePlay
+        const section = this.createContainer('section', {})
+        section.node.setAttribute('id', 'game-container')
+        section.node.classList.add('position-absolute')
+        const main = document.querySelector('#game')
+        main?.append(section.node)
+        const mainStore: any = useMainStore()
+        const config: Phaser.Types.Core.GameConfig = {
+            type: Phaser.AUTO,
+            width: mainStore.getWidth * mainStore.zoom,
+            height: mainStore.getHeight * mainStore.zoom,
+            parent: section.node as HTMLElement,
+            // transparent: true,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    debug: true,
+                },
+            },
+        }
+        const game = new Phaser.Game(config)
+        this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {
+            data: dataRes,
+        }) as GamePlay
     }
 
     update() {

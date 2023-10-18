@@ -102,22 +102,6 @@ class Stick extends Character {
         // console.groupEnd()
         // #endregion
 
-        // #region listeners collision
-        // this.game.matter.world.on('collisionstart', (e: any) => {
-        //     e.pairs.forEach((pair: any) => {
-        //         const { bodyA, bodyB } = pair
-        //         // if (bodyA === this.stickSprite?.body || bodyB === this.stickSprite?.body) {
-        //         //     // Check collision bodyA or bodyB is world bottom
-        //         //     if (
-        //         //         bodyA.position.y >= this.game.MAX_HEIGHT ||
-        //         //         bodyB.position.y >= this.game.MAX_HEIGHT
-        //         //     ) {
-        //         //     }
-        //         // }
-        //     })
-        // })
-        // #endregion
-
         // this.updateSpriteSize()
         // this.stickSprite?.setAngle(0)
     }
@@ -126,7 +110,11 @@ class Stick extends Character {
         // console.log(time, new Date(time))
 
         if (this.y && this.y < this.curY) {
-            this.setLocation({ y: this.y + 1 })
+            this.setLocation({ y: this.y + 10 })
+        }
+
+        if (this.y && this.y > this.curY) {
+            this.setLocation({ y: this.y - 10 })
         }
         // to keep sprite stand
         this.stickSprite?.setAngle(0)
@@ -134,8 +122,10 @@ class Stick extends Character {
     }
 
     updateData({ event, x, y }: { event?: string; x?: number; y?: number }): void {
-        this.setLocation({ x, y })
-        this.updateAnimation(event!)
+        if (y) this.curY = y
+        // this.setLocation({ x, y })
+        this.setLocation({ x })
+        event && this.updateAnimation(event!)
     }
 
     isOldAnimation(event: string): boolean {
@@ -145,7 +135,7 @@ class Stick extends Character {
     }
 
     updateAnimation(event?: string): boolean {
-        const e = event || this.keyActivities.stand
+        const e = this.keyActivities.hasOwnProperty(event!) ? event! : this.keyActivities.stand
         const key = initKeyAnimation(this.name, this.keyActivities[e])
         // flip
         this.stickSprite?.setFlipX(this.configStick?.animations[e]?.frames[0].flipX || false)
