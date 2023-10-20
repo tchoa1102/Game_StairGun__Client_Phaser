@@ -11,46 +11,46 @@ class GamePlay extends Phaser.Scene {
     public numOfLoaded: number = 0
     public maxLoaded: number = 2
 
-    private dataGame: IMatchRes | null
-    private stairGame: any | null
-    private gunGame: any | null
+    // private dataGame: IMatchRes | null = null
     private loadings: Array<any> = []
     constructor() {
         super('game-play-scene')
-        this.dataGame = null
-        this.stairGame = null
-        this.gunGame = null
     }
 
     getLoading(): Array<any> {
         return this.loadings || []
     }
 
-    init({ data }: { data: IMatchRes }) {
-        console.log('data game: ', data)
-
-        this.dataGame = data
+    init() {
+        //{ data }: { data: IMatchRes }
+        // console.log('data game: ', data)
+        // this.dataGame = data
+        // const mainStore = useMainStore()
+        // mainStore.setMatch(data)
     }
 
     async preload() {
         console.log('%c\nLoading Game Play...\n', 'color: yellow; font-size: 16px;')
-        const mainStore = useMainStore()
+        const mainStore: any = useMainStore()
         this.load.spritesheet(CONSTANT_HOME.loading.key, CONSTANT_HOME.loading.src, {
             frameWidth: 159,
             frameHeight: 308,
         })
 
-        const configStick: IStickAnimationConfig = await FETCH(this.dataGame!.stickConfig)
-        const tiledMap = await FETCH(this.dataGame!.tiledMapConfig)
+        const configStick: IStickAnimationConfig = await FETCH(mainStore.getMatch!.stickConfig)
+        const tiledMap = await FETCH(mainStore.getMatch!.tiledMapConfig)
 
-        this.stairGame = this.scene.add('stair-game', StairGame, true, {
-            players: this.dataGame!.players,
-            stairs: JSON.stringify(this.dataGame!.stairs),
-            configStick: configStick,
+        mainStore.setPropertyMatch({
+            stickConfig: JSON.stringify(configStick),
+            tiledMapConfig: JSON.stringify(tiledMap),
+        })
+        // mainStore
+        this.scene.add('stair-game', StairGame, true, {
+            players: mainStore.getMatch!.players,
         })
 
         console.log('%cLoaded!', 'color: red; font-size: 16px;')
-        this.gunGame = this.scene.add('gun-game', GunGame, true, {
+        this.scene.add('gun-game', GunGame, true, {
             tiledMapConfig: tiledMap,
         })
     }

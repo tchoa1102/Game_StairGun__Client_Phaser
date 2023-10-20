@@ -1,7 +1,7 @@
 import { Stick } from '@/characters'
 import { useMainStore } from '@/stores'
 import '../gamePlay.interface'
-import type { IPlayerOnMatch } from '@/util/interface/index.interface'
+import type { ICard, IPlayerOnMatch } from '@/util/interface/index.interface'
 import FETCH from '@/services/fetchConfig.service'
 import { stickService } from '@/services/socket'
 
@@ -9,6 +9,12 @@ const CONSTANTS = {
     background: {
         key: 'stairGame-background',
         src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
+    },
+    cardBack: {
+        key: 'stairGame-card-back',
+        src: 'src/assets/card-back.png',
+        width: 30.5,
+        height: 44,
     },
 }
 
@@ -37,8 +43,9 @@ class StairGame extends Phaser.Scene {
     private background: Phaser.GameObjects.Image | undefined
     private yourPosition: number = 0
     private yourIndex: number = 0
-    private stairs: Array<IStair> | undefined
     private players: Array<IPlayerOnMatch> | undefined
+
+    private cardsObj: Array<Phaser.GameObjects.Image> = []
     // #endregion
     constructor() {
         super('stair-game')
@@ -51,7 +58,8 @@ class StairGame extends Phaser.Scene {
     }
 
     init(data: IStairGameReceivingData) {
-        this.stairs = JSON.parse(data.stairs)
+        // this.stairs = JSON.parse(data.stairs)
+        const mainStore: any = useMainStore()
         this.players = data.players
         console.log('Players received for stairGame: ', data.players)
 
@@ -74,7 +82,7 @@ class StairGame extends Phaser.Scene {
                 'circleStick-' + player.position,
                 Number.parseFloat(player.stairGame.x),
                 Number.parseFloat(player.stairGame.y),
-                JSON.stringify(data.configStick),
+                mainStore.getMatch.stickConfig,
                 0.5,
             )
             this.sticks.push(stick)
@@ -82,16 +90,19 @@ class StairGame extends Phaser.Scene {
     }
 
     preload() {
+        const mainStore: any = useMainStore()
         this.sticks.forEach((stick: Stick) => stick.preload())
 
         this.load.image(CONSTANTS.background.key, CONSTANTS.background.src)
         const stairIsLoading: Array<string> = []
-        this.stairs?.forEach((stair: IStair) => {
+        mainStore.getMatch.stairs?.forEach((stair: IStair) => {
             const isLoaded = stairIsLoading.includes(stair.img)
             if (!isLoaded) {
                 this.load.image(stair.img, stair.img)
             }
         })
+
+        this.load.image(CONSTANTS.cardBack.key, CONSTANTS.cardBack.src)
     }
 
     create(data: IStairGameReceivingData) {
@@ -102,6 +113,7 @@ class StairGame extends Phaser.Scene {
     createGameObject(isCreate: boolean = true) {
         if (!isCreate) return
         console.log('%cCreate', 'color: pink; font-size: 22px')
+        const mainStore: any = useMainStore()
 
         // #region config matter
         this.physics.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
@@ -114,7 +126,7 @@ class StairGame extends Phaser.Scene {
         // #endregion
 
         // #region init stair
-        this.stairs?.forEach((stair: IStair) => {
+        mainStore.getMatch.stairs?.forEach((stair: IStair) => {
             const obj = this.add.image(stair.x, stair.y, stair.img).setOrigin(0)
 
             obj.scaleX = stair.width / obj.width
@@ -130,6 +142,18 @@ class StairGame extends Phaser.Scene {
                 { color: 'red', backgroundColor: '#fff' },
             )
             this.staticGroup.add(obj)
+        })
+
+        mainStore.getMatch.cards.forEach((card: ICard) => {
+            const obj = this.add
+                .image(JSON.parse(card.x), JSON.parse(card.y), CONSTANTS.cardBack.key)
+                .setOrigin(0, 1)
+            obj.setScale(
+                CONSTANTS.cardBack.width / obj.width,
+                CONSTANTS.cardBack.height / obj.height,
+            )
+
+            this.cardsObj.push(obj)
         })
 
         // #endregion

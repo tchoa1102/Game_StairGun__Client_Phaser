@@ -10,13 +10,34 @@ export interface IMatchRes {
         x: string
         y: string
         width: string
+        height: string
+        img: string
+        _id: string
     }>
     timeStart: string
     players: Array<IPlayerOnMatch>
-    cards: Array<{}>
+    cards: Array<ICard>
     backgroundStairGame: string
     stickConfig: string
     tiledMapConfig: string
+}
+
+export interface IStair {
+    x: string
+    y: string
+    width: string
+    height: string
+    img: string
+    _id: string
+}
+
+export interface ICard {
+    data: any
+    x: string
+    y: string
+    isEnable: boolean
+    owner: string
+    _id: string
 }
 
 export interface IPlayerOnMatch {

@@ -147,6 +147,18 @@ const useMainStore = defineStore('main', {
             this.match = data
             this.watches.match.forEach((callback: CallableFunction) => callback())
         },
+        setPropertyMatch(data: { [key: string]: any }) {
+            for (const key in data) {
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    const element = data[key]
+                    const m: any = this.match
+                    if (Object.prototype.hasOwnProperty.call(m, key)) {
+                        m[key] = element
+                    }
+                }
+            }
+            this.watches.match.forEach((callback: CallableFunction) => callback())
+        },
     },
 })
 
