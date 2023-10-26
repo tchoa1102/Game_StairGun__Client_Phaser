@@ -2,6 +2,8 @@ const CONSTANT_HOME = {
     key: {
         home: 'home-scene',
         prepareDuel: 'prepare-duel-scene',
+        stairGame: 'stair-game-scene',
+        gunGame: 'gun-game-scene',
     },
     background: {
         key: 'home-background',

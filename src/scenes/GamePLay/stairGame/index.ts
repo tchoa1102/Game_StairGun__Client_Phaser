@@ -1,11 +1,15 @@
 import { Stick } from '@/characters'
 import { useMainStore } from '@/stores'
 import '../gamePlay.interface'
-import type { ICard, IPlayerOnMatch } from '@/util/interface/index.interface'
+import type { ICard, ICardRes, IPlayerOnMatch } from '@/util/interface/index.interface'
 import FETCH from '@/services/fetchConfig.service'
 import { stickService } from '@/services/socket'
+import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 
 const CONSTANTS = {
+    scene: {
+        key: CONSTANT_HOME.key.stairGame,
+    },
     background: {
         key: 'stairGame-background',
         src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
@@ -48,7 +52,7 @@ class StairGame extends Phaser.Scene {
     private cardsObj: Array<Phaser.GameObjects.Image> = []
     // #endregion
     constructor() {
-        super('stair-game')
+        super(CONSTANTS.scene)
         this.mainStore = useMainStore()
         this.CAMERA_WIDTH = ((this.mainStore.width * this.mainStore.zoom) / 24) * 6
         this.CAMERA_HEIGHT = this.mainStore.height * this.mainStore.zoom
@@ -125,7 +129,7 @@ class StairGame extends Phaser.Scene {
         this.background.setOrigin(0, 0)
         // #endregion
 
-        // #region init stair
+        // #region init stair and card
         mainStore.getMatch.stairs?.forEach((stair: IStair) => {
             const obj = this.add.image(stair.x, stair.y, stair.img).setOrigin(0)
 
@@ -133,14 +137,14 @@ class StairGame extends Phaser.Scene {
             obj.scaleY = stair.height / obj.height
 
             this.staticGroup = this.add.group()
-            const text = this.add.text(
-                stair.x,
-                stair.y,
-                `(${Math.floor(stair.x)}, ${Math.floor(stair.y)}, ${Math.floor(stair.width)}, ${
-                    stair.height
-                })`,
-                { color: 'red', backgroundColor: '#fff' },
-            )
+            // const text = this.add.text(
+            //     stair.x,
+            //     stair.y,
+            //     `(${Math.floor(stair.x)}, ${Math.floor(stair.y)}, ${Math.floor(stair.width)}, ${
+            //         stair.height
+            //     })`,
+            //     { color: 'red', backgroundColor: '#fff' },
+            // )
             this.staticGroup.add(obj)
         })
 
@@ -152,17 +156,26 @@ class StairGame extends Phaser.Scene {
                 CONSTANTS.cardBack.width / obj.width,
                 CONSTANTS.cardBack.height / obj.height,
             )
+            obj.name = card._id
+            // console.log(obj.name)
+            // const text = this.add.text(
+            //     JSON.parse(card.x),
+            //     JSON.parse(card.y),
+            //     `(${Math.floor(JSON.parse(card.x))}, ${Math.floor(JSON.parse(card.y))})`,
+            //     { color: 'red', backgroundColor: '#fff' },
+            // )
 
             this.cardsObj.push(obj)
+            // card._id === '65316ff94b30d349bdeb8817' && console.log(card.y)
         })
 
-        // #endregion
+        // #endregion init stair and card
 
         // #region init game object
         this.sticks.forEach((stick: Stick, index: number) => {
             stick.create()
             if (this.yourIndex === index) {
-                console.log(index)
+                // console.log(index)
 
                 stick.addEvent()
             }
@@ -188,7 +201,7 @@ class StairGame extends Phaser.Scene {
 
         // #region init game'params, again
         this.cameraGame!.startFollow(
-            this.sticks[this.yourIndex].stickSprite!,
+            this.sticks[this.yourIndex].character!,
             true,
             this.CAMERA_V_X,
             this.CAMERA_V_Y,
@@ -216,6 +229,38 @@ class StairGame extends Phaser.Scene {
             this.sticks[index].updateData({ event: data.event, x: data.x, y: data.y })
             // this.updateData({ event: data.event, x: data.x, y: data.y })
         })
+        stickService.listeningUpdateCard((data: ICardRes) => {
+            this.updateCardState(data._id, data.owner, JSON.parse(data.time))
+        })
+    }
+
+    updateCardState(_id: string, owner: string, time: number): void {
+        const mainStore: any = useMainStore()
+        const cardsPickUp = mainStore.getMatch.cardsPickUp || {}
+        const timeOut = setTimeout(() => {
+            console.log('Destroy')
+            const card = this.cardsObj.find((c: Phaser.GameObjects.Image) => c.name === _id)
+            card?.destroy()
+            this.cardsObj = this.cardsObj.reduce(
+                (newArray: Array<Phaser.GameObjects.Image>, card: Phaser.GameObjects.Image) => {
+                    if (card.name !== _id) newArray.push(card)
+
+                    return newArray
+                },
+                [],
+            )
+            mainStore.getMatch.cards.forEach((card: ICard) => {
+                if (card._id === _id) {
+                    card.isEnable = false
+                }
+            })
+        }, time - new Date().getTime())
+
+        if (Object.prototype.hasOwnProperty.call(cardsPickUp, timeOut)) {
+            clearTimeout(cardsPickUp[_id])
+            return
+        }
+        cardsPickUp[_id] = timeOut
     }
 }
 

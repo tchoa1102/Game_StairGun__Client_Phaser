@@ -1,4 +1,5 @@
 import { useMainStore } from '@/stores'
+import type { ICardRes } from '@/util/interface/index.interface'
 
 class StickService {
     constructor() {}
@@ -48,6 +49,14 @@ class StickService {
     listeningAnimation(callback: (data: any) => void) {
         const mainStore: any = useMainStore()
         mainStore.getSocket.on('stick-keyboard-event', (data: any) => {
+            callback(data)
+        })
+    }
+
+    listeningUpdateCard(callback: (data: ICardRes) => void) {
+        const mainStore: any = useMainStore()
+        mainStore.getSocket.on('stick/card/pick-up', (data: ICardRes) => {
+            console.log(data)
             callback(data)
         })
     }

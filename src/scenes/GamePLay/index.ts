@@ -37,22 +37,34 @@ class GamePlay extends Phaser.Scene {
             frameHeight: 308,
         })
 
-        const configStick: IStickAnimationConfig = await FETCH(mainStore.getMatch!.stickConfig)
-        const tiledMap = await FETCH(mainStore.getMatch!.tiledMapConfig)
+        const configStick: IStickAnimationConfig = JSON.parse(
+            await FETCH(mainStore.getMatch!.stickConfig),
+        )
+
+        // const maps = mainStore.getMatch!.mapConfigs.reduce(
+        //     (objMaps: { [key: string]: any }, e: any) => {
+        //         objMaps[e.data.name] = e.data.src
+        //         return objMaps
+        //     },
+        //     {},
+        // )
+        // for (const key in maps) {
+        //     if (Object.prototype.hasOwnProperty.call(maps, key)) {
+        //         const tiledMap = JSON.parse(await FETCH(maps[key]))
+        //         mainStore.setMapDataJSON(key, tiledMap)
+        //     }
+        // }
 
         mainStore.setPropertyMatch({
             stickConfig: JSON.stringify(configStick),
-            tiledMapConfig: JSON.stringify(tiledMap),
         })
-        // mainStore
-        this.scene.add('stair-game', StairGame, true, {
+
+        this.scene.add(CONSTANT_HOME.key.stairGame, StairGame, true, {
             players: mainStore.getMatch!.players,
         })
 
         console.log('%cLoaded!', 'color: red; font-size: 16px;')
-        this.scene.add('gun-game', GunGame, true, {
-            tiledMapConfig: tiledMap,
-        })
+        this.scene.add(CONSTANT_HOME.key.gunGame, GunGame, true)
     }
 
     create() {

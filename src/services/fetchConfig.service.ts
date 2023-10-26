@@ -8,5 +8,5 @@ export default async function FETCH(url: string) {
     console.log(data)
     console.groupEnd()
 
-    return data
+    return JSON.stringify(data)
 }

@@ -1,4 +1,4 @@
-export default class BaseScene extends Phaser.Scene {
+export default abstract class BaseScene extends Phaser.Scene {
     constructor(key: string) {
         super(key)
     }

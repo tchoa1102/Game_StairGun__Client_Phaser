@@ -1,5 +1,16 @@
+import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 import FETCH from '@/services/fetchConfig.service'
 import { useMainStore } from '@/stores'
+import type { IObject } from '@/util/interface/index.interface'
+
+const CONSTANTS = {
+    scene: {
+        key: CONSTANT_HOME.key.gunGame,
+    },
+    background: {
+        key: 'background-gun',
+    },
+}
 
 class GunGame extends Phaser.Scene {
     // #region declare properties
@@ -9,30 +20,69 @@ class GunGame extends Phaser.Scene {
     public CAMERA_HEIGHT: number
     public isPlay: boolean = false
     public x: number
+    public eventListener: IEventListener = {}
 
     private mainStore: any
-    private background: Phaser.GameObjects.Image | undefined
     private cameraGame: Phaser.Cameras.Scene2D.Camera | undefined
+    private background: Phaser.GameObjects.Image | undefined
     private tiledMapConfig: any
     private map: Phaser.Tilemaps.Tilemap | undefined
     private controls: any
+    private cardPlugins: Array<Phaser.GameObjects.Rectangle> = []
+    private gunAngle: number = 0
+    private graphicsFanShaped: Phaser.GameObjects.Graphics | undefined
+    private graphicsLine: Phaser.GameObjects.Graphics | undefined
+    private cH: number
+    private r = 70
+    private gunMidAngle: { x: number; y: number }
+    private zeroGunAngle = -90
+
+    private keysTileMap: Array<string> = []
+    private objectsMap: Array<Phaser.Tilemaps.TilemapLayer> = []
     // #endregion
     constructor() {
-        super('gun-game')
+        super(CONSTANTS.scene)
         this.mainStore = useMainStore()
         this.CAMERA_WIDTH = ((this.mainStore.width * this.mainStore.zoom) / 24) * 18
         this.x = ((this.mainStore.width * this.mainStore.zoom) / 24) * 6 + 1
         this.CAMERA_HEIGHT = this.mainStore.height * this.mainStore.zoom
+        this.cH = this.mainStore.height - 150
+        this.gunMidAngle = {
+            x: 20 + this.r,
+            y: this.cH + this.r,
+        }
     }
 
-    init({ tiledMapConfig }: { tiledMapConfig: any }) {
-        this.tiledMapConfig = tiledMapConfig
-    }
+    init() {}
 
     preload() {
-        this.load.image('background-gun', this.tiledMapConfig.background)
-        // this.load.tilemapTiledJSON('tilemap', this.tiledMapConfig)
-        // this.load.image(this.tiledMapConfig.tilesets[0].name, this.tiledMapConfig.tilesets[0].image)
+        this.load.image(CONSTANTS.background.key, this.mainStore!.getMatch.backgroundGunGame)
+        // #region load map
+        console.log('GunGame', this.mainStore!.getMatch)
+        const imgObjectsLoad = this.mainStore!.getMatch.objects.reduce(
+            (total: { [_id: string]: string }, e: IObject) => {
+                if (!total.hasOwnProperty(e.data._id)) total[e.data._id] = e.data.src
+                return total
+            },
+            {},
+        )
+
+        const keysLoadObject: Array<string> = Object.keys(imgObjectsLoad)
+        for (const key of keysLoadObject) {
+            console.log('Loading: ', key)
+            this.load.image(key, imgObjectsLoad[key])
+        }
+        // const mapConfigs = this.mainStore!.getMatch.mapConfigs
+        // const mapsDataJSON = this.mainStore!.getMatch.mapDataJSON
+        // for (const key in this.mainStore!.getMatch.mapDataJSON) {
+        //     if (Object.prototype.hasOwnProperty.call(this.mainStore!.getMatch.mapDataJSON, key)) {
+        //         const config = this.mainStore!.getMatch.mapDataJSON[key]
+        //         this.load.image(config.tilesets[0].name, config.tilesets[0].image)
+        //         this.load.tilemapTiledJSON(key, mapsDataJSON[key])
+        //         this.keysTileMap.push(key)
+        //     }
+        // }
+        // #endregion load map
     }
 
     create() {
@@ -42,8 +92,10 @@ class GunGame extends Phaser.Scene {
 
     createGameObject(isCreate: boolean = true) {
         if (!isCreate) return
+        const mainStore: any = useMainStore()
         // #region config world
         console.log('create')
+        this.isPlay = true
         this.physics.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
         // this.physics.world.gravity.y = 9.8
         // #endregion
@@ -70,18 +122,40 @@ class GunGame extends Phaser.Scene {
         // #endregion
 
         // #region config background
-        this.background = this.add.image(0, 0, 'background-gun')
-        this.background.setOrigin(0, 0)
+        this.add.image(0, 0, CONSTANTS.background.key).setOrigin(0, 0)
         // #endregion
 
-        // #region config tiled
-        // this.map = this.make.tilemap({ key: 'tilemap' })
-
-        // const tileSet = this.map.addTilesetImage(this.tiledMapConfig.tilesets[0].name)
-        // const layer = this.map.createLayer(this.tiledMapConfig.layers[0].name, tileSet!)
-        // layer?.setSkipCull(true)
+        // #region config tiled => very lags
+        // const mapConfigs = this.mainStore!.getMatch.mapConfigs
+        // const mapsDataJSON = this.mainStore!.getMatch.mapDataJSON
+        // for (let i = 0; i < mapConfigs.length; i++) {
+        //     const tileMapConfig = mapsDataJSON[mapConfigs[i].data.name]
+        //     const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: this.keysTileMap[0] })
+        //     const tileSet: Phaser.Tilemaps.Tileset = map.addTilesetImage(
+        //         tileMapConfig.tilesets[0].name,
+        //     )!
+        //     const layer: Phaser.Tilemaps.TilemapLayer = map
+        //         .createLayer(
+        //             tileMapConfig.layers[0].name,
+        //             tileSet!,
+        //             mapConfigs[i].location.x,
+        //             mapConfigs[i].location.y,
+        //         )
+        //         ?.setSkipCull(true)!
+        //     // this.objectsMap.push(layer!)
+        // }
         // #endregion
-        this.isPlay = true
+
+        // #region load objects map
+        this.createUIObjectsMap()
+        // #endregion load objects map
+
+        // #region create UI fight
+        this.createUIFight()
+        // #endregion create UI fight
+        //
+        this.listeningSocket()
+        this.updateUIHearthLineGun(45)
     }
 
     update(time: any, delta: any) {
@@ -99,6 +173,89 @@ class GunGame extends Phaser.Scene {
             this.MAX_HEIGHT - this.CAMERA_HEIGHT,
         )
     }
+
+    updateUIHearthLineGun(angle: number) {
+        this.graphicsLine && this.graphicsLine.clear()
+        this.gunAngle = angle
+        this.graphicsLine = this.add.graphics()
+        this.graphicsLine.fillStyle(0x000000, 1)
+        this.graphicsLine.slice(
+            this.gunMidAngle.x,
+            this.gunMidAngle.y,
+            this.r,
+            Phaser.Math.DegToRad(this.zeroGunAngle + this.gunAngle - 0.5),
+            Phaser.Math.DegToRad(this.zeroGunAngle + this.gunAngle + 0.5),
+            false,
+        )
+        this.graphicsLine.fillPath()
+        this.graphicsLine.setScrollFactor(0, 0)
+    }
+
+    drawUIGunZone({ beginAngle, endAngle }: { beginAngle: number; endAngle: number }) {
+        this.graphicsFanShaped && this.graphicsFanShaped.clear()
+        const graphicsFanShaped = this.add.graphics()
+        graphicsFanShaped.fillStyle(0x005dff, 0.3)
+        graphicsFanShaped.slice(
+            this.gunMidAngle.x,
+            this.gunMidAngle.y,
+            this.r,
+            Phaser.Math.DegToRad(this.zeroGunAngle + beginAngle),
+            Phaser.Math.DegToRad(this.zeroGunAngle + endAngle),
+            false,
+        )
+        graphicsFanShaped.fillPath()
+        graphicsFanShaped.setScrollFactor(0, 0)
+    }
+
+    createUIFight(): void {
+        // #region create card plugins
+        const keyObjCardPlugins = ['z', 'x', 'c', 'v', 'b']
+        for (let i = 0; i < 5; i++) {
+            let y = 100 * (i + 1) - 50 * i
+
+            const obj = this.add.rectangle(50, y, 30.5, 44, 0xffffff, 0.3).setScrollFactor(0, 0)
+            const text = this.add
+                .text(20, y, keyObjCardPlugins[i], {
+                    color: '#fff',
+                    fontSize: 16,
+                })
+                .setScrollFactor(0, 0)
+            this.cardPlugins.push(obj)
+        }
+        // #endregion create card plugins
+
+        // #region create create circle
+        this.add.circle(20, this.cH, this.r, 0xffffff, 0.3).setOrigin(0).setScrollFactor(0, 0)
+        this.add.circle(this.gunMidAngle.x, this.gunMidAngle.y, 4, 0xff00000).setScrollFactor(0, 0)
+        this.add
+            .text(this.gunMidAngle.x - 5, this.cH, '0', {
+                color: '#fff',
+                fontSize: '20px',
+            })
+            .setScrollFactor(0, 0)
+        // #endregion create circle
+
+        // #region create gun zone
+        this.drawUIGunZone({ beginAngle: 0, endAngle: 90 })
+        // #endregion create gun zone
+
+        // #region create gun angle
+        this.updateUIHearthLineGun(0)
+        // #endregion create gun angle
+    }
+
+    createUIObjectsMap() {
+        const objs: Array<IObject> = this.mainStore.getMatch!.objects
+        objs.forEach((obj: IObject) => {
+            this.add
+                .image(JSON.parse(obj.location.x), JSON.parse(obj.location.y), obj.data._id)
+                .setOrigin(0)
+        })
+    }
+
+    // #region listening socket
+    listeningSocket() {}
+    // #endregion listening socket
 }
 
 export default GunGame

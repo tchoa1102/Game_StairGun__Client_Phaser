@@ -159,6 +159,10 @@ const useMainStore = defineStore('main', {
             }
             this.watches.match.forEach((callback: CallableFunction) => callback())
         },
+        // setMapDataJSON(name: string, data: string) {
+        //     if (!this.match?.mapDataJSON) this.match!.mapDataJSON = {}
+        //     this.match!.mapDataJSON[name] = data
+        // },
     },
 })
 

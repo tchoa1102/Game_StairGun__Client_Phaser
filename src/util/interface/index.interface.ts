@@ -18,8 +18,24 @@ export interface IMatchRes {
     players: Array<IPlayerOnMatch>
     cards: Array<ICard>
     backgroundStairGame: string
-    stickConfig: string
-    tiledMapConfig: string
+    stickConfig: IStickAnimationConfig | string
+    objects: Array<IObject>
+    // mapDataJSON: { [name: string]: any }
+    cardsPickUp: { [k: string]: number }
+    backgroundGunGame: string
+}
+
+export interface IObject {
+    location: { x: string; y: string }
+    data: IDataObjectMatch
+}
+
+export interface IDataObjectMatch {
+    _id: string
+    name: string
+    points: Array<{ x: string; y: string }>
+    src: string
+    canBeDestroyed: boolean
 }
 
 export interface IStair {
@@ -36,6 +52,12 @@ export interface ICard {
     x: string
     y: string
     isEnable: boolean
+    owner: string
+    _id: string
+}
+
+export interface ICardRes {
+    time: string
     owner: string
     _id: string
 }

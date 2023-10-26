@@ -1,7 +1,7 @@
-import { BootGame } from "@/scenes"
-import {Character} from ".."
-import { useMainStore } from "@/stores"
-import './interface'
+import { BootGame } from '@/scenes'
+import { Character } from '..'
+import { useMainStore } from '@/stores'
+import '../interface'
 
 const keyActivities = {
     stand: 'stand',
@@ -24,8 +24,8 @@ class Stick extends Character {
     constructor(_this: any, name: string, fileConfig: string) {
         super(_this, name)
         this.fileConfig = JSON.parse(fileConfig)
-        console.log(this.fileConfig);
-        
+        console.log(this.fileConfig)
+
         this.stickAnimation = {}
         this.stickSprite = null
         this.eventListener = {}
@@ -36,31 +36,30 @@ class Stick extends Character {
     }
 
     create() {
-        console.log(`%c\nCreate ${this.name}...\n`, 'color: red; font-size: 16px;');
+        console.log(`%c\nCreate ${this.name}...\n`, 'color: red; font-size: 16px;')
         const mainStore = useMainStore()
         // #region init animation from config json
         const animations = this.fileConfig.animation
-        for(const key in animations) {
+        for (const key in animations) {
             if (animations.hasOwnProperty(key)) {
                 const instance = animations[key]
                 const keyAnim = initKeyAnimation(this.name, instance.key as string)
-                this.stickAnimation[keyAnim]
-                    = this.game.anims.create({
-                        ...instance,
-                        key: keyAnim,
-                        frames: this.game.anims.generateFrameNumbers(
-                            this.name, instance.frames
-                        ),
-                    })
-                    console.log(this.stickAnimation[keyAnim]);
-                    
+                this.stickAnimation[keyAnim] = this.game.anims.create({
+                    ...instance,
+                    key: keyAnim,
+                    frames: this.game.anims.generateFrameNumbers(this.name, instance.frames),
+                })
+                console.log(this.stickAnimation[keyAnim])
             }
         }
         // #endregion
 
         // #region init sprite
         this.stickSprite = this.game.matter.add.sprite(200, 600, this.name)
-        this.stickSprite.setRectangle(this.fileConfig.frame.frameWidth * 0.5, this.fileConfig.frame.frameHeight * 0.5)
+        this.stickSprite.setRectangle(
+            this.fileConfig.frame.frameWidth * 0.5,
+            this.fileConfig.frame.frameHeight * 0.5,
+        )
         this.stickSprite.scale = 0.5
         this.stickSprite.setBounce(0)
         this.stickSprite.setVelocityY(1)
@@ -68,10 +67,18 @@ class Stick extends Character {
         // #endregion
 
         // #region add event
-        this.eventListener.left = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT)
-        this.eventListener.right = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT)
-        this.eventListener.jumpUp = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.UP)
-        this.eventListener.jumpDown = this.game.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
+        this.eventListener.left = this.game.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.LEFT,
+        )
+        this.eventListener.right = this.game.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.RIGHT,
+        )
+        this.eventListener.jumpUp = this.game.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.UP,
+        )
+        this.eventListener.jumpDown = this.game.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.DOWN,
+        )
         // #endregion
     }
 
@@ -81,7 +88,7 @@ class Stick extends Character {
         const cur = this.stickSprite?.anims.currentAnim
 
         if (this.eventListener.jumpUp?.isDown && this.eventListener.left?.isDown) {
-            console.log('jumpUp and left');
+            console.log('jumpUp and left')
             isEvent = true
             const keyJumpLeft = initKeyAnimation(this.name, keyActivities.jumpLeft)
 
@@ -90,7 +97,7 @@ class Stick extends Character {
                 this.stickSprite?.anims.play(keyJumpLeft)
             }
         } else if (this.eventListener.jumpUp?.isDown && this.eventListener.right?.isDown) {
-            console.log('jumpUp and right');
+            console.log('jumpUp and right')
             isEvent = true
             const keyJumpRight = initKeyAnimation(this.name, keyActivities.jumpRight)
 
@@ -101,7 +108,7 @@ class Stick extends Character {
         } else {
             if (this.eventListener.left?.isDown) {
                 isEvent = true
-                console.log('left');
+                console.log('left')
                 const keyAnim = initKeyAnimation(this.name, keyActivities.runLeft)
                 if (cur !== this.stickAnimation[keyAnim]) {
                     this.stickSprite?.anims.play(keyAnim)
@@ -109,7 +116,7 @@ class Stick extends Character {
             }
             if (this.eventListener.right?.isDown) {
                 isEvent = true
-                console.log('right');
+                console.log('right')
                 const keyAnim = initKeyAnimation(this.name, keyActivities.runRight)
                 if (cur !== this.stickAnimation[keyAnim]) {
                     this.stickSprite?.anims.play(keyAnim)
