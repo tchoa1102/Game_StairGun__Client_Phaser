@@ -1,7 +1,8 @@
 import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 import FETCH from '@/services/fetchConfig.service'
+import { stickService } from '@/services/socket'
 import { useMainStore } from '@/stores'
-import type { IObject } from '@/util/interface/index.interface'
+import type { ICardRes, IObject } from '@/util/interface/index.interface'
 
 const CONSTANTS = {
     scene: {
@@ -28,7 +29,6 @@ class GunGame extends Phaser.Scene {
     private tiledMapConfig: any
     private map: Phaser.Tilemaps.Tilemap | undefined
     private controls: any
-    private cardPlugins: Array<Phaser.GameObjects.Rectangle> = []
     private gunAngle: number = 0
     private graphicsFanShaped: Phaser.GameObjects.Graphics | undefined
     private graphicsLine: Phaser.GameObjects.Graphics | undefined
@@ -37,8 +37,8 @@ class GunGame extends Phaser.Scene {
     private gunMidAngle: { x: number; y: number }
     private zeroGunAngle = -90
 
-    private keysTileMap: Array<string> = []
-    private objectsMap: Array<Phaser.Tilemaps.TilemapLayer> = []
+    private cardPlugins: Array<Phaser.GameObjects.Rectangle> = []
+    private cards: Array<Phaser.GameObjects.Image> = []
     // #endregion
     constructor() {
         super(CONSTANTS.scene)
@@ -254,7 +254,16 @@ class GunGame extends Phaser.Scene {
     }
 
     // #region listening socket
-    listeningSocket() {}
+    listeningSocket() {
+        stickService.listeningUpdateCard((data: ICardRes) => {
+            const location = this.cardPlugins[this.cards.length]
+            const card = this.add.image(location.x, location.y, data.card._id).setOrigin(0.5)
+            card.scaleX = location.width / card.width
+            card.scaleY = location.height / card.height
+            card.name = data._id
+            this.cards.push(card)
+        })
+    }
     // #endregion listening socket
 }
 

@@ -1,12 +1,15 @@
-import type { Home } from '@/scenes'
+import type { GamePlay, Home, PrepareDuel } from '@/scenes'
+import { useMainStore } from '@/stores'
 
-export default class BaseDOM extends Phaser.GameObjects.DOMElement {
-    // protected game: Home
-    protected game: any
+export default abstract class BaseDOM extends Phaser.GameObjects.DOMElement {
+    protected game: Home | PrepareDuel | GamePlay
+    protected mainStore: any
+    // protected game: any
     constructor(game: any, style: { [key: string]: string }) {
         super(game, 0, 0, 'section', style)
         this.setOrigin(0)
         this.game = game
+        this.mainStore = useMainStore()
     }
 
     createContainer(tag: string, style: { [key: string]: string }) {

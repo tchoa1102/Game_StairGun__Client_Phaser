@@ -1,10 +1,8 @@
-import { useMainStore } from '@/stores'
 import Phaser from 'phaser'
 import BaseScene from '../baseScene'
 import BtnFunc from '@/components/btnFunc'
 import CONSTANT_HOME from '../Home/CONSTANT'
 import type {
-    IPlayer,
     IPlayerOnRoom,
     IPlayerRemoved,
     IReadyRes,
@@ -12,9 +10,8 @@ import type {
 } from '@/util/interface/state.main.interface'
 import { roomService } from '@/services/socket'
 import ShowCharacter from '@/characters/avatars/show'
-import matchService from '@/services/socket/match.service'
-import type { IChangePosition, IMatchRes } from '@/util/interface/index.interface'
-import GamePlay from '../GamePLay'
+import type { IChangePosition } from '@/util/interface/index.interface'
+import Chat from '@/components/chats'
 
 const CONSTANTS = {
     keyScene: CONSTANT_HOME.key.prepareDuel,
@@ -36,9 +33,8 @@ class PrepareDuel extends BaseScene {
     private listCharacterShow: { [key: string]: Phaser.Game }
     constructor() {
         super(CONSTANTS.keyScene)
-        const mainStore: any = useMainStore()
-        this.MAX_WIDTH = mainStore.getWidth * mainStore.zoom
-        this.MAX_HEIGHT = mainStore.getHeight * mainStore.zoom
+        this.MAX_WIDTH = this.mainStore.getWidth
+        this.MAX_HEIGHT = this.mainStore.getHeight
         this.listCharacterShow = {}
         this.listeningSocket()
     }
@@ -146,7 +142,9 @@ class PrepareDuel extends BaseScene {
         // #endregion create items
 
         // #region create chat
-        const chat = this.createChat()
+        const chat = new Chat(this, ['position-relative'], { width: '722px' }).create({
+            isShowRoom: true,
+        })
         // #endregion create chat
 
         const mapAndBtnFuncWrapper = this.createContainer('section', {
@@ -188,7 +186,6 @@ class PrepareDuel extends BaseScene {
 
     changePositionPlayer(data: IChangePosition, oldPosition: number) {
         const container = this.listPlayerDOM?.node.children
-        const mainStore: any = useMainStore()
         if (container) {
             const oldPositionDOM = container[oldPosition]
             const newPositionDOM = container[data.position]
@@ -199,7 +196,7 @@ class PrepareDuel extends BaseScene {
             oldPositionDOM.classList.remove('noReady')
 
             this.freeCharacter(data.player)
-            const dataPlayer: IPlayerOnRoom = mainStore.getRoom.players.find(
+            const dataPlayer: IPlayerOnRoom = this.mainStore.getRoom.players.find(
                 (p: IPlayerOnRoom) => p.player._id === data.player,
             )
             this.editPlayerDOM(newPositionDOM, dataPlayer)
@@ -285,15 +282,14 @@ class PrepareDuel extends BaseScene {
     }
 
     removePlayerDOM(player: Element, data: IPlayerRemoved) {
-        const mainStore: any = useMainStore()
         console.log('Removing player')
 
         player.setAttribute('id', '')
         player.innerHTML = ''
         player.classList.remove('noReady')
 
-        mainStore.setCurrentRoom({
-            ...mainStore.getRoom.players.reduce(
+        this.mainStore.setCurrentRoom({
+            ...this.mainStore.getRoom.players.reduce(
                 (result: Array<IPlayerOnRoom>, p: IPlayerOnRoom) => {
                     if (p.player._id === data.newMaster) {
                         p.isRoomMaster = true
@@ -351,14 +347,15 @@ class PrepareDuel extends BaseScene {
     // #endregion create background screen
     // #region create items
     createItemsDOM() {
-        const mainStore: any = useMainStore()
         const section = this.createContainer('section', {})
         section.node.classList.add(`${this.className}__items`)
         // #region header
         const header = this.createContainer('div', {})
         header.node.classList.add(`${this.className}__items__header`)
 
-        const idRoom = this.add.dom(0, 0, 'div', {}, `ID: ${mainStore.getPlayer._id}`).setOrigin(0)
+        const idRoom = this.add
+            .dom(0, 0, 'div', {}, `ID: ${this.mainStore.getPlayer._id}`)
+            .setOrigin(0)
         idRoom.node.classList.add('position-relative')
         idRoom.node.classList.add(`${this.className}__items__header__text`)
         // #endregion header
@@ -675,10 +672,9 @@ class PrepareDuel extends BaseScene {
     listeningSocket() {
         roomService.listeningAddToRoom((data: IRoom) => {
             // show waiting room
-            const mainStore: any = useMainStore()
             console.log('Players: ', data.players)
 
-            mainStore.setCurrentRoom({
+            this.mainStore.setCurrentRoom({
                 ...data,
                 players: data.players.filter((pl: IPlayerOnRoom) => {
                     return pl.isOnRoom
@@ -686,7 +682,7 @@ class PrepareDuel extends BaseScene {
             })
 
             // add player
-            mainStore.getRoom.players.forEach((p: IPlayerOnRoom) => {
+            this.mainStore.getRoom.players.forEach((p: IPlayerOnRoom) => {
                 this.addPlayer(p)
             })
 
@@ -696,12 +692,10 @@ class PrepareDuel extends BaseScene {
         })
 
         roomService.listeningRemovePlayerOnRoom((data: any) => {
-            const mainStore: any = useMainStore()
             this.removePlayer(data)
         })
 
         roomService.listeningReady((data: IReadyRes) => {
-            const mainStore: any = useMainStore()
             const player: Element | undefined | null = document.getElementById(
                 `prepareDuel__player--${data.player._id}`,
             )
@@ -712,9 +706,9 @@ class PrepareDuel extends BaseScene {
             const btnDestroy: Element = this.section?.node.querySelector(
                 `.${this.className}__btn-func__destroy`,
             ) as Element
-            if (data.player._id === mainStore.getPlayer._id && data.player.isReady) {
+            if (data.player._id === this.mainStore.getPlayer._id && data.player.isReady) {
                 this.changeDisplayBtn(btnStart, btnDestroy)
-            } else if (data.player._id === mainStore.getPlayer._id && !data.player.isReady) {
+            } else if (data.player._id === this.mainStore.getPlayer._id && !data.player.isReady) {
                 this.changeDisplayBtn(btnDestroy, btnStart)
             }
             if (player) {

@@ -11,6 +11,8 @@ import matchService from '@/services/socket/match.service'
 import type { IMatchRes } from '@/util/interface/index.interface'
 import GamePlay from '../GamePLay'
 import chatService from '@/services/socket/chat.service'
+import Chat from '@/components/chats'
+import Status from '@/components/status'
 
 const dRaw = {
     _id: '6528fb7d960eecd821e4040d',
@@ -1061,7 +1063,7 @@ class Home extends BaseScene {
     }
     public gamePlay: GamePlay | undefined
 
-    private configDefault: Array<any>
+    // private configDefault: Array<any> = []
     private statesScreen: Array<string>
     private section: Phaser.GameObjects.DOMElement | undefined
     private duelBuilding: Phaser.GameObjects.Polygon | undefined
@@ -1073,7 +1075,6 @@ class Home extends BaseScene {
         this.DOMElement = {
             boardListRoom: undefined,
         }
-        this.configDefault = []
     }
 
     async preload() {
@@ -1086,10 +1087,10 @@ class Home extends BaseScene {
             if (looks.hasOwnProperty(key)) {
                 const srcConfig = looks[key]
                 const config: any = JSON.parse(await FETCH(srcConfig))
-                this.configDefault.push(config)
+                // this.configDefault.push(config)
                 localStorage.setItem(config.meta.name, JSON.stringify(config))
 
-                this.load.atlas(config.meta.name, config.src[0], config)
+                // this.load.atlas(config.meta.name, config.src[0], config)
             }
         }
         // #endregion load skin
@@ -1105,9 +1106,9 @@ class Home extends BaseScene {
         // #endregion listening socket
 
         // #region create body default
-        this.configDefault.forEach((config) => {
-            createAnimation(this, config.meta.name, config.animations)
-        })
+        // this.configDefault.forEach((config) => {
+        //     createAnimation(this, config.meta.name, config.animations)
+        // })
         // #endregion create body default
 
         // #region DOM
@@ -1115,19 +1116,34 @@ class Home extends BaseScene {
         this.section.node.classList.remove('d-flex')
         this.section.node.classList.add('home')
 
-        // #region create board
+        // #region create status
+        const status = new Status(this).create()
+        this.section.node.appendChild(status.node)
+        // #endregion create status
+
+        // #region create board DOM
         this.DOMElement.boardListRoom = new BoardListRoom(this)
         this.DOMElement.boardListRoom.setCallbackExit(() =>
             this.closeBoard(this.DOMElement.boardListRoom),
         )
         this.DOMElement.boardListRoom.hidden()
-        // #endregion create board
+        // #endregion create board DOM
 
         // #region create button functionality
         const sectionFuncBottomRight = new BtnFunc(this).createFuncMain()
         this.section.node.appendChild(sectionFuncBottomRight.node)
         // #endregion create button functionality
         // #endregion DOM
+
+        // #region create chat DOM
+        const chat = new Chat(this, [], { width: '722px' }).create({})
+        const chatH = chat.node.getBoundingClientRect().height
+        chat.node.setAttribute(
+            'style',
+            `top: ${this.mainStore.getHeight - chatH}px; ${chat.node.getAttribute('style')}`,
+        )
+        this.section.node.appendChild(chat.node)
+        // #endregion create chat DOM
 
         // #region create polygon building
         this.duelBuilding = this.add.polygon(0, 0, CONSTANT_HOME.building.duel).setOrigin(0)
@@ -1140,33 +1156,35 @@ class Home extends BaseScene {
         zone.on('pointerdown', this.handleClickBuilding.bind(this))
         // #endregion
 
+        // #region add scene
         const prepareDuelScene = this.scene.add(CONSTANT_HOME.key.prepareDuel, PrepareDuel, true)
         if (prepareDuelScene) {
             this.visibleScene(prepareDuelScene.scene.key)
         }
+        // #endregion add scene
 
-        const section = this.createContainer('section', {})
-        section.node.setAttribute('id', 'game-container')
-        section.node.classList.add('position-absolute')
-        const main = document.querySelector('#game')
-        main?.append(section.node)
-        const mainStore: any = useMainStore()
-        const config: Phaser.Types.Core.GameConfig = {
-            type: Phaser.AUTO,
-            width: mainStore.getWidth * mainStore.zoom,
-            height: mainStore.getHeight * mainStore.zoom,
-            parent: section.node as HTMLElement,
-            // transparent: true,
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    debug: true,
-                },
-            },
-        }
-        const game = new Phaser.Game(config)
-        mainStore.setMatch(dataRes)
-        this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {}) as GamePlay
+        // const section = this.createContainer('section', {})
+        // section.node.setAttribute('id', 'game-container')
+        // section.node.classList.add('position-absolute')
+        // const main = document.querySelector('#game')
+        // main?.append(section.node)
+        // const mainStore: any = useMainStore()
+        // const config: Phaser.Types.Core.GameConfig = {
+        //     type: Phaser.AUTO,
+        //     width: mainStore.getWidth * mainStore.zoom,
+        //     height: mainStore.getHeight * mainStore.zoom,
+        //     parent: section.node as HTMLElement,
+        //     // transparent: true,
+        //     physics: {
+        //         default: 'arcade',
+        //         arcade: {
+        //             debug: true,
+        //         },
+        //     },
+        // }
+        // const game = new Phaser.Game(config)
+        // mainStore.setMatch(dataRes)
+        // this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {}) as GamePlay
 
         // setTimeout(() => {
         //     console.log('Chat message')
@@ -1263,6 +1281,7 @@ class Home extends BaseScene {
             }) as GamePlay
             console.log('Game play')
         })
+        chatService.receiveMessage()
     }
     // #endregion listening socket
 

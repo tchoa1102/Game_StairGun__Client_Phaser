@@ -15,7 +15,6 @@ class BoardListRoom extends Board {
     }
 
     async create() {
-        const mainStore: any = useMainStore()
         super.create()
         this.content = this.game.add
             .dom(0, 0, 'section', {

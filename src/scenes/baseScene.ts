@@ -1,6 +1,10 @@
+import { useMainStore } from '@/stores'
+
 export default abstract class BaseScene extends Phaser.Scene {
+    protected mainStore: any
     constructor(key: string) {
         super(key)
+        this.mainStore = useMainStore()
     }
 
     createContainer(tag: string, style: { [key: string]: string }) {

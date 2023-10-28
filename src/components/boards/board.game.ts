@@ -1,80 +1,54 @@
-import type { Home } from '@/scenes'
+import type { GamePlay, Home, PrepareDuel } from '@/scenes'
+import { useMainStore } from '@/stores'
 
 const CONSTANTS = {
     exitBtn: 'src/assets/exit.png',
 }
 
-class Board extends Phaser.GameObjects.DOMElement {
+abstract class Board extends Phaser.GameObjects.DOMElement {
     public name: string
     public callbackExit: CallableFunction | undefined
 
-    protected game: Home
+    protected game: Home | PrepareDuel | GamePlay
+    protected mainStore: any
 
+    protected className: string = 'board'
     private contentBoard: Phaser.GameObjects.DOMElement | undefined
     private exitBtn: Phaser.GameObjects.DOMElement | undefined
     constructor(game: any, name: string) {
-        super(game, 0, 0, 'section', {
-            width: '900px',
-            height: '600px',
-            position: 'relative',
-            top: '40px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'linear-gradient(180deg, #63390F 0%, #4E2905 8%)',
-            'border-radius': '20px',
-            border: '4px #A87123 solid',
-        })
+        super(game, 0, 0, 'section', {})
+        this.node.classList.add(this.className)
         this.setOrigin(0.5, 0)
         this.game = game
+        this.mainStore = useMainStore()
         this.name = name
         console.log('name input: ', this.name, name)
     }
 
-    create() {
-        const nameBoard = this.game.add
-            .dom(
-                24,
-                8,
-                'span',
-                {
-                    color: '#fff',
-                    font: '20px Arial',
-                },
-                this.name,
-            )
-            .setOrigin(0)
+    create(): typeof this {
+        const header = this.createContainer('section', {
+            'justify-content': 'space-between',
+        })
+        const nameBoard = this.createText('span', {}, this.name)
+        nameBoard.node.classList.add(this.className + '__name')
 
         this.exitBtn = this.game.add
-            .dom(880, 5, 'div', {
-                width: '51px',
-                height: '28px',
-                background: `url(${CONSTANTS.exitBtn})`,
-                'box-shadow': '0px 2px 6px rgba(0, 0, 0, 0.75)',
-                'border-radius': '6px',
-                overflow: 'hidden',
-            })
+            .dom(0, 0, 'div', { background: `url(${CONSTANTS.exitBtn})` })
             .setOrigin(1, 0) // render from top - right
             .addListener('click')
             .on('click', this.handleClickExit.bind(this))
-        const boardPadding = this.game.add
-            .dom(10, 45, 'section', {
-                width: '880px',
-                height: '530px',
-                background: 'linear-gradient(180deg, #DCAB55 0%, #945F02 86%)',
-                'border-radius': '10px',
-            })
-            .setOrigin(0)
-        this.contentBoard = this.game.add
-            .dom(5, 10, 'section', {
-                width: '870px',
-                height: '510px',
-                background: '#A97739',
-                'border-radius': '4px',
-                border: '1px black solid',
-            })
-            .setOrigin(0)
+        this.exitBtn.node.classList.add(this.className + '__btn-exit')
+        this.exitBtn.node.classList.add('position-relative')
+        header.node.append(nameBoard.node, this.exitBtn!.node)
+
+        const boardPadding = this.createContainer('section', {})
+        boardPadding.node.classList.add(this.className + '__board-padding')
+        this.contentBoard = this.createContainer('section', {})
+        this.contentBoard.node.classList.add(this.className + '__board-padding__content')
         boardPadding.node.append(this.contentBoard!.node)
-        this.node.append(nameBoard.node, this.exitBtn!.node, boardPadding.node)
+        this.node.append(header.node, boardPadding.node)
+
+        return this
     }
 
     update() {
@@ -117,6 +91,25 @@ class Board extends Phaser.GameObjects.DOMElement {
         }
     }
     // #endregion share functionality
+
+    createContainer(tag: string, style: { [key: string]: string }) {
+        const section = this.game.add.dom(0, 0, tag, style).setOrigin(0)
+        section.node.classList.add('position-relative')
+        section.node.classList.add('d-flex')
+        return section
+    }
+
+    createText(tag: string, style: { [key: string]: string }, message: string) {
+        const text = this.game.add.dom(0, 0, tag, style, message).setOrigin(0)
+        text.node.classList.add('position-relative')
+        return text
+    }
+
+    createBtn(tag: string, style: { [key: string]: string }) {
+        const btn = this.game.add.dom(0, 0, tag, style).setOrigin(0)
+        btn.node.classList.add('position-relative')
+        return btn
+    }
 }
 
 export default Board

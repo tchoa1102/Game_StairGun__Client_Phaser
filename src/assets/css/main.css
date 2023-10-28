@@ -265,6 +265,50 @@ body {
     --angle: 360deg;
   }
 }
+.board {
+  width: 900px;
+  height: 600px;
+  position: relative;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #63390f 0%, #4e2905 8%);
+  border-radius: 20px;
+  border: 4px #a87123 solid;
+}
+.board__name {
+  margin-left: 24px;
+  margin-top: 8px;
+  color: #fff;
+  font: 20px Arial;
+}
+.board__btn-exit {
+  margin-top: 8px;
+  margin-right: 8px;
+  width: 51px;
+  height: 28px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.75);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.board__board-padding {
+  width: 880px;
+  height: 530px;
+  margin-left: 10px;
+  margin-top: 10px;
+  background: linear-gradient(180deg, #dcab55 0%, #945f02 86%);
+  border-radius: 10px;
+}
+.board__board-padding__content {
+  width: 870px;
+  height: 510px;
+  margin-top: 10px;
+  margin-left: 5px;
+  background: #a97739;
+  border-radius: 4px;
+  border: 1px black solid;
+}
+
 .component__btn-func {
   right: 0;
 }
@@ -287,6 +331,264 @@ body {
   bottom: 0;
   right: 0;
 }
+.chat {
+  width: 400px;
+  height: 224px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  flex-direction: column;
+  justify-content: start;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.chat__header {
+  align-self: stretch;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.3);
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-bottom: 4px;
+  gap: 5px;
+}
+.chat__header__btn {
+  min-width: 80px;
+  align-self: stretch;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 700;
+  word-wrap: break-word;
+  text-shadow: 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b, 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b, 1px 1px 10px #a1621b;
+}
+.chat__header__btn--public {
+  background: #0e8bb3;
+}
+.chat__header__btn--public__text {
+  color: #efd5d5;
+}
+.chat__header__btn--room {
+  background: #c5af3e;
+}
+.chat__header__btn--room__text {
+  color: #efd5d5;
+}
+.chat__header__btn--private {
+  background: #6a1aa9;
+}
+.chat__header__btn--private__text {
+  color: #efd5d5;
+}
+.chat__body-wrapper {
+  height: 153px;
+  overflow-y: auto;
+  flex-direction: column-reverse;
+}
+.chat__body-wrapper__container {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  align-items: start;
+}
+.chat__body-wrapper__container__message {
+  align-self: stretch;
+  padding-top: 6px;
+  padding-bottom: 2px;
+  padding-left: 14px;
+  padding-right: 6px;
+  justify-content: flex-start;
+  align-items: start;
+  gap: 8px;
+}
+.chat__body-wrapper__container__message__area {
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: Inter;
+  font-weight: 700;
+  word-wrap: break-word;
+  color: #6a1aa9;
+}
+.chat__body-wrapper__container__message__area--public {
+  color: #136a87;
+  text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3137254902);
+}
+.chat__body-wrapper__container__message__area--room {
+  color: #c5af3e;
+  text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3137254902);
+}
+.chat__body-wrapper__container__message__block {
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: Inter;
+  font-weight: 500;
+  margin-right: 4px;
+  word-break: break-all;
+}
+.chat__body-wrapper__container__message__block__from {
+  color: #455103;
+}
+.chat__body-wrapper__container__message__block__text {
+  color: #cdcbcb;
+}
+.chat__footer {
+  width: 100%;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.3);
+  justify-content: start;
+  align-items: center;
+}
+.chat__footer__location {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: #2b2b2b;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 6px #857833 solid;
+  justify-content: center;
+  align-items: center;
+}
+.chat__footer__location__text {
+  color: white;
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 700;
+  word-wrap: break-word;
+}
+.chat__footer__input-container {
+  width: 542px;
+  height: 100%;
+  padding-left: 10px;
+  padding-right: 1px;
+  background: #3b3a3a;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px #672a2a solid;
+  align-items: center;
+  gap: 2px;
+}
+.chat__footer__input-container__input {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0);
+  color: #fff;
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 700;
+  outline: none;
+  border: none;
+  border-right: 1px solid #969595;
+  padding-left: 10px;
+}
+.chat__footer__input-container__btn-send {
+  width: 48px;
+  height: 40px;
+  position: relative;
+  background: #0066ff;
+  box-shadow: 1px 1px 1px;
+  filter: blur(1px);
+  justify-content: center;
+  align-items: center;
+}
+.chat__footer__input-container__btn-send__icon {
+  font-size: 34px;
+  color: #000;
+}
+.chat__footer__func {
+  flex: 1;
+  padding-left: 10px;
+  justify-content: space-around;
+  align-items: center;
+}
+.chat__footer__func__friend {
+  font-size: 27px;
+  align-self: stretch;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  padding-left: 3px;
+  padding-right: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  color: #55e000;
+}
+.chat__footer__func__icon {
+  align-self: stretch;
+  font-size: 32px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+}
+.chat__footer__func__icon:first-child {
+  color: #fff;
+}
+
+.status {
+  padding: 4px 6px;
+  background: linear-gradient(180deg, #63390f 0%, #4e2905 8%);
+  border-bottom-right-radius: 10px;
+}
+.status__avatar-wrapper__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: 50%;
+  background-repeat: no-repeat;
+}
+.status__avatar-wrapper__playerStatus {
+  margin-left: 10px;
+}
+.status__avatar-wrapper__playerStatus__name {
+  color: #fff;
+  font-weight: 500;
+}
+
+.status-info__avatar {
+  border-radius: 10px;
+  background: #f6dcac;
+}
+
+.status-board__content {
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.status-board__content__character {
+  width: 400px;
+  flex-direction: column;
+  background-color: #f6dcac;
+  border: 1px rgba(0, 0, 0, 0.3137254902) solid;
+  border-radius: 3px;
+}
+.status-board__content__character__status {
+  border-top: 1px #fff solid;
+}
+.status-board__content__setting {
+  flex: 1;
+  background-color: rgba(157, 178, 2, 0.5764705882);
+  padding-top: 10px;
+  padding-left: 10px;
+}
+.status-board__content__setting__btn-logout {
+  color: #fff;
+  font-weight: 500;
+  font-size: 16px;
+  background-color: #ff0000;
+  border: none;
+}
+
 .prepareDuel__listPlayer {
   width: 718px;
   height: 482px;
@@ -410,207 +712,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.prepareDuel__chat {
-  width: 722px;
-  height: 224px;
-  background: rgba(0, 0, 0, 0.3);
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  flex-direction: column;
-  justify-content: start;
-  align-items: flex-start;
-  overflow: hidden;
-}
-.prepareDuel__chat__header {
-  align-self: stretch;
-  height: 40px;
-  padding-right: 412px;
-  background: rgba(0, 0, 0, 0.3);
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 5px;
-}
-.prepareDuel__chat__header__btn {
-  width: 100px;
-  align-self: stretch;
-  padding-top: 9px;
-  padding-bottom: 9px;
-  padding-left: 20px;
-  padding-right: 20px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  font-size: 20px;
-  font-family: Inter;
-  font-weight: 700;
-  word-wrap: break-word;
-  text-shadow: 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b, 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b, 1px 1px 10px #a1621b, -1px 1px 10px #a1621b, 1px -1px 10px #a1621b, -1px -1px 10px #a1621b;
-}
-.prepareDuel__chat__header__btn--public {
-  background: #0e8bb3;
-}
-.prepareDuel__chat__header__btn--public__text {
-  color: #efd5d5;
-}
-.prepareDuel__chat__header__btn--room {
-  background: #c5af3e;
-}
-.prepareDuel__chat__header__btn--room__text {
-  color: #efd5d5;
-}
-.prepareDuel__chat__header__btn--private {
-  background: #6a1aa9;
-}
-.prepareDuel__chat__header__btn--private__text {
-  color: #efd5d5;
-}
-.prepareDuel__chat__body-wrapper {
-  height: 143px;
-  overflow-y: auto;
-  flex-direction: column-reverse;
-}
-.prepareDuel__chat__body-wrapper__container {
-  background: rgba(0, 0, 0, 0.1);
-  flex-direction: column;
-  align-items: start;
-}
-.prepareDuel__chat__body-wrapper__container__message {
-  align-self: stretch;
-  padding-top: 6px;
-  padding-bottom: 2px;
-  padding-left: 14px;
-  padding-right: 6px;
-  justify-content: flex-start;
-  align-items: start;
-  gap: 8px;
-}
-.prepareDuel__chat__body-wrapper__container__message__area {
-  font-size: 16px;
-  line-height: 1.6;
-  font-family: Inter;
-  font-weight: 700;
-  word-wrap: break-word;
-  color: #6a1aa9;
-}
-.prepareDuel__chat__body-wrapper__container__message__area--public {
-  color: #0e8bb3;
-}
-.prepareDuel__chat__body-wrapper__container__message__area--room {
-  color: #c5af3e;
-}
-.prepareDuel__chat__body-wrapper__container__message__block {
-  font-size: 16px;
-  line-height: 1.6;
-  font-family: Inter;
-  font-weight: 700;
-  margin-right: 4px;
-  word-break: break-all;
-}
-.prepareDuel__chat__body-wrapper__container__message__block__from {
-  color: #d964b8;
-}
-.prepareDuel__chat__body-wrapper__container__message__block__text {
-  color: #cdcbcb;
-}
-.prepareDuel__chat__footer {
-  width: 100%;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.3);
-  justify-content: start;
-  align-items: center;
-}
-.prepareDuel__chat__footer__location {
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 10px;
-  padding-right: 10px;
-  background: #2b2b2b;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 6px #857833 solid;
-  justify-content: center;
-  align-items: center;
-}
-.prepareDuel__chat__footer__location__text {
-  color: white;
-  font-size: 16px;
-  font-family: Inter;
-  font-weight: 700;
-  word-wrap: break-word;
-}
-.prepareDuel__chat__footer__input-container {
-  width: 542px;
-  height: 100%;
-  padding-left: 10px;
-  padding-right: 1px;
-  background: #3b3a3a;
-  border-radius: 3px;
-  overflow: hidden;
-  border: 1px #672a2a solid;
-  align-items: center;
-  gap: 2px;
-}
-.prepareDuel__chat__footer__input-container__input {
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0);
-  color: #fff;
-  font-size: 16px;
-  font-family: Inter;
-  font-weight: 700;
-  outline: none;
-  border: none;
-  border-right: 1px solid #969595;
-  padding-left: 10px;
-}
-.prepareDuel__chat__footer__input-container__btn-send {
-  width: 48px;
-  height: 40px;
-  position: relative;
-  background: #0066ff;
-  box-shadow: 1px 1px 1px;
-  filter: blur(1px);
-  justify-content: center;
-  align-items: center;
-}
-.prepareDuel__chat__footer__input-container__btn-send__icon {
-  font-size: 34px;
-  color: #000;
-}
-.prepareDuel__chat__footer__func {
-  flex: 1;
-  padding-left: 10px;
-  justify-content: space-around;
-  align-items: center;
-}
-.prepareDuel__chat__footer__func__friend {
-  font-size: 27px;
-  align-self: stretch;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  padding-left: 3px;
-  padding-right: 3px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 20px;
-  overflow: hidden;
-  justify-content: center;
-  align-items: center;
-  color: #55e000;
-}
-.prepareDuel__chat__footer__func__icon {
-  align-self: stretch;
-  font-size: 32px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  overflow: hidden;
-  justify-content: center;
-  align-items: center;
-}
-.prepareDuel__chat__footer__func__icon:first-child {
-  color: #fff;
 }
 .prepareDuel__map {
   width: 374px;

@@ -16,7 +16,7 @@ export interface IMatchRes {
     }>
     timeStart: string
     players: Array<IPlayerOnMatch>
-    cards: Array<ICard>
+    cards: Array<ICardOnMatch>
     backgroundStairGame: string
     stickConfig: IStickAnimationConfig | string
     objects: Array<IObject>
@@ -48,6 +48,13 @@ export interface IStair {
 }
 
 export interface ICard {
+    _id: string
+    name: string
+    type: string
+    src: string
+}
+
+export interface ICardOnMatch {
     data: any
     x: string
     y: string
@@ -60,6 +67,7 @@ export interface ICardRes {
     time: string
     owner: string
     _id: string
+    card: ICard
 }
 
 export interface IPlayerOnMatch {
@@ -89,4 +97,10 @@ export interface IPlayerOnMatch {
 export interface IChangePosition {
     player: string
     position: number
+}
+
+export interface IChatReceiveMessage {
+    sender: { _id: string; name: string }
+    receiver: { _id: string }
+    message: string
 }

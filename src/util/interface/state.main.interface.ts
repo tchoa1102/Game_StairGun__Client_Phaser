@@ -8,19 +8,12 @@ export default interface IState {
     width: number
     height: number
     player: IPlayer
-    chatInput: {
-        to: {
-            name: string
-            _id: string
-        }
-        message: string
-    }
     currentRoom: IRoom | undefined
     chatWorld: Array<IChat>
     match: IMatchRes | undefined
     watches: {
         currentRoom: Array<CallableFunction>
-        chatWorld: Array<CallableFunction>
+        chat: Array<CallableFunction>
         match: Array<CallableFunction>
     }
 }
@@ -39,6 +32,7 @@ export interface IPlayer {
     name: string | undefined
     email: string | undefined
     picture: string | undefined
+    friends: Array<IFriend>
     looks: { [key: string]: string }
     level: number | undefined
     HP: number | undefined
@@ -52,6 +46,14 @@ export interface IPlayer {
     }
     skills: Array<any>
     bag: Array<any>
+}
+
+export interface IFriend {
+    _id: string
+    name: string
+    level: number
+    picture: string
+    socketId: string
 }
 
 export interface IRoom {

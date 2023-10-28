@@ -1,7 +1,7 @@
 import { Stick } from '@/characters'
 import { useMainStore } from '@/stores'
 import '../gamePlay.interface'
-import type { ICard, ICardRes, IPlayerOnMatch } from '@/util/interface/index.interface'
+import type { ICardOnMatch, ICardRes, IPlayerOnMatch } from '@/util/interface/index.interface'
 import FETCH from '@/services/fetchConfig.service'
 import { stickService } from '@/services/socket'
 import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
@@ -148,7 +148,7 @@ class StairGame extends Phaser.Scene {
             this.staticGroup.add(obj)
         })
 
-        mainStore.getMatch.cards.forEach((card: ICard) => {
+        mainStore.getMatch.cards.forEach((card: ICardOnMatch) => {
             const obj = this.add
                 .image(JSON.parse(card.x), JSON.parse(card.y), CONSTANTS.cardBack.key)
                 .setOrigin(0, 1)
@@ -249,7 +249,7 @@ class StairGame extends Phaser.Scene {
                 },
                 [],
             )
-            mainStore.getMatch.cards.forEach((card: ICard) => {
+            mainStore.getMatch.cards.forEach((card: ICardOnMatch) => {
                 if (card._id === _id) {
                     card.isEnable = false
                 }

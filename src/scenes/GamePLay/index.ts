@@ -3,11 +3,13 @@ import StairGame from './stairGame'
 import GunGame from './gunGame'
 import { useMainStore } from '@/stores'
 import FETCH from '@/services/fetchConfig.service'
-import type { IMatchRes } from '@/util/interface/index.interface'
+import type { ICard, IMatchRes } from '@/util/interface/index.interface'
 import CONSTANT_HOME from '../Home/CONSTANT'
 import matchService from '@/services/socket/match.service'
+import { CardService } from '@/services'
+import BaseScene from '../baseScene'
 
-class GamePlay extends Phaser.Scene {
+class GamePlay extends BaseScene {
     public numOfLoaded: number = 0
     public maxLoaded: number = 2
 
@@ -36,6 +38,11 @@ class GamePlay extends Phaser.Scene {
             frameWidth: 159,
             frameHeight: 308,
         })
+
+        const allCard: Array<ICard> = await CardService.getAll()
+        for (const card of allCard) {
+            this.load.image(card._id, card.src)
+        }
 
         const configStick: IStickAnimationConfig = JSON.parse(
             await FETCH(mainStore.getMatch!.stickConfig),

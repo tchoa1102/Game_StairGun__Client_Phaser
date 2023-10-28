@@ -1,3 +1,4 @@
+import type { IChatReceiveMessage } from './../util/interface/index.interface'
 import { type IChat, type IRoom } from './../util/interface/state.main.interface'
 import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
@@ -13,7 +14,7 @@ const MIN_HEIGHT = 740
 
 const state: IState = {
     watches: {
-        chatWorld: [],
+        chat: [],
         currentRoom: [],
         match: [],
     },
@@ -30,6 +31,7 @@ const state: IState = {
         name: undefined,
         email: undefined,
         picture: undefined,
+        friends: [],
         looks: {},
         level: undefined,
         HP: undefined,
@@ -42,13 +44,6 @@ const state: IState = {
         skills: [],
         bag: [],
     },
-    chatInput: {
-        to: {
-            name: 'Chung',
-            _id: '',
-        },
-        message: '',
-    },
     currentRoom: undefined,
     chatWorld: [],
     match: undefined,
@@ -56,6 +51,9 @@ const state: IState = {
 const useMainStore = defineStore('main', {
     state: () => state,
     getters: {
+        getWatch(): typeof this.watches {
+            return this.watches
+        },
         getSocket(): typeof this.socket {
             return this.socket
         },
@@ -135,10 +133,6 @@ const useMainStore = defineStore('main', {
                 console.log('%cERROR', 'color: red; font-size: 20px')
             }
         },
-        pushChatWorld(data: IChat) {
-            this.chatWorld.push(data)
-            this.watches.chatWorld.forEach((callback: CallableFunction) => callback())
-        },
         setCurrentRoom(data: IRoom | undefined) {
             this.currentRoom = data
             this.watches.currentRoom.forEach((callback: CallableFunction) => callback())
@@ -158,6 +152,9 @@ const useMainStore = defineStore('main', {
                 }
             }
             this.watches.match.forEach((callback: CallableFunction) => callback())
+        },
+        pushChat(data: IChatReceiveMessage) {
+            this.watches.chat.forEach((callback: CallableFunction) => callback(data))
         },
         // setMapDataJSON(name: string, data: string) {
         //     if (!this.match?.mapDataJSON) this.match!.mapDataJSON = {}

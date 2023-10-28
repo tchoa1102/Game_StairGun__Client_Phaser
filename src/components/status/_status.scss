@@ -1,0 +1,28 @@
+.status {
+    padding: 4px 6px;
+    background: linear-gradient(180deg, #63390f 0%, #4e2905 8%);
+    border-bottom-right-radius: 10px;
+
+    &__avatar-wrapper {
+        & {
+        }
+
+        &__avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: 50%;
+            background-repeat: no-repeat;
+        }
+
+        &__playerStatus {
+            margin-left: 10px;
+
+            &__name {
+                color: #fff;
+                font-weight: 500;
+            }
+        }
+    }
+}
