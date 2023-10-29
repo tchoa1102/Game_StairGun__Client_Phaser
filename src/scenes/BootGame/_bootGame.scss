@@ -48,8 +48,8 @@
                 padding-top: 1px;
                 padding-bottom: 2px;
                 padding-left: 10px;
-                padding-right: 119px;
-                justify-content: flex-start;
+                padding-right: 10px;
+                justify-content: space-between;
                 align-items: center;
             }
             &__header-name {
@@ -61,6 +61,16 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+            }
+
+            &__header-icon {
+                width: 26px;
+                height: 26px;
+                color: #fff;
+                border: 1px #ccc solid;
+                border-radius: 50%;
+                align-items: center;
+                justify-content: center;
             }
 
             &__body {

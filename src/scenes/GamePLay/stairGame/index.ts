@@ -110,7 +110,7 @@ class StairGame extends Phaser.Scene {
     }
 
     create(data: IStairGameReceivingData) {
-        // ;(this.game.scene.getScene('game-play-scene') as any).loaded()
+        ;(this.game.scene.getScene('game-play-scene') as any).loaded()
         this.createGameObject(true)
     }
 

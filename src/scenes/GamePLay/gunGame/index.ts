@@ -1,8 +1,9 @@
 import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
+import { CardService } from '@/services'
 import FETCH from '@/services/fetchConfig.service'
 import { stickService } from '@/services/socket'
 import { useMainStore } from '@/stores'
-import type { ICardRes, IObject } from '@/util/interface/index.interface'
+import type { ICard, ICardRes, IObject } from '@/util/interface/index.interface'
 
 const CONSTANTS = {
     scene: {
@@ -57,6 +58,13 @@ class GunGame extends Phaser.Scene {
 
     preload() {
         this.load.image(CONSTANTS.background.key, this.mainStore!.getMatch.backgroundGunGame)
+
+        CardService.getAll().then((allCard: Array<ICard>) => {
+            console.log('All card: ', allCard)
+            for (const card of allCard) {
+                this.load.image(card._id, card.src)
+            }
+        })
         // #region load map
         console.log('GunGame', this.mainStore!.getMatch)
         const imgObjectsLoad = this.mainStore!.getMatch.objects.reduce(
@@ -86,7 +94,7 @@ class GunGame extends Phaser.Scene {
     }
 
     create() {
-        // ;(this.game.scene.getScene('game-play-scene') as any).loaded()
+        ;(this.game.scene.getScene('game-play-scene') as any).loaded()
         this.createGameObject(true)
     }
 
@@ -256,12 +264,15 @@ class GunGame extends Phaser.Scene {
     // #region listening socket
     listeningSocket() {
         stickService.listeningUpdateCard((data: ICardRes) => {
-            const location = this.cardPlugins[this.cards.length]
-            const card = this.add.image(location.x, location.y, data.card._id).setOrigin(0.5)
-            card.scaleX = location.width / card.width
-            card.scaleY = location.height / card.height
-            card.name = data._id
-            this.cards.push(card)
+            if (data.owner === this.mainStore.getPlayer._id) {
+                const location = this.cardPlugins[this.cards.length]
+                console.log('Is loaded?: ', this.textures.exists(data.card._id))
+                const card = this.add.image(location.x, location.y, data.card._id).setOrigin(0.5)
+                card.scaleX = location.width / card.width
+                card.scaleY = location.height / card.height
+                card.name = data._id
+                this.cards.push(card)
+            }
         })
     }
     // #endregion listening socket

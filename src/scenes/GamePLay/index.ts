@@ -39,10 +39,12 @@ class GamePlay extends BaseScene {
             frameHeight: 308,
         })
 
-        const allCard: Array<ICard> = await CardService.getAll()
-        for (const card of allCard) {
-            this.load.image(card._id, card.src)
-        }
+        // CardService.getAll().then((allCard: Array<ICard>) => {
+        //     console.log('All card: ', allCard)
+        //     for (const card of allCard) {
+        //         this.load.image(card._id, card.src)
+        //     }
+        // })
 
         const configStick: IStickAnimationConfig = JSON.parse(
             await FETCH(mainStore.getMatch!.stickConfig),
@@ -75,24 +77,24 @@ class GamePlay extends BaseScene {
     }
 
     create() {
-        // const mainStore: any = useMainStore()
-        // const w = mainStore.getWidth * mainStore.getZoom
-        // const h = mainStore.getHeight * mainStore.getZoom
+        const mainStore: any = useMainStore()
+        const w = mainStore.getWidth * mainStore.getZoom
+        const h = mainStore.getHeight * mainStore.getZoom
 
-        // const rect = this.add.rectangle(0, 0, w, h, 0xffffff, 0.2).setOrigin(0)
-        // const loading = this.add.sprite(w / 2, h / 2, CONSTANT_HOME.loading.key)
-        // this.anims.create({
-        //     key: 'animation__' + CONSTANT_HOME.loading.key,
-        //     frames: this.anims.generateFrameNumbers(CONSTANT_HOME.loading.key, {
-        //         start: 0,
-        //         end: 4,
-        //     }),
-        //     frameRate: 6,
-        //     repeat: -1,
-        // })
-        // loading.anims.play('animation__' + CONSTANT_HOME.loading.key)
-        // this.loadings.push(rect)
-        // this.loadings.push(loading)
+        const rect = this.add.rectangle(0, 0, w, h, 0xffffff, 0.2).setOrigin(0)
+        const loading = this.add.sprite(w / 2, h / 2, CONSTANT_HOME.loading.key)
+        this.anims.create({
+            key: 'animation__' + CONSTANT_HOME.loading.key,
+            frames: this.anims.generateFrameNumbers(CONSTANT_HOME.loading.key, {
+                start: 0,
+                end: 4,
+            }),
+            frameRate: 6,
+            repeat: -1,
+        })
+        loading.anims.play('animation__' + CONSTANT_HOME.loading.key)
+        this.loadings.push(rect)
+        this.loadings.push(loading)
         console.log('%c\nCreate Game Play...\n', 'color: red; font-size: 16px;')
         this.listeningSocket()
     }

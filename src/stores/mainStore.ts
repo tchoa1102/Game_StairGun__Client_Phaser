@@ -1,5 +1,5 @@
 import type { IChatReceiveMessage } from './../util/interface/index.interface'
-import { type IChat, type IRoom } from './../util/interface/state.main.interface'
+import { type IChat, type IFriend, type IRoom } from './../util/interface/state.main.interface'
 import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
 
@@ -17,6 +17,7 @@ const state: IState = {
         chat: [],
         currentRoom: [],
         match: [],
+        friend: [],
     },
     game: undefined,
     socket: null,
@@ -155,6 +156,10 @@ const useMainStore = defineStore('main', {
         },
         pushChat(data: IChatReceiveMessage) {
             this.watches.chat.forEach((callback: CallableFunction) => callback(data))
+        },
+        addFriend(data: IFriend) {
+            this.player.friends.push(data)
+            this.watches.friend.forEach((callback: CallableFunction) => callback(data))
         },
         // setMapDataJSON(name: string, data: string) {
         //     if (!this.match?.mapDataJSON) this.match!.mapDataJSON = {}

@@ -3,12 +3,13 @@ import BaseScene from '../baseScene'
 import BtnFunc from '@/components/btnFunc'
 import CONSTANT_HOME from '../Home/CONSTANT'
 import type {
+    IFriend,
     IPlayerOnRoom,
     IPlayerRemoved,
     IReadyRes,
     IRoom,
 } from '@/util/interface/state.main.interface'
-import { roomService } from '@/services/socket'
+import { roomService, siteService } from '@/services/socket'
 import ShowCharacter from '@/characters/avatars/show'
 import type { IChangePosition } from '@/util/interface/index.interface'
 import Chat from '@/components/chats'
@@ -256,13 +257,26 @@ class PrepareDuel extends BaseScene {
         !data.isReady && player.classList.add('noReady')
 
         // #region header
-        const header = this.add.dom(0, 0, 'div').setOrigin(0)
-        header.node.classList.add('position-relative')
+        const header = this.createContainer('div', {})
         header.node.classList.add(`${className}__header`)
-        const playerName = this.add.dom(0, 0, 'div', {}, playerData.name).setOrigin(0)
+        const playerName = this.createText('div', {}, playerData.name!)
         playerName.node.classList.add(`${className}__header-name`)
 
-        header.node.append(playerName.node)
+        const addFriend = this.createContainer('iconify-icon', {})
+            .addListener('click')
+            .on('click', this.handleClickAddFriend.bind(this))
+        addFriend.node.classList.add(`${className}__header-icon`)
+        addFriend.node.setAttribute('icon', 'fluent-mdl2:add-friend')
+        addFriend.node.setAttribute('data-id', playerData._id!)
+
+        const deletePlayer = this.createContainer('iconify-icon', { color: '#ff0000' })
+            .addListener('click')
+            .on('click', this.handleClickDeletePlayer.bind(this))
+        deletePlayer.node.classList.add(`${className}__header-icon`)
+        deletePlayer.node.setAttribute('icon', 'iwwa:delete')
+        deletePlayer.node.setAttribute('data-id', playerData._id!)
+
+        header.node.append(playerName.node, addFriend.node, deletePlayer.node)
         // #endregion header
 
         // #region body
@@ -366,197 +380,6 @@ class PrepareDuel extends BaseScene {
     }
     // #endregion create items
     // #region create chat
-    createChat() {
-        const section = this.createContainer('section', {})
-        section.node.classList.add(`${this.className}__chat`)
-
-        // #region header
-        const header = this.createContainer('div', {})
-        header.node.classList.add(`${this.className}__chat__header`)
-
-        const btnPublic = this.createChatAreaBtn('public', 'Chung')
-        const btnRoom = this.createChatAreaBtn('room', 'Phòng')
-        const btnPrivate = this.createChatAreaBtn('private', 'Riêng')
-        header.node.append(btnPublic.node, btnRoom.node, btnPrivate.node)
-        // #endregion header
-
-        // #region body
-        const body = this.createContainer('div', {})
-        body.node.classList.add(`${this.className}__chat__body-wrapper`)
-        body.node.classList.add('scrollbar')
-        const pad = this.add.dom(0, 0, 'span').setOrigin(0)
-        pad.node.classList.add('position-relative')
-        pad.node.classList.add('pad')
-        const bodyContainer = this.createContainer('div', {})
-        bodyContainer.node.classList.add(`${this.className}__chat__body-wrapper__container`)
-        for (let i of [1, 2]) {
-            const message = this.createChatMessage(
-                'public',
-                'ABCasasdasfasasdasdasdasdasdasdasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                'Hhahahahhahahahahahahahahaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbb1',
-            )
-            bodyContainer.node.append(message.node)
-        }
-
-        // let i = 2
-        // setInterval(() => {
-        //     const message = this.createChatMessage(
-        //         'public',
-        //         'ABC',
-        //         'Hhahahahhahahahahahahahahaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbb' +
-        //             i++,
-        //     )
-        //     body.node.append(message.node)
-        // }, 3000)
-        body.node.append(pad.node, bodyContainer.node)
-        // #endregion body
-
-        // #region footer
-        const footer = this.createChatFooter()
-        footer.node.classList.add(`${this.className}__chat__footer`)
-        // #endregion footer
-        section.node.append(header.node, body.node, footer.node)
-        return section
-    }
-
-    createChatAreaBtn(area: string, text: string) {
-        const btn = this.createContainer('div', {})
-        btn.node.classList.add(`${this.className}__chat__header__btn`)
-        btn.node.classList.add(`prepareDuel__chat__header__btn--${area}`)
-        const btnText = this.add.dom(0, 0, 'div', {}, text).setOrigin(0)
-        btnText.node.classList.add('position-relative')
-        btnText.node.classList.add(`${this.className}__chat__header__btn--public__text`)
-
-        btn.node.append(btnText.node)
-
-        return btn
-    }
-
-    createChatMessage(area: string, from: string, message: string) {
-        const section = this.createContainer('div', {})
-        section.node.classList.add('d-block')
-        section.node.classList.add(`${this.className}__chat__body-wrapper__container__message`)
-
-        // area
-        const areaText = this.add
-            .dom(0, 0, 'span', {}, `[${(CONSTANTS.areas as any)[area] || area}]`)
-            .setOrigin(0)
-        areaText.node.classList.add('position-relative')
-        areaText.node.classList.add(
-            `${this.className}__chat__body-wrapper__container__message__area`,
-        )
-        if (area === 'public' || area === 'room') {
-            areaText.node.classList.add(
-                `prepareDuel__chat__body-wrapper__container__message__area--${area}`,
-            )
-        }
-        // message
-        const messageBlock = this.add.dom(0, 0, 'div', {}).setOrigin(0)
-        messageBlock.node.classList.add('position-relative')
-        messageBlock.node.classList.add(
-            `${this.className}__chat__body-wrapper__container__message__block`,
-        )
-
-        // whoSend
-        const whoSend = this.add.dom(0, 0, 'span', {}, `[${from}]: `).setOrigin(0)
-        whoSend.node.classList.add('position-relative')
-        whoSend.node.classList.add('d-inline')
-        whoSend.node.classList.add(
-            `${this.className}__chat__body-wrapper__container__message__block__from`,
-        )
-        // text
-        const text = this.add.dom(0, 0, 'span', {}, `${message}`).setOrigin(0)
-        text.node.classList.add('position-relative')
-        text.node.classList.add('d-inline')
-        text.node.classList.add(
-            `${this.className}__chat__body-wrapper__container__message__block__text`,
-        )
-
-        messageBlock.node.append(whoSend.node, text.node)
-        section.node.append(areaText.node, messageBlock.node)
-
-        return section
-    }
-
-    createChatFooter() {
-        const className = `${this.className}__chat__footer`
-        const section = this.createContainer('section', {})
-
-        const location = this.createContainer('div', {})
-        location.node.classList.add(`${className}__location`)
-        const locationText = this.createText('span', {}, 'Chung')
-        locationText.node.classList.add(className + '__location__text')
-        location.node.append(locationText.node)
-
-        // #region inputContainer
-        const inputContainer = this.createContainer('form', {})
-        inputContainer.node.classList.add(className + '__input-container')
-        inputContainer.addListener('submit').on('submit', (e: any) => {
-            e.preventDefault()
-            console.log('Send Message')
-        })
-
-        const inputWrapper = this.add.dom(0, 0, 'div', { height: '100%', flex: 1 }).setOrigin(0)
-        inputWrapper.node.classList.add('position-relative')
-        const input = this.add.dom(0, 0, 'input', {}).setOrigin(0)
-        input.node.classList.add('position-relative')
-        input.node.classList.add('d-block')
-        input.node.setAttribute('value', 'aaaaaaaaaaaa')
-        input.node.classList.add(className + '__input-container__input')
-        inputWrapper.node.append(input.node)
-
-        const btnSend = this.createContainer('button', {})
-        btnSend.node.classList.add(className + '__input-container__btn-send')
-
-        // #region icon send
-        const iconSend = this.add.dom(0, 0, 'iconify-icon', {}).setOrigin(0)
-        iconSend.node.classList.add('position-relative')
-        iconSend.node.classList.add(className + '__input-container__btn-send__icon')
-        iconSend.node.setAttribute('icon', 'bi:send')
-        const iconSendFillBackground = this.add
-            .dom(0, 0, 'iconify-icon', { color: '#fff', 'font-size': '24px' })
-            .setOrigin(0)
-        iconSendFillBackground.node.classList.add(className + '__input-container__btn-send__icon')
-        iconSendFillBackground.node.setAttribute('icon', 'teenyicons:send-solid')
-        // #endregion icon send
-
-        btnSend.node.append(iconSend.node, iconSendFillBackground.node)
-
-        inputContainer.node.append(inputWrapper.node, btnSend.node)
-        // #endregion inputContainer
-
-        // #region other functionality
-        const functionContainer = this.createContainer('div', {})
-        functionContainer.node.classList.add(className + '__func')
-
-        const friend = this.createContainer('div', {})
-            .addListener('click')
-            .on('click', (e: any) => {
-                console.log('Func friend')
-            })
-        const friendIcon = this.add.dom(0, 0, 'iconify-icon').setOrigin(0)
-        friendIcon.node.classList.add('position-relative')
-        friendIcon.node.setAttribute('icon', 'fa6-solid:user')
-        friendIcon.node.classList.add(className + '__func__friend')
-        friend.node.append(friendIcon.node)
-
-        const icon = this.createContainer('div', {})
-            .addListener('click')
-            .on('click', (e: any) => {
-                console.log('Func icon')
-            })
-        const iconIcon = this.add.dom(0, 0, 'iconify-icon').setOrigin(0)
-        iconIcon.node.classList.add('position-relative')
-        iconIcon.node.setAttribute('icon', 'carbon:face-add')
-        iconIcon.node.classList.add(className + '__func__icon')
-        icon.node.append(iconIcon.node)
-
-        functionContainer.node.append(friend.node, icon.node)
-        // #endregion other functionality
-
-        section.node.append(location.node, inputContainer.node, functionContainer.node)
-        return section
-    }
     // #endregion create chat
     // #region create map
     createMap() {
@@ -622,6 +445,38 @@ class PrepareDuel extends BaseScene {
     }
     // #endregion button functions
 
+    createModelAddFriend(data: IFriend) {
+        const model = this.createContainer('section', {
+            // 'z-index': 9999999,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(50%, 50%)',
+            background: 'linear-gradient(180deg, #63390f 0%, #4e2905 8%)',
+        })
+        model.node.classList.add('position-fixed')
+
+        const text = this.createText('div', {}, `Người chơi ${data.name!} muốn kết bạn với bạn!`)
+        model.node.appendChild(text.node)
+
+        const btnAccept = this.createBtn('button', { background: '' })
+            .addListener('click')
+            .on('click', this.handleClickAceptBtn.bind(this))
+        btnAccept.node.setAttribute('data-id', data._id)
+        btnAccept.node.setAttribute('data-socketId', data.socketId)
+        const textAccept = this.createText('span', {}, 'Đồng ý')
+        btnAccept.node.appendChild(textAccept.node)
+
+        const btnDeny = this.createBtn('button', { background: '' })
+            .addListener('click')
+            .on('click', this.handleClickDenyBtn.bind(this))
+        btnDeny.node.setAttribute('data-id', data._id)
+        btnDeny.node.setAttribute('data-socket', data.socketId)
+        const textDeny = this.createText('span', {}, 'Từ chối')
+        btnDeny.node.appendChild(textDeny.node)
+
+        this.section?.node.appendChild(model.node)
+    }
+
     // #endregion create DOM
 
     // #region handle events
@@ -657,6 +512,30 @@ class PrepareDuel extends BaseScene {
         }, 5000)
 
         roomService.ready(false)
+    }
+    handleClickAddFriend(e: any) {
+        const btn = e.currentTarget
+        console.log(btn.dataset.id)
+        siteService.addFriend(btn.dataset.id)
+    }
+    handleClickAceptBtn(e: any) {
+        const element: Element = e.currentTarget
+        const btn = e.currentTarget
+        const id = btn.dataset.id
+        siteService.acceptAddFriend({ _id: id, isAccepted: true })
+        element.remove()
+    }
+    handleClickDenyBtn(e: any) {
+        const element: Element = e.currentTarget
+        const btn = e.currentTarget
+        const id = btn.dataset.id
+        siteService.acceptAddFriend({ _id: id, isAccepted: false })
+        element.remove()
+    }
+    handleClickDeletePlayer(e: any) {
+        const element = e.currentTarget
+        const id = element.dataset.id
+        roomService.deletePlayer(id)
     }
     // #endregion handle events
 
@@ -719,6 +598,10 @@ class PrepareDuel extends BaseScene {
 
         roomService.listeningChangePosition((data: IChangePosition, oldPosition: number) => {
             this.changePositionPlayer(data, oldPosition)
+        })
+
+        siteService.listeningAddFriend((data: IFriend) => {
+            this.createModelAddFriend(data)
         })
     }
     // #endregion listening socket

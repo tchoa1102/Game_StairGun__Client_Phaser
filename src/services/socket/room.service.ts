@@ -33,6 +33,12 @@ class RoomService {
         return socket.emit('rooms/players/ready', { idRoom: mainStore.getRoom._id, isReady })
     }
 
+    deletePlayer(idPlayer: string) {
+        const mainStore: any = useMainStore()
+        if (idPlayer === mainStore.getPlayer._id) return
+        mainStore.getSocket.emit('rooms/players/delete', { _id: idPlayer })
+    }
+
     changePosition(position: number) {
         const mainStore: any = useMainStore()
         const socket = mainStore.getSocket

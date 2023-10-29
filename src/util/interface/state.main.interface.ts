@@ -15,6 +15,7 @@ export default interface IState {
         currentRoom: Array<CallableFunction>
         chat: Array<CallableFunction>
         match: Array<CallableFunction>
+        friend: Array<CallableFunction>
     }
 }
 
@@ -51,8 +52,8 @@ export interface IPlayer {
 export interface IFriend {
     _id: string
     name: string
-    level: number
-    picture: string
+    level?: number
+    picture?: string
     socketId: string
 }
 

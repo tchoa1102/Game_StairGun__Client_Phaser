@@ -18,7 +18,6 @@ const CONSTANTS = {
 
 export default class Chat extends BaseDOM {
     private className = 'chat'
-    private mainStore: any
     private targetMessage: Phaser.GameObjects.DOMElement | undefined
     private listMessageWrapper: Phaser.GameObjects.DOMElement | undefined
     constructor(game: any, customClass: Array<string>, style: { [key: string]: string }) {
