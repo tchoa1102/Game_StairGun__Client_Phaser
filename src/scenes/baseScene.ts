@@ -7,7 +7,7 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.mainStore = useMainStore()
     }
 
-    createContainer(tag: string, style: { [key: string]: string }) {
+    createContainer(tag: string, style: { [key: string]: string | number }) {
         const section = this.add.dom(0, 0, tag, style).setOrigin(0)
         section.node.classList.add('position-relative')
         section.node.classList.add('d-flex')

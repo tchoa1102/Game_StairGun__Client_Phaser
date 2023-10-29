@@ -37,11 +37,14 @@ class PrepareDuel extends BaseScene {
         this.MAX_WIDTH = this.mainStore.getWidth
         this.MAX_HEIGHT = this.mainStore.getHeight
         this.listCharacterShow = {}
-        this.listeningSocket()
     }
 
     getListPlayer(): Phaser.GameObjects.DOMElement | undefined {
         return this.listPlayerDOM
+    }
+
+    getThis(): typeof this {
+        return this
     }
 
     init() {}
@@ -67,18 +70,7 @@ class PrepareDuel extends BaseScene {
         const sectionFuncBottomRight = new BtnFunc(this).createFuncRoom()
         this.section.node.append(interfaceDOM.node, sectionFuncBottomRight.node)
         // #endregion create button functionality
-
-        // const config: Phaser.Types.Core.GameConfig = {
-        //     type: Phaser.AUTO,
-        //     width: 270,
-        //     height: 190,
-        //     parent: 'game',
-        //     transparent: true,
-        // }
-        // const game = new Phaser.Game(config)
-        // game.scene.add(`character-show`, ShowCharacter, true, {
-        //     gameObject: this,
-        // })
+        this.listeningSocket()
     }
 
     update() {
@@ -262,19 +254,23 @@ class PrepareDuel extends BaseScene {
         const playerName = this.createText('div', {}, playerData.name!)
         playerName.node.classList.add(`${className}__header-name`)
 
+        // #region add friend btn
         const addFriend = this.createContainer('iconify-icon', {})
             .addListener('click')
             .on('click', this.handleClickAddFriend.bind(this))
         addFriend.node.classList.add(`${className}__header-icon`)
         addFriend.node.setAttribute('icon', 'fluent-mdl2:add-friend')
         addFriend.node.setAttribute('data-id', playerData._id!)
+        // #endregion add friend btn
 
+        // #region delete player on room
         const deletePlayer = this.createContainer('iconify-icon', { color: '#ff0000' })
             .addListener('click')
             .on('click', this.handleClickDeletePlayer.bind(this))
         deletePlayer.node.classList.add(`${className}__header-icon`)
         deletePlayer.node.setAttribute('icon', 'iwwa:delete')
         deletePlayer.node.setAttribute('data-id', playerData._id!)
+        // #endregion delete player on room
 
         header.node.append(playerName.node, addFriend.node, deletePlayer.node)
         // #endregion header
@@ -445,37 +441,52 @@ class PrepareDuel extends BaseScene {
     }
     // #endregion button functions
 
+    // #region create model ad friend
     createModelAddFriend(data: IFriend) {
         const model = this.createContainer('section', {
-            // 'z-index': 9999999,
+            'min-width': '300px',
+            'min-height': '100px',
+            'z-index': 99999,
             top: '50%',
             left: '50%',
             transform: 'translate(50%, 50%)',
             background: 'linear-gradient(180deg, #63390f 0%, #4e2905 8%)',
         })
+        model.node.classList.remove('d-flex')
+        model.node.classList.remove('position-relative')
         model.node.classList.add('position-fixed')
 
-        const text = this.createText('div', {}, `Người chơi ${data.name!} muốn kết bạn với bạn!`)
+        const text = this.createText(
+            'div',
+            { color: '#fff', 'font-size': '16px' },
+            `Người chơi ${data.name!} muốn kết bạn với bạn!`,
+        )
         model.node.appendChild(text.node)
 
-        const btnAccept = this.createBtn('button', { background: '' })
+        const btnWrapper = this.createContainer('section', { 'justify-content': 'space-around' })
+        model.node.appendChild(btnWrapper.node)
+        const btnAccept = this.createBtn('button', { background: '#363636' })
             .addListener('click')
-            .on('click', this.handleClickAceptBtn.bind(this))
+            .on('click', (e: any) => this.handleClickAcceptBtn.call(this, e, model))
         btnAccept.node.setAttribute('data-id', data._id)
         btnAccept.node.setAttribute('data-socketId', data.socketId)
         const textAccept = this.createText('span', {}, 'Đồng ý')
         btnAccept.node.appendChild(textAccept.node)
+        btnWrapper.node.appendChild(btnAccept.node)
 
-        const btnDeny = this.createBtn('button', { background: '' })
+        const btnDeny = this.createBtn('button', { background: '#ff0000' })
             .addListener('click')
-            .on('click', this.handleClickDenyBtn.bind(this))
+            .on('click', (e: any) => this.handleClickDenyBtn.call(this, e, model))
         btnDeny.node.setAttribute('data-id', data._id)
         btnDeny.node.setAttribute('data-socket', data.socketId)
         const textDeny = this.createText('span', {}, 'Từ chối')
         btnDeny.node.appendChild(textDeny.node)
+        btnWrapper.node.appendChild(btnDeny.node)
 
+        console.log(model.node)
         this.section?.node.appendChild(model.node)
     }
+    // #endregion create model ad friend
 
     // #endregion create DOM
 
@@ -515,22 +526,21 @@ class PrepareDuel extends BaseScene {
     }
     handleClickAddFriend(e: any) {
         const btn = e.currentTarget
-        console.log(btn.dataset.id)
         siteService.addFriend(btn.dataset.id)
     }
-    handleClickAceptBtn(e: any) {
+    handleClickAcceptBtn(e: any, model: Phaser.GameObjects.DOMElement) {
         const element: Element = e.currentTarget
         const btn = e.currentTarget
         const id = btn.dataset.id
         siteService.acceptAddFriend({ _id: id, isAccepted: true })
-        element.remove()
+        model.destroy()
     }
-    handleClickDenyBtn(e: any) {
+    handleClickDenyBtn(e: any, model: Phaser.GameObjects.DOMElement) {
         const element: Element = e.currentTarget
         const btn = e.currentTarget
         const id = btn.dataset.id
         siteService.acceptAddFriend({ _id: id, isAccepted: false })
-        element.remove()
+        model.destroy()
     }
     handleClickDeletePlayer(e: any) {
         const element = e.currentTarget
@@ -600,9 +610,7 @@ class PrepareDuel extends BaseScene {
             this.changePositionPlayer(data, oldPosition)
         })
 
-        siteService.listeningAddFriend((data: IFriend) => {
-            this.createModelAddFriend(data)
-        })
+        siteService.listeningAddFriend(this.createModelAddFriend.bind(this.getThis()))
     }
     // #endregion listening socket
     render() {
