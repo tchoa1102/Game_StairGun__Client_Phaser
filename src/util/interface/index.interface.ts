@@ -101,6 +101,6 @@ export interface IChangePosition {
 
 export interface IChatReceiveMessage {
     sender: { _id: string; name: string }
-    receiver: { _id: string }
+    receiver: { _id: string; name?: string }
     message: string
 }

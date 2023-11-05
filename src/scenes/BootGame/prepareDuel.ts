@@ -13,6 +13,7 @@ import { roomService, siteService } from '@/services/socket'
 import ShowCharacter from '@/characters/avatars/show'
 import type { IChangePosition } from '@/util/interface/index.interface'
 import Chat from '@/components/chats'
+import StatusShowDOM from '@/components/boards/status/status.show.dom'
 
 const CONSTANTS = {
     keyScene: CONSTANT_HOME.key.prepareDuel,
@@ -63,7 +64,7 @@ class PrepareDuel extends BaseScene {
 
         // #region dom
         this.section = this.createContainer('section', {})
-        this.section.node.classList.add('prepareDuel-dom')
+        this.section.node.classList.add(this.className)
         const interfaceDOM = this.createInterfaceDOM()
         // #endregion dom
         // #region create button functionality
@@ -135,7 +136,9 @@ class PrepareDuel extends BaseScene {
         // #endregion create items
 
         // #region create chat
-        const chat = new Chat(this, ['position-relative'], { width: '722px' }).create({
+        const chat = new Chat(this, this.className, ['position-relative'], {
+            width: '722px',
+        }).create({
             isShowRoom: true,
         })
         // #endregion create chat
@@ -279,7 +282,8 @@ class PrepareDuel extends BaseScene {
         const body = this.createContainer('div', {})
         body.node.classList.add(`${className}__body`)
 
-        const game = this.createElementShowCharacter(data, body)
+        // const game = this.createElementShowCharacter(body)
+        const game = new StatusShowDOM(this).createElementShowCharacter(body)
         this.listCharacterShow[playerData._id!] = game
         // #endregion body
 
@@ -314,20 +318,6 @@ class PrepareDuel extends BaseScene {
         })
         // free memory
         this.freeCharacter(data.player)
-    }
-
-    createElementShowCharacter(data: IPlayerOnRoom, body: Phaser.GameObjects.DOMElement) {
-        const bodyContainer = body.node.getBoundingClientRect()
-        const config: Phaser.Types.Core.GameConfig = {
-            type: Phaser.AUTO,
-            width: bodyContainer.width,
-            height: bodyContainer.height,
-            parent: body.node as HTMLElement,
-            transparent: true,
-        }
-        const game = new Phaser.Game(config)
-        game.scene.add(`character-show-${data.player}`, ShowCharacter, true)
-        return game
     }
 
     freeCharacter(idPlayer: string) {
@@ -441,31 +431,28 @@ class PrepareDuel extends BaseScene {
     }
     // #endregion button functions
 
-    // #region create model ad friend
+    // #region create model add friend
     createModelAddFriend(data: IFriend) {
-        const model = this.createContainer('section', {
-            'min-width': '300px',
-            'min-height': '100px',
-            'z-index': 99999,
-            top: '50%',
-            left: '50%',
-            transform: 'translate(50%, 50%)',
-            background: 'linear-gradient(180deg, #63390f 0%, #4e2905 8%)',
-        })
+        const className = 'model-add-friend'
+        const model = this.createContainer('section', {})
         model.node.classList.remove('d-flex')
         model.node.classList.remove('position-relative')
         model.node.classList.add('position-fixed')
+        model.node.classList.add('d-flex')
+        model.node.classList.add(className)
 
         const text = this.createText(
             'div',
             { color: '#fff', 'font-size': '16px' },
-            `Người chơi ${data.name!} muốn kết bạn với bạn!`,
+            `${data.name!} muốn kết bạn với bạn!`,
         )
         model.node.appendChild(text.node)
 
-        const btnWrapper = this.createContainer('section', { 'justify-content': 'space-around' })
+        const btnWrapper = this.createContainer('section', {})
+        btnWrapper.node.classList.add(className + '__list-btn')
         model.node.appendChild(btnWrapper.node)
-        const btnAccept = this.createBtn('button', { background: '#363636' })
+
+        const btnAccept = this.createBtn('button', {})
             .addListener('click')
             .on('click', (e: any) => this.handleClickAcceptBtn.call(this, e, model))
         btnAccept.node.setAttribute('data-id', data._id)
@@ -474,7 +461,7 @@ class PrepareDuel extends BaseScene {
         btnAccept.node.appendChild(textAccept.node)
         btnWrapper.node.appendChild(btnAccept.node)
 
-        const btnDeny = this.createBtn('button', { background: '#ff0000' })
+        const btnDeny = this.createBtn('button', {})
             .addListener('click')
             .on('click', (e: any) => this.handleClickDenyBtn.call(this, e, model))
         btnDeny.node.setAttribute('data-id', data._id)

@@ -13,6 +13,10 @@ import GamePlay from '../GamePLay'
 import chatService from '@/services/socket/chat.service'
 import Chat from '@/components/chats'
 import Status from '@/components/status'
+import BoardShop from '@/components/boards/shop'
+import itemService from '@/services/item.service'
+import type { IItem } from '@/util/interface/state.main.interface'
+import BoardBag from '@/components/boards/bag'
 
 const dRaw = {
     _id: '6528fb7d960eecd821e4040d',
@@ -1060,21 +1064,22 @@ class Home extends BaseScene {
     // #region declarations
     public DOMElement: {
         boardListRoom: BoardListRoom | undefined
+        shopBoard: BoardShop | undefined
+    } = {
+        boardListRoom: undefined,
+        shopBoard: undefined,
     }
     public gamePlay: GamePlay | undefined
 
     // private configDefault: Array<any> = []
-    private statesScreen: Array<string>
+    private statesScreen: Array<string> = []
     private section: Phaser.GameObjects.DOMElement | undefined
+    private className = 'home'
     private duelBuilding: Phaser.GameObjects.Polygon | undefined
     private shoppingBuilding: Phaser.GameObjects.Polygon | undefined
     // #endregion declarations
     constructor() {
         super(CONSTANT_HOME.key.home)
-        this.statesScreen = []
-        this.DOMElement = {
-            boardListRoom: undefined,
-        }
     }
 
     async preload() {
@@ -1082,17 +1087,17 @@ class Home extends BaseScene {
         this.load.image(CONSTANT_HOME.background.key, CONSTANT_HOME.background.src)
 
         // #region load skin
-        const looks: { [key: string]: string } = mainStore.getPlayer.looks
-        for (const key in looks) {
-            if (looks.hasOwnProperty(key)) {
-                const srcConfig = looks[key]
-                const config: any = JSON.parse(await FETCH(srcConfig))
-                // this.configDefault.push(config)
-                localStorage.setItem(config.meta.name, JSON.stringify(config))
+        // const looks: { [key: string]: string } = mainStore.getPlayer.looks
+        // for (const key in looks) {
+        //     if (looks.hasOwnProperty(key)) {
+        //         const srcConfig = looks[key]
+        //         // const config: any = JSON.parse(await FETCH(srcConfig))
+        //         // this.configDefault.push(config)
+        //         // localStorage.setItem(config.meta.name, JSON.stringify(config))
 
-                // this.load.atlas(config.meta.name, config.src[0], config)
-            }
-        }
+        //         // this.load.atlas(config.meta.name, config.src[0], config)
+        //     }
+        // }
         // #endregion load skin
     }
 
@@ -1114,7 +1119,7 @@ class Home extends BaseScene {
         // #region DOM
         this.section = this.createContainer('section', {}).setOrigin(0)
         this.section.node.classList.remove('d-flex')
-        this.section.node.classList.add('home')
+        this.section.node.classList.add(this.className)
 
         // #region create status
         const status = new Status(this).create()
@@ -1127,16 +1132,21 @@ class Home extends BaseScene {
             this.closeBoard(this.DOMElement.boardListRoom),
         )
         this.DOMElement.boardListRoom.hidden()
+
+        this.DOMElement.shopBoard = new BoardShop(this).create()
+        this.DOMElement.shopBoard.setCallbackExit(() => {
+            this.closeBoard(this.DOMElement.shopBoard)
+        })
+        this.DOMElement.shopBoard.hidden()
         // #endregion create board DOM
 
         // #region create button functionality
-        const sectionFuncBottomRight = new BtnFunc(this).createFuncMain()
-        this.section.node.appendChild(sectionFuncBottomRight.node)
+        const listBtnFuncRight = new BtnFunc(this).createFuncMain()
+        this.section.node.appendChild(listBtnFuncRight.node)
         // #endregion create button functionality
-        // #endregion DOM
 
         // #region create chat DOM
-        const chat = new Chat(this, [], { width: '722px' }).create({})
+        const chat = new Chat(this, this.className, [], { width: '722px' }).create({})
         const chatH = chat.node.getBoundingClientRect().height
         chat.node.setAttribute(
             'style',
@@ -1144,6 +1154,7 @@ class Home extends BaseScene {
         )
         this.section.node.appendChild(chat.node)
         // #endregion create chat DOM
+        // #endregion DOM
 
         // #region create polygon building
         this.duelBuilding = this.add.polygon(0, 0, CONSTANT_HOME.building.duel).setOrigin(0)
@@ -1151,7 +1162,9 @@ class Home extends BaseScene {
         // #endregion
 
         // #region add event
-        var zone = this.add.zone(0, 0, 2960, 1480)
+        var zone = this.add
+            .zone(0, 0, this.mainStore.getWidth, this.mainStore.getHeight)
+            .setOrigin(0, 0)
         zone.setInteractive()
         zone.on('pointerdown', this.handleClickBuilding.bind(this))
         // #endregion
@@ -1161,6 +1174,7 @@ class Home extends BaseScene {
         if (prepareDuelScene) {
             this.visibleScene(prepareDuelScene.scene.key)
         }
+
         // #endregion add scene
 
         // const section = this.createContainer('section', {})
@@ -1302,6 +1316,7 @@ class Home extends BaseScene {
             Phaser.Geom.Polygon.Contains(this.shoppingBuilding!.geom, x, y)
         ) {
             console.log('Shopping building clicked!')
+            this.openBoard(this.DOMElement.shopBoard)
         }
     }
     // #endregion handle events

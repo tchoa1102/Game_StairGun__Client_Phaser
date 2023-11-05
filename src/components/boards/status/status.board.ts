@@ -39,7 +39,7 @@ export default class StatusBoard extends Board {
         statusCharacterWrapper.node.classList.add(classStatusCharacterWrapper)
 
         const characterWrapper = this.createContainer('section', { 'justify-content': 'center' })
-        const character = new StatusShowDOM(this.game)
+        const character = new StatusShowDOM(this.game).create()
         character.node.classList.add('position-relative')
         characterWrapper.node.classList.add('position-relative')
         characterWrapper.node.appendChild(character.node)

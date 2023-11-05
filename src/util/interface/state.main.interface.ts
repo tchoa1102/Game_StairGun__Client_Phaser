@@ -11,12 +11,34 @@ export default interface IState {
     currentRoom: IRoom | undefined
     chatWorld: Array<IChat>
     match: IMatchRes | undefined
+    dataShop: Array<IItem>
     watches: {
-        currentRoom: Array<CallableFunction>
+        room: Array<CallableFunction>
         chat: Array<CallableFunction>
         match: Array<CallableFunction>
         friend: Array<CallableFunction>
+        dataShop: Array<CallableFunction>
+        bag: Array<CallableFunction>
     }
+}
+
+export interface IItem {
+    _id: string
+    name: string
+    type: string
+    canWear: boolean
+    imgItem: string
+    texture: string
+    hasPowerSkill: string
+    description: string
+    properties: Array<IProperty>
+    price: number
+    isSale: boolean
+}
+
+export interface IProperty {
+    type: string
+    value: number
 }
 
 export interface IChat {
@@ -42,11 +64,29 @@ export interface IPlayer {
     DEF: number | undefined
     LUK: number | undefined
     AGI: number | undefined
+    gold: number
     character: {
         [key: string]: any
     }
     skills: Array<any>
-    bag: Array<any>
+    bag: Array<IItemOnBag>
+}
+
+export interface IItemOnBag {
+    _id: string
+    data: {
+        _id: string
+        name: string
+        type: string
+        canWear: boolean
+        imgItem: string
+        texture: string
+        hasPowerSkill: string
+        description: string
+        properties: [IProperty]
+    }
+    isWear: boolean
+    levelUp: number
 }
 
 export interface IFriend {

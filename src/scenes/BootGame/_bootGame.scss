@@ -244,3 +244,37 @@
         }
     }
 }
+
+.model-add-friend {
+    min-width: 300px;
+    min-height: 100px;
+    padding: 10px 12px;
+    z-index: 99999;
+    top: 40%;
+    left: 50%;
+    transform: translate(50%, 50%);
+    background: linear-gradient(180deg, #6380cf 0%, #484b70 30%);
+    border-radius: 3px;
+    box-shadow: 0px 0px 100px #000;
+    justify-content: space-between;
+    flex-direction: column;
+
+    &__list-btn {
+        display: flex;
+        justify-content: space-around;
+
+        & > button {
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 5px;
+        }
+
+        & > button:first-child {
+            background-color: #436cc5;
+        }
+
+        & > button:last-child {
+            background-color: #923b3b;
+        }
+    }
+}

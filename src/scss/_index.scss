@@ -72,6 +72,10 @@
     align-items: center;
 }
 
+.position-static {
+    position: static !important;
+}
+
 .position-fixed {
     position: fixed !important;
 }

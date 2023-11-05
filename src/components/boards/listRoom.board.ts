@@ -14,7 +14,7 @@ class BoardListRoom extends Board {
         this.listeningSocket()
     }
 
-    async create() {
+    create(): typeof this {
         super.create()
         this.content = this.game.add
             .dom(0, 0, 'section', {
@@ -130,61 +130,66 @@ class BoardListRoom extends Board {
         this.listRoom?.node.classList.add('flex-wrap')
         this.listRoom?.node.classList.add('flex-normal')
         this.listRoom?.node.classList.add('scrollbar')
-        try {
-            const listRooms: Array<any> = (await RoomService.getAll()).data
-            for (let i = 0; i < listRooms.length; i++) {
-                this.createRoom(listRooms[i])
-            }
-        } catch (e) {
-            console.log(e)
-        }
-        // #endregion
+        RoomService.getAll()
+            .then(({ data }) => {
+                const listRooms: Array<any> = data
+                for (let i = 0; i < listRooms.length; i++) {
+                    this.createRoom(listRooms[i])
+                }
+                // #region left footer
+                const leftFooter = this.game.add.dom(0, 0, 'section').setOrigin(0)
+                const createBtn = this.game.add
+                    .dom(400, 447, 'div', {
+                        width: '160px',
+                        height: '40px',
+                        'padding-top': '10px',
+                        'padding-bottom': '10px',
+                        'padding-left': '38px',
+                        'padding-right': '39px',
+                        background:
+                            'linear-gradient(180deg, #C0CE6B 0%, #EAED52 100%), linear-gradient(90deg, rgba(248.82, 215.52, 97.46, 0.20) 0%, rgba(160.64, 132.51, 32.80, 0.20) 100%)',
+                        'box-shadow': '0px 4px 12px rgba(0, 0, 0, 0.75)',
+                        'justify-content': 'center',
+                        'align-items': 'center',
+                        cursor: 'pointer',
+                    })
+                    .setOrigin(0)
+                    .addListener('click')
+                    .on('click', this.handleEventClickStartBtn)
+                createBtn.node.classList.add('d-flex')
+                const textCreateBtn = this.game.add
+                    .dom(
+                        0,
+                        0,
+                        'span',
+                        {
+                            color: '#A76E44',
+                            'font-size': '20px',
+                            'font-family': 'Inter',
+                            'font-weight': '700',
+                            'word-wrap': 'break-word',
+                        },
+                        'BẮT ĐẦU',
+                    )
+                    .setOrigin(0)
+                createBtn.node.append(textCreateBtn.node)
+                leftFooter.node.append(createBtn.node)
 
-        // #region left footer
-        const leftFooter = this.game.add.dom(0, 0, 'section').setOrigin(0)
-        const createBtn = this.game.add
-            .dom(400, 447, 'div', {
-                width: '160px',
-                height: '40px',
-                'padding-top': '10px',
-                'padding-bottom': '10px',
-                'padding-left': '38px',
-                'padding-right': '39px',
-                background:
-                    'linear-gradient(180deg, #C0CE6B 0%, #EAED52 100%), linear-gradient(90deg, rgba(248.82, 215.52, 97.46, 0.20) 0%, rgba(160.64, 132.51, 32.80, 0.20) 100%)',
-                'box-shadow': '0px 4px 12px rgba(0, 0, 0, 0.75)',
-                'justify-content': 'center',
-                'align-items': 'center',
-                cursor: 'pointer',
+                // #endregion
+
+                formSearchIdRoom.node.append(inputID.node, enterBtn.node)
+
+                this.content!.node.append(
+                    roomFunction_header.node,
+                    this.listRoom!.node,
+                    leftFooter.node,
+                )
+                this.appendChildToContent(this.content!.node)
             })
-            .setOrigin(0)
-            .addListener('click')
-            .on('click', this.handleEventClickStartBtn)
-        createBtn.node.classList.add('d-flex')
-        const textCreateBtn = this.game.add
-            .dom(
-                0,
-                0,
-                'span',
-                {
-                    color: '#A76E44',
-                    'font-size': '20px',
-                    'font-family': 'Inter',
-                    'font-weight': '700',
-                    'word-wrap': 'break-word',
-                },
-                'BẮT ĐẦU',
-            )
-            .setOrigin(0)
-        createBtn.node.append(textCreateBtn.node)
-        leftFooter.node.append(createBtn.node)
-
+            .catch((e) => console.log(e))
         // #endregion
 
-        formSearchIdRoom.node.append(inputID.node, enterBtn.node)
-
-        this.content!.node.append(roomFunction_header.node, this.listRoom!.node, leftFooter.node)
-        this.appendChildToContent(this.content!.node)
+        return this
     }
 
     listeningSocket() {

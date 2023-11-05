@@ -4,37 +4,51 @@ import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 import FETCH from '@/services/fetchConfig.service'
 import { useMainStore } from '@/stores'
 import { createAnimation, initKeyAnimation } from '@/util/shares'
+import faceConfig from '@/assets/configs/face.json'
+import bodyConfig from '@/assets/configs/face.json'
+import footConfig from '@/assets/configs/face.json'
 
 export const CONSTANT = {
+    scene: {
+        key: 'character-show',
+    },
+    textureNotFound: '__MISSING',
     sprites: {
         face: {
             key: 'face.default',
-            positionY: 65,
+            config: 'src/assets/configs/face.json',
+            img: 'src/assets/img/equips/faces/face.default.png',
         },
         body: {
             key: 'body.default',
-            positionY: 65 + 55,
+            config: 'src/assets/configs/body.json',
+            img: 'src/assets/img/equips/bodies/body.default.png',
         },
-        // 'body.default.hand': {
-        //     key: 'body.default.hand',
-        //     positionY: 65 + 55
-        // },
         foot: {
             key: 'foot.default',
-            positionY: 142,
+            config: 'src/assets/configs/foot.json',
+            img: 'src/assets/img/equips/foots/foot.default.png',
         },
     },
     active: 'show',
 }
 
 export default class ShowCharacter extends Phaser.Scene {
-    // private gameObject: any
-    // private keys: Array<any> = []
-    private configDefault: Array<any> = []
+    private configs: { [key: string]: any } = {
+        face: faceConfig,
+        body: bodyConfig,
+        foot: footConfig,
+    }
+    private sprite: {
+        [key: string]: Phaser.GameObjects.Sprite | undefined
+        face?: Phaser.GameObjects.Sprite
+        body?: Phaser.GameObjects.Sprite
+        foot?: Phaser.GameObjects.Sprite
+    } = { face: undefined, body: undefined, foot: undefined }
+
+    private keysShow: { [key: string]: string } = {}
     constructor() {
-        super({
-            key: 'character-show',
-        })
+        super(CONSTANT.scene)
     }
 
     init() {
@@ -43,22 +57,21 @@ export default class ShowCharacter extends Phaser.Scene {
 
     preload() {
         const mainStore: any = useMainStore()
-        // this.gameObject = mainStore.getGame.scene.getScene(CONSTANT_HOME.key.home)
-
         const looks: { [key: string]: string } = mainStore.getPlayer.looks
         // console.log(looks)
-        for (const key in looks) {
-            if (looks.hasOwnProperty(key)) {
-                const srcConfig = looks[key]
-                const element: { [key: string]: any } = CONSTANT.sprites
-                if (element.hasOwnProperty(key)) {
-                    const e = element[key]
-                    const k = e.key
-                    const config: any = JSON.parse(localStorage.getItem(k)!)
-                    // console.log('Config avatar: ', k, config)
-                    this.configDefault.push(config)
 
-                    this.load.atlas(config.meta.name, config.src[0], config)
+        const objsSpriteConfig: any = CONSTANT.sprites
+        // load default and current display
+        // console.log('Config default: ', this.configs)
+        for (const key in objsSpriteConfig) {
+            if (objsSpriteConfig.hasOwnProperty(key)) {
+                const element = objsSpriteConfig[key]
+                this.load.atlas(element.key, element.img, this.configs[key])
+                // console.log(element.key)
+                this.keysShow[key] = element.key
+                if (looks[key]) {
+                    this.keysShow[key] = looks[key]
+                    this.load.atlas(looks[key], looks[key], this.configs[key])
                 }
             }
         }
@@ -82,22 +95,52 @@ export default class ShowCharacter extends Phaser.Scene {
     }
 
     create() {
-        this.configDefault.forEach((config) => {
-            createAnimation(this, config.meta.name, config.animations)
-        })
+        const configs: { [key: string]: any } = this.configs
+        for (const key in configs) {
+            if (Object.prototype.hasOwnProperty.call(configs, key)) {
+                const config: { [key: string]: any } = configs[key]
+                // console.log(config)
+                const anim = createAnimation(this, config.meta.name, config.animations)
+                // console.log(anim)
+            }
+        }
         const dataObj: any = CONSTANT.sprites
         for (const key in dataObj) {
             if (dataObj.hasOwnProperty(key)) {
                 const element = dataObj[key]
-                const sprite = this.add
-                    .sprite(+this.game.config.width / 2, element.positionY, element.key)
-                    .setOrigin(0.5, 0)
+                // console.log(element.key)
+                this.changeSprite(key, element.key)
             }
         }
+        console.log('Create show character successfully')
+    }
+
+    changeDisplay(type: string, key?: string) {
+        if (!key || key.length === 0) {
+            this.keysShow[type] = (CONSTANT.sprites as any)[type].key
+            this.changeSprite(type, this.keysShow[type])
+            return
+        }
+        const texture = this.textures.get(key)
+        if (texture.key === CONSTANT.textureNotFound) {
+            this.load.atlas(key, key, this.configs[type])
+            this.load.once('complete', () => {
+                this.changeSprite(type, key)
+            })
+            this.load.start
+            return
+        }
+
+        this.changeSprite(type, key)
+    }
+
+    changeSprite(type: string, key: string) {
+        if (!!this.sprite[type]) this.sprite[type]!.destroy()
+        this.sprite[type] = this.add.sprite(0, 0, key).setOrigin(0, 0)
     }
 
     rerender() {
         console.log('Rerendering')
-        this.scene.restart()
+        // this.scene.restart()
     }
 }

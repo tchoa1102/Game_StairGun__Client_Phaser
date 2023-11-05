@@ -2,6 +2,7 @@ import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 import BaseDOM from '../baseDOMElement'
 import { useMainStore } from '@/stores'
 import { roomService } from '@/services/socket'
+import BoardBag from '../boards/bag'
 
 const CONSTANTS = {
     character: 'src/assets/character.png',
@@ -34,11 +35,19 @@ export default class BtnFunc extends BaseDOM {
     }
 
     createCharacter(classNames: Array<string>): Phaser.GameObjects.DOMElement {
+        const boardBag = new BoardBag(this.game).create()
+        boardBag.setCallbackExit(() => {
+            ;(this.game.scene.get(CONSTANT_HOME.key.home) as any).closeBoard(boardBag)
+        })
+        // boardBag.hidden()
         const character = this.createContainer('div', {
             'background-image': `url(${CONSTANTS.character})`,
         })
             .addListener('click')
-            .on('click', this.handleClickShowCharacter.bind(this))
+            .on('click', (e: any) => {
+                // console.log('Character clicked')
+                ;(this.game.scene.get(CONSTANT_HOME.key.home) as any).openBoard(boardBag)
+            })
         character.node.classList.add('btn-30')
         classNames.forEach((className) => character.node.classList.add(className))
         return character
@@ -70,9 +79,6 @@ export default class BtnFunc extends BaseDOM {
     hanldeVisibleScene() {}
 
     // #region handle events
-    handleClickShowCharacter() {
-        console.log('Character clicked')
-    }
     handleClickVisibleScene() {
         roomService.goOut()
     }

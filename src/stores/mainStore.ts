@@ -1,11 +1,16 @@
 import type { IChatReceiveMessage } from './../util/interface/index.interface'
-import { type IChat, type IFriend, type IRoom } from './../util/interface/state.main.interface'
+import {
+    type IChat,
+    type IFriend,
+    type IRoom,
+    type IItem,
+    type IItemOnBag,
+} from './../util/interface/state.main.interface'
 import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
 
 import { type IIndicator, type IMatchRes, type IState } from '@/util/interface/index.interface'
 import { GamePlay, Home } from '@/scenes'
-import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin'
 import { io } from 'socket.io-client'
 import { firebaseService } from '@/services'
 import PrepareDuel from '@/scenes/BootGame/prepareDuel'
@@ -15,9 +20,11 @@ const MIN_HEIGHT = 740
 const state: IState = {
     watches: {
         chat: [],
-        currentRoom: [],
+        room: [],
         match: [],
         friend: [],
+        dataShop: [],
+        bag: [],
     },
     game: undefined,
     socket: null,
@@ -41,6 +48,7 @@ const state: IState = {
         DEF: undefined,
         LUK: undefined,
         AGI: undefined,
+        gold: 0,
         character: {},
         skills: [],
         bag: [],
@@ -48,6 +56,7 @@ const state: IState = {
     currentRoom: undefined,
     chatWorld: [],
     match: undefined,
+    dataShop: [],
 }
 const useMainStore = defineStore('main', {
     state: () => state,
@@ -81,6 +90,12 @@ const useMainStore = defineStore('main', {
         },
         getMatch(): IMatchRes {
             return this.match!
+        },
+        getDataShop(): Array<IItem> {
+            return this.dataShop
+        },
+        getBag(): Array<IItemOnBag> {
+            return this.player.bag
         },
     },
     actions: {
@@ -136,7 +151,8 @@ const useMainStore = defineStore('main', {
         },
         setCurrentRoom(data: IRoom | undefined) {
             this.currentRoom = data
-            this.watches.currentRoom.forEach((callback: CallableFunction) => callback())
+            console.log(this.watches.room)
+            this.watches.room.forEach((callback: CallableFunction) => callback())
         },
         setMatch(data?: IMatchRes) {
             this.match = data
@@ -160,6 +176,14 @@ const useMainStore = defineStore('main', {
         addFriend(data: IFriend) {
             this.player.friends.push(data)
             this.watches.friend.forEach((callback: CallableFunction) => callback(data))
+        },
+        pushDataShop(data: IItem) {
+            this.dataShop.push({ ...data })
+            this.watches.dataShop.forEach((callback: CallableFunction) => callback(data))
+        },
+        pushItemToBag(data: IItemOnBag) {
+            this.player.bag.push({ ...data })
+            this.watches.bag.forEach((callback: CallableFunction) => callback(data))
         },
         // setMapDataJSON(name: string, data: string) {
         //     if (!this.match?.mapDataJSON) this.match!.mapDataJSON = {}

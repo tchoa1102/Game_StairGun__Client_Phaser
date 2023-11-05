@@ -73,6 +73,7 @@ class FirebaseService {
                 }
 
                 const userLoaded = await authService.loadUser()
+                console.log('player loaded: ', userLoaded)
                 const mainStore = useMainStore()
                 mainStore.player = { ...userLoaded }
                 console.log('Player loaded: ', mainStore.player)

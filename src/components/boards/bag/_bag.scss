@@ -1,0 +1,29 @@
+.board-bag {
+    &__preview {
+        & {
+            width: 400px;
+            height: 100%;
+            border-right: 1px #e19523 solid;
+            padding-top: 10px;
+        }
+
+        &__list {
+            & {
+                top: 10px;
+                left: 10px;
+                flex-direction: column;
+                gap: 6px;
+            }
+            & > * {
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(180deg, #4f2b12 0%, #694a23 4%);
+                border-radius: 4px;
+                box-shadow: 0 -2px 3px #00000090;
+            }
+        }
+    }
+
+    &__list {
+    }
+}

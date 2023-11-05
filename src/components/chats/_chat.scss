@@ -167,10 +167,15 @@
 
             &__text {
                 color: white;
+                width: 50px;
                 font-size: 16px;
                 font-family: Inter;
                 font-weight: 700;
-                word-wrap: break-word;
+                word-break: keep-all;
+                text-wrap: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
         }
 
@@ -238,14 +243,61 @@
                 align-self: stretch;
                 padding-top: 6px;
                 padding-bottom: 6px;
-                padding-left: 3px;
-                padding-right: 3px;
+                padding-left: 6px;
+                padding-right: 6px;
                 background: rgba(255, 255, 255, 0.4);
-                border-radius: 20px;
-                overflow: hidden;
+                border-radius: 50%;
                 justify-content: center;
                 align-items: center;
                 color: #55e000;
+
+                &__list {
+                    display: none !important;
+                    min-width: 150px;
+                    max-width: 200px;
+                    min-height: 100px;
+                    max-height: 180px;
+                    bottom: 99%;
+                    right: 0;
+                    background-color: #00000080;
+                    border-radius: 3px;
+                    overflow-y: auto;
+
+                    &__item {
+                        width: 100%;
+                        margin-top: 1px;
+                        margin-bottom: 1px;
+                        padding: 4px 6px;
+                        background: #00000090;
+
+                        &__avatar {
+                            width: 40px;
+                            height: 40px;
+                            margin-right: 4px;
+                            background-size: cover;
+                            background-repeat: no-repeat;
+                            border-radius: 50%;
+                        }
+
+                        &__name {
+                            width: 100px;
+                            color: #fff;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                            font-size: 16px;
+                        }
+
+                        &__status {
+                            color: #bbb;
+                            font-size: 14px;
+                        }
+                    }
+                }
+
+                &:hover &__list {
+                    display: flex !important;
+                }
             }
 
             &__icon {

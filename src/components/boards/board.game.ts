@@ -22,7 +22,7 @@ abstract class Board extends Phaser.GameObjects.DOMElement {
         this.game = game
         this.mainStore = useMainStore()
         this.name = name
-        console.log('name input: ', this.name, name)
+        // console.log('name input: ', this.name, name)
     }
 
     create(): typeof this {

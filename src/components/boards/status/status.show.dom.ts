@@ -5,11 +5,12 @@ export default class StatusShowDOM extends BaseDOM {
     private className: string = 'status-info'
     private widthCharacter: number = 204
     private heightCharacter: number = 190
+    public gameShowManager: Phaser.Game | undefined
     constructor(game: any) {
         super(game, {})
         this.setOrigin(0)
         this.node.classList.add(this.className)
-        this.create()
+        // this.create()
     }
 
     create(): typeof this {
@@ -20,7 +21,7 @@ export default class StatusShowDOM extends BaseDOM {
         return this
     }
 
-    createElementShowCharacter(body: Phaser.GameObjects.DOMElement) {
+    createElementShowCharacter(body: Phaser.GameObjects.DOMElement): Phaser.Game {
         const bodyContainer = body.node.getBoundingClientRect()
         console.log('bodyContainer: ', bodyContainer.width, bodyContainer.height)
         const config: Phaser.Types.Core.GameConfig = {
@@ -28,10 +29,19 @@ export default class StatusShowDOM extends BaseDOM {
             width: this.widthCharacter,
             height: this.heightCharacter,
             parent: body.node as HTMLElement,
+            scene: [ShowCharacter],
             transparent: true,
         }
-        const game = new Phaser.Game(config)
-        game.scene.add(`character-show-${this.mainStore.getPlayer._id}`, ShowCharacter, true)
-        return game
+        this.gameShowManager = new Phaser.Game(config)
+        return this.gameShowManager
+    }
+
+    changeDisplay(type: string, key?: string) {
+        setTimeout(() => {
+            if (!this.gameShowManager) return
+            const sceneGame: any = this.gameShowManager.scene.getScene('character-show')
+            // console.log('Scene game: ', sceneGame)
+            sceneGame?.changeDisplay(type, key)
+        }, 1)
     }
 }

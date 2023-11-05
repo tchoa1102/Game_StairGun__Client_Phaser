@@ -16,6 +16,8 @@ export function createAnimation(game: any, name: string, animations: any) {
             // init animation
             // console.group('Animation: ' + key)
             // console.log('instance: ', instance)
+            const anim = game.anims.get(keyAnim)
+            if (anim) return
             animationsInstances[keyAnim] = game.anims.create({
                 ...instance,
                 defaultTextureKey: name,
