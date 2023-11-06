@@ -1,7 +1,7 @@
 import type { Home } from '@/scenes'
 import type PrepareDuel from '@/scenes/BootGame/prepareDuel'
 import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
-import FETCH from '@/services/fetchConfig.service'
+import FETCH from '@/services/http-https/fetchConfig.service'
 import { useMainStore } from '@/stores'
 import { createAnimation, initKeyAnimation } from '@/util/shares'
 import faceConfig from '@/assets/configs/face.json'
@@ -104,12 +104,13 @@ export default class ShowCharacter extends Phaser.Scene {
                 // console.log(anim)
             }
         }
-        const dataObj: any = CONSTANT.sprites
-        for (const key in dataObj) {
-            if (dataObj.hasOwnProperty(key)) {
-                const element = dataObj[key]
-                // console.log(element.key)
-                this.changeSprite(key, element.key)
+        // const dataObj: any = CONSTANT.sprites
+        const mainStore: any = useMainStore()
+        const looks: any = mainStore.getPlayer.looks
+        for (const type in looks) {
+            if (looks.hasOwnProperty(type)) {
+                const src = looks[type]
+                this.changeDisplay(type, src)
             }
         }
         console.log('Create show character successfully')

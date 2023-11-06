@@ -2,7 +2,7 @@
 import { onMounted, watch } from 'vue'
 import { useMainStore } from './stores'
 import { type Router, useRoute, useRouter, type RouteLocationNormalizedLoaded } from 'vue-router'
-import firebaseService from './services/firebase.service'
+import firebaseService from './services/http-https/firebase.service'
 
 const mainStore = useMainStore()
 watch(

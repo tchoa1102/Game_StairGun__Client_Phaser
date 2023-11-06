@@ -1,5 +1,6 @@
 import ShowCharacter from '@/characters/avatars/show'
 import BaseDOM from '@/components/baseDOMElement'
+import type { IItemOnBag } from '@/util/interface/state.main.interface'
 
 export default class StatusShowDOM extends BaseDOM {
     private className: string = 'status-info'
@@ -33,7 +34,20 @@ export default class StatusShowDOM extends BaseDOM {
             transparent: true,
         }
         this.gameShowManager = new Phaser.Game(config)
+        this.mainStore.getWatch.bag.push(this.handleChangeDisplay.bind(this))
         return this.gameShowManager
+    }
+
+    handleChangeDisplay(data: Array<IItemOnBag>): void {
+        const itemIsGoingWear = data.find((item) => item.isWear)
+        if (!itemIsGoingWear) {
+            const itemUnbind = data.find((item) => !item.isWear)
+            itemUnbind && this.changeDisplay(itemUnbind.data.type)
+            return
+        }
+
+        this.changeDisplay(itemIsGoingWear.data.type, itemIsGoingWear.data.texture)
+        return
     }
 
     changeDisplay(type: string, key?: string) {

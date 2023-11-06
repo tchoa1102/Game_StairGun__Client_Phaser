@@ -5,6 +5,7 @@ import {
     type IRoom,
     type IItem,
     type IItemOnBag,
+    type IProperty,
 } from './../util/interface/state.main.interface'
 import { defineStore, type _GettersTree } from 'pinia'
 import Phaser from 'phaser'
@@ -12,7 +13,7 @@ import Phaser from 'phaser'
 import { type IIndicator, type IMatchRes, type IState } from '@/util/interface/index.interface'
 import { GamePlay, Home } from '@/scenes'
 import { io } from 'socket.io-client'
-import { firebaseService } from '@/services'
+import { firebaseService } from '@/services/http-https'
 import PrepareDuel from '@/scenes/BootGame/prepareDuel'
 
 const MIN_HEIGHT = 740
@@ -25,6 +26,8 @@ const state: IState = {
         friend: [],
         dataShop: [],
         bag: [],
+        status: [],
+        statusMatch: [],
     },
     game: undefined,
     socket: null,
@@ -177,13 +180,37 @@ const useMainStore = defineStore('main', {
             this.player.friends.push(data)
             this.watches.friend.forEach((callback: CallableFunction) => callback(data))
         },
+        changeGold(data: number) {
+            this.player.gold = data
+        },
         pushDataShop(data: IItem) {
             this.dataShop.push({ ...data })
-            this.watches.dataShop.forEach((callback: CallableFunction) => callback(data))
+            this.watches.dataShop.forEach((callback) => callback(data))
         },
-        pushItemToBag(data: IItemOnBag) {
-            this.player.bag.push({ ...data })
-            this.watches.bag.forEach((callback: CallableFunction) => callback(data))
+        pushItemToBag(data: Array<IItemOnBag>) {
+            data.forEach((d) => this.player.bag.push({ ...d }))
+            this.watches.bag.forEach((callback) => callback(data))
+            return
+        },
+        changeItemOnBag(data: Array<IItemOnBag>) {
+            for (const d of data) {
+                const item = this.player.bag.find((i) => i._id === d._id)
+                if (!item) continue
+                item.data = d.data
+                item.isWear = d.isWear
+                item.levelUp = d.levelUp
+            }
+
+            this.watches.bag.forEach((callback) => callback(data))
+        },
+        updateStatusPlayer(data: Record<string, number>) {
+            for (const type in data) {
+                if (Object.prototype.hasOwnProperty.call(data, type)) {
+                    const value = data[type]
+                    const property: IProperty = { type, value }
+                    this.watches.status.forEach((callback) => callback(property))
+                }
+            }
         },
         // setMapDataJSON(name: string, data: string) {
         //     if (!this.match?.mapDataJSON) this.match!.mapDataJSON = {}

@@ -1,7 +1,7 @@
 import { signOut } from 'firebase/auth'
 import Board from '../board.game'
 import StatusShowDOM from './status.show.dom'
-import { firebaseService } from '@/services'
+import { firebaseService } from '@/services/http-https'
 
 export default class StatusBoard extends Board {
     private content: Phaser.GameObjects.DOMElement | undefined

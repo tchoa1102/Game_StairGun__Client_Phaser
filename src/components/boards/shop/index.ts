@@ -1,6 +1,6 @@
 import type { IItem, IProperty } from '@/util/interface/state.main.interface'
 import Board from '../board.game'
-import itemService from '@/services/item.service'
+import itemService from '@/services/http-https/item.service'
 import modelConfirm from '../model.confirm'
 
 export default class BoardShop extends Board {

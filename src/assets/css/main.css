@@ -717,6 +717,12 @@ body {
   align-items: end;
   justify-content: center;
 }
+.board-shop__list__img img {
+  max-width: 100%;
+  max-height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
 .board-shop__list__quantity {
   width: 100%;
   height: 32px;
@@ -755,6 +761,8 @@ body {
 .board-shop__detail__header__img {
   width: 100px;
   height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
   border: 1px rgba(133, 60, 19, 0.5803921569) solid;
   align-items: center;
   justify-content: center;
@@ -817,6 +825,9 @@ body {
   height: 100%;
   border-right: 1px #e19523 solid;
   padding-top: 10px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
 }
 .board-bag__preview__list {
   top: 10px;
@@ -831,6 +842,67 @@ body {
   border-radius: 4px;
   box-shadow: 0 -2px 3px rgba(0, 0, 0, 0.5647058824);
 }
+.board-bag__preview__list > * > * {
+  justify-content: center;
+  align-items: center;
+}
+.board-bag__preview__list > * > span {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(204, 204, 204, 0.5647058824);
+}
+.board-bag__preview__status-wrapper {
+  margin-top: auto;
+  border-top: 1px solid #fff;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  flex-direction: column;
+  gap: 4px;
+}
+.board-bag__list {
+  flex: 1;
+  padding: 10px 14px;
+  background: rgba(118, 77, 31, 0.5647058824);
+}
+.board-bag__list__item {
+  background: rgba(105, 74, 35, 0.4392156863);
+  width: 60px;
+  height: 60px;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.board-bag__list__item > img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+.board-bag__list__item__list-func {
+  display: none !important;
+  width: 70px;
+  height: 100%;
+  top: 0;
+  left: 0;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.4392156863);
+  gap: 4px;
+}
+.board-bag__list__item__list-func * {
+  width: 100%;
+  padding: 4px 6px;
+  text-align: start;
+  color: #f0ef96;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  background: #8b7e02;
+}
+.board-bag__list__item:hover .board-bag__list__item__list-func {
+  display: flex !important;
+}
+
 .prepareDuel__listPlayer {
   width: 718px;
   height: 482px;

@@ -1,12 +1,9 @@
-import Phaser from 'phaser'
 import StairGame from './stairGame'
 import GunGame from './gunGame'
 import { useMainStore } from '@/stores'
-import FETCH from '@/services/fetchConfig.service'
-import type { ICard, IMatchRes } from '@/util/interface/index.interface'
+import FETCH from '@/services/http-https/fetchConfig.service'
 import CONSTANT_HOME from '../Home/CONSTANT'
 import matchService from '@/services/socket/match.service'
-import { CardService } from '@/services'
 import BaseScene from '../baseScene'
 
 class GamePlay extends BaseScene {

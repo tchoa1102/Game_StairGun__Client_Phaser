@@ -2,7 +2,7 @@ import type { Home } from '@/scenes'
 import Board from './board.game'
 import RoomItem from './roomItem'
 import roomService from '@/services/socket/room.service'
-import { RoomService } from '@/services'
+import { RoomService } from '@/services/http-https'
 import { useMainStore } from '@/stores'
 
 class BoardListRoom extends Board {

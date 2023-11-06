@@ -18,7 +18,9 @@ export default interface IState {
         match: Array<CallableFunction>
         friend: Array<CallableFunction>
         dataShop: Array<CallableFunction>
-        bag: Array<CallableFunction>
+        bag: Array<(data: Array<IItemOnBag>) => any>
+        status: Array<(data: IProperty) => any>
+        statusMatch: Array<CallableFunction>
     }
 }
 

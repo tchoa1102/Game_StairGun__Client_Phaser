@@ -1,6 +1,6 @@
 import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
-import { CardService } from '@/services'
-import FETCH from '@/services/fetchConfig.service'
+import { CardService } from '@/services/http-https'
+import FETCH from '@/services/http-https/fetchConfig.service'
 import { stickService } from '@/services/socket'
 import { useMainStore } from '@/stores'
 import type { ICard, ICardRes, IObject } from '@/util/interface/index.interface'

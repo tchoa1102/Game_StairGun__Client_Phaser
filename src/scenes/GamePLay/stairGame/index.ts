@@ -2,7 +2,7 @@ import { Stick } from '@/characters'
 import { useMainStore } from '@/stores'
 import '../gamePlay.interface'
 import type { ICardOnMatch, ICardRes, IPlayerOnMatch } from '@/util/interface/index.interface'
-import FETCH from '@/services/fetchConfig.service'
+import FETCH from '@/services/http-https/fetchConfig.service'
 import { stickService } from '@/services/socket'
 import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 

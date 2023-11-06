@@ -5,6 +5,9 @@
             height: 100%;
             border-right: 1px #e19523 solid;
             padding-top: 10px;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
         }
 
         &__list {
@@ -20,10 +23,76 @@
                 background: linear-gradient(180deg, #4f2b12 0%, #694a23 4%);
                 border-radius: 4px;
                 box-shadow: 0 -2px 3px #00000090;
+
+                & > * {
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                & > span {
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: #cccccc90;
+                }
             }
+        }
+
+        &__status-wrapper {
+            margin-top: auto;
+            border-top: 1px solid #fff;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            flex-direction: column;
+            gap: 4px;
         }
     }
 
     &__list {
+        flex: 1;
+        padding: 10px 14px;
+        background: #764d1f90;
+
+        &__item {
+            background: #694a2370;
+            width: 60px;
+            height: 60px;
+            padding: 10px;
+
+            align-items: center;
+            justify-content: center;
+
+            & > img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            &__list-func {
+                display: none !important;
+                width: 70px;
+                height: 100%;
+                top: 0;
+                left: 0;
+                flex-direction: column;
+                background: #00000070;
+                gap: 4px;
+
+                & * {
+                    width: 100%;
+                    padding: 4px 6px;
+                    text-align: start;
+                    color: #f0ef96;
+                    font-weight: 700;
+                    font-size: 14px;
+                    border: none;
+                    background: #8b7e02;
+                }
+            }
+
+            &:hover &__list-func {
+                display: flex !important;
+            }
+        }
     }
 }

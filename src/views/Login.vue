@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { firebaseService } from '../services'
+import { firebaseService } from '../services/http-https'
 export default {
     data() {
         return {}
