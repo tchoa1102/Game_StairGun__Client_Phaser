@@ -33,6 +33,7 @@ class PrepareDuel extends BaseScene {
 
     private listPlayerDOM: Phaser.GameObjects.DOMElement | undefined
     private listCharacterShow: { [key: string]: Phaser.Game }
+    private idRoomDOM: Phaser.GameObjects.DOMElement | undefined
     constructor() {
         super(CONSTANTS.keyScene)
         this.MAX_WIDTH = this.mainStore.getWidth
@@ -72,6 +73,7 @@ class PrepareDuel extends BaseScene {
         this.section.node.append(interfaceDOM.node, sectionFuncBottomRight.node)
         // #endregion create button functionality
         this.listeningSocket()
+        this.mainStore.getWatch.room.push(this.watchChangeIdRoom.bind(this))
     }
 
     update() {
@@ -351,17 +353,14 @@ class PrepareDuel extends BaseScene {
         section.node.classList.add(`${this.className}__items`)
         // #region header
         const header = this.createContainer('div', {})
+        section.node.appendChild(header.node)
         header.node.classList.add(`${this.className}__items__header`)
 
-        const idRoom = this.add
-            .dom(0, 0, 'div', {}, `ID: ${this.mainStore.getPlayer._id}`)
-            .setOrigin(0)
-        idRoom.node.classList.add('position-relative')
-        idRoom.node.classList.add(`${this.className}__items__header__text`)
+        this.idRoomDOM = this.createText('div', {}, 'ID: ')
+        this.idRoomDOM.node.classList.add(`${this.className}__items__header__text`)
+        header.node.appendChild(this.idRoomDOM.node)
         // #endregion header
 
-        header.node.append(idRoom.node)
-        section.node.append(header.node)
         return section
     }
     // #endregion create items
@@ -600,6 +599,14 @@ class PrepareDuel extends BaseScene {
         siteService.listeningAddFriend(this.createModelAddFriend.bind(this.getThis()))
     }
     // #endregion listening socket
+
+    // #region watch
+    watchChangeIdRoom() {
+        if (!this.mainStore.getRoom) return
+        if (!this.idRoomDOM) return
+        this.idRoomDOM.node.textContent = 'ID: ' + this.mainStore.getRoom._id
+    }
+    // #endregion watch
     render() {
         console.log('%c\nRendering...\n', 'color: #363; font-size: 16px;')
     }

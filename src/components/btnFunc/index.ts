@@ -39,7 +39,7 @@ export default class BtnFunc extends BaseDOM {
         boardBag.setCallbackExit(() => {
             ;(this.game.scene.get(CONSTANT_HOME.key.home) as any).closeBoard(boardBag)
         })
-        // boardBag.hidden()
+        boardBag.hidden()
         const character = this.createContainer('div', {
             'background-image': `url(${CONSTANTS.character})`,
         })

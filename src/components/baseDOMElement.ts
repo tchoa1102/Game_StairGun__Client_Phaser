@@ -30,4 +30,11 @@ export default abstract class BaseDOM extends Phaser.GameObjects.DOMElement {
         btn.node.classList.add('position-relative')
         return btn
     }
+
+    createIcon(icon: string, style: Record<string, string | number>) {
+        const iconDOM = this.game.add.dom(0, 0, 'iconify-icon', style).setOrigin(0)
+        iconDOM.node.setAttribute('icon', icon)
+        iconDOM.node.classList.add('position-relative')
+        return iconDOM
+    }
 }

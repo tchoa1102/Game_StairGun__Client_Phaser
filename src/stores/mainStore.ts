@@ -28,6 +28,7 @@ const state: IState = {
         bag: [],
         status: [],
         statusMatch: [],
+        gold: [],
     },
     game: undefined,
     socket: null,
@@ -180,8 +181,17 @@ const useMainStore = defineStore('main', {
             this.player.friends.push(data)
             this.watches.friend.forEach((callback: CallableFunction) => callback(data))
         },
+        updateLooks(data: Record<string, string>) {
+            const looks = this.player.looks
+            for (const key in data) {
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    looks[key] = data[key]
+                }
+            }
+        },
         changeGold(data: number) {
             this.player.gold = data
+            this.watches.gold.forEach((callback) => callback(data))
         },
         pushDataShop(data: IItem) {
             this.dataShop.push({ ...data })
@@ -191,6 +201,11 @@ const useMainStore = defineStore('main', {
             data.forEach((d) => this.player.bag.push({ ...d }))
             this.watches.bag.forEach((callback) => callback(data))
             return
+        },
+        removeItemFromBag(data: IItemOnBag) {
+            const indexItem = this.player.bag.findIndex((item) => item._id === data._id)
+            this.player.bag.splice(indexItem, 1)
+            this.watches.bag.forEach((callback) => callback())
         },
         changeItemOnBag(data: Array<IItemOnBag>) {
             for (const d of data) {

@@ -25,6 +25,15 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+                flex-direction: column;
+            }
+
+            &__gold {
+                height: 30px;
+                margin-left: 20px;
+                color: #ffe600;
+                align-items: center;
+                gap: 4px;
             }
         }
     }

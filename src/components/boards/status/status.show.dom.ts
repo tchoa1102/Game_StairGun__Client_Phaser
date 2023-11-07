@@ -39,7 +39,9 @@ export default class StatusShowDOM extends BaseDOM {
     }
 
     handleChangeDisplay(data: Array<IItemOnBag>): void {
+        // console.log(data)
         const itemIsGoingWear = data.find((item) => item.isWear)
+        // console.log('itemIsGoingWear', itemIsGoingWear)
         if (!itemIsGoingWear) {
             const itemUnbind = data.find((item) => !item.isWear)
             itemUnbind && this.changeDisplay(itemUnbind.data.type)
