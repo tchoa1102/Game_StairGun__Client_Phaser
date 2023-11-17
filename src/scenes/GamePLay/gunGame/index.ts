@@ -1,9 +1,16 @@
+import Person from '@/characters/person'
 import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 import { CardService } from '@/services/http-https'
 import FETCH from '@/services/http-https/fetchConfig.service'
-import { stickService } from '@/services/socket'
+import { gunService, stickService } from '@/services/socket'
 import { useMainStore } from '@/stores'
-import type { ICard, ICardRes, IObject } from '@/util/interface/index.interface'
+import type {
+    ICard,
+    ICardRes,
+    IObject,
+    IPlayerOnMatch,
+    IUpdateLocationGunGame,
+} from '@/util/interface/index.interface'
 
 const CONSTANTS = {
     scene: {
@@ -20,38 +27,60 @@ class GunGame extends Phaser.Scene {
     public MAX_HEIGHT = 1000
     public CAMERA_WIDTH: number
     public CAMERA_HEIGHT: number
-    public isPlay: boolean = false
+    public cameraGame: Phaser.Cameras.Scene2D.Camera | undefined
+
     public x: number
+    public isPlay: boolean = false
     public eventListener: IEventListener = {}
 
     private mainStore: any
-    private cameraGame: Phaser.Cameras.Scene2D.Camera | undefined
-    private background: Phaser.GameObjects.Image | undefined
-    private tiledMapConfig: any
-    private map: Phaser.Tilemaps.Tilemap | undefined
-    private controls: any
+    private controls: Phaser.Cameras.Controls.FixedKeyControl | undefined
+    // private background: Phaser.GameObjects.Image | undefined
+    // private tiledMapConfig: any
+    // private map: Phaser.Tilemaps.Tilemap | undefined
+
+    // #region gun zone
     private gunAngle: number = 0
     private graphicsFanShaped: Phaser.GameObjects.Graphics | undefined
     private graphicsLine: Phaser.GameObjects.Graphics | undefined
-    private cH: number
+    private __xGunAngleZone: number = 20
+    private __yGunAngleZone: number
     private r = 70
     private gunMidAngle: { x: number; y: number }
     private zeroGunAngle = -90
+    // #endregion gun zone
 
     private cardPlugins: Array<Phaser.GameObjects.Rectangle> = []
     private cards: Array<Phaser.GameObjects.Image> = []
+    private objsMap: Array<Phaser.GameObjects.Image> = []
+
+    private playerPersons: Array<Person> = []
     // #endregion
     constructor() {
         super(CONSTANTS.scene)
         this.mainStore = useMainStore()
-        this.CAMERA_WIDTH = ((this.mainStore.width * this.mainStore.zoom) / 24) * 18
-        this.x = ((this.mainStore.width * this.mainStore.zoom) / 24) * 6 + 1
-        this.CAMERA_HEIGHT = this.mainStore.height * this.mainStore.zoom
-        this.cH = this.mainStore.height - 150
+        this.CAMERA_WIDTH = (this.mainStore.getWidth / 24) * 18
+        this.x = (this.mainStore.getWidth / 24) * 6 + 1
+        this.CAMERA_HEIGHT = this.mainStore.getHeight
+        this.__yGunAngleZone = this.mainStore.getHeight - 150
         this.gunMidAngle = {
-            x: 20 + this.r,
-            y: this.cH + this.r,
+            x: this.__xGunAngleZone + this.r,
+            y: this.__yGunAngleZone + this.r,
         }
+
+        const players = this.mainStore.getMatch.players
+        players.forEach((player: IPlayerOnMatch, index: number) => {
+            const person = new Person(
+                this,
+                index,
+                player.target.name!,
+                player.mainGame.bottomLeft.x,
+                Math.abs(player.mainGame.bottomLeft.y),
+                '{}',
+                1,
+            )
+            this.playerPersons.push(person)
+        })
     }
 
     init() {}
@@ -77,7 +106,7 @@ class GunGame extends Phaser.Scene {
 
         const keysLoadObject: Array<string> = Object.keys(imgObjectsLoad)
         for (const key of keysLoadObject) {
-            console.log('Loading: ', key)
+            // console.log('Loading: ', key)
             this.load.image(key, imgObjectsLoad[key])
         }
         // const mapConfigs = this.mainStore!.getMatch.mapConfigs
@@ -91,19 +120,21 @@ class GunGame extends Phaser.Scene {
         //     }
         // }
         // #endregion load map
+
+        this.playerPersons.forEach((p) => p.preload())
     }
 
     create() {
-        ;(this.game.scene.getScene('game-play-scene') as any).loaded()
+        // ;(this.game.scene.getScene('game-play-scene') as any).loaded()
         this.createGameObject(true)
     }
 
     createGameObject(isCreate: boolean = true) {
         if (!isCreate) return
-        const mainStore: any = useMainStore()
-        // #region config world
         console.log('create')
         this.isPlay = true
+        // #region config
+        // #region config world
         this.physics.world.setBounds(0, 0, this.MAX_WIDTH, this.MAX_HEIGHT)
         // this.physics.world.gravity.y = 9.8
         // #endregion
@@ -115,10 +146,7 @@ class GunGame extends Phaser.Scene {
         const IKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.I)
         const LKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.L)
         const KKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.K)
-        // #endregion
-
-        // #region config controls
-        const controlConfig = {
+        const controlConfig: Phaser.Types.Cameras.Controls.FixedKeyControlConfig = {
             camera: this.cameras.main,
             left: JKey,
             right: LKey,
@@ -131,6 +159,7 @@ class GunGame extends Phaser.Scene {
 
         // #region config background
         this.add.image(0, 0, CONSTANTS.background.key).setOrigin(0, 0)
+
         // #endregion
 
         // #region config tiled => very lags
@@ -153,50 +182,76 @@ class GunGame extends Phaser.Scene {
         //     // this.objectsMap.push(layer!)
         // }
         // #endregion
+        // #endregion config
 
+        // #region draw
         // #region load objects map
-        this.createUIObjectsMap()
+        this.drawUIObjectsMap()
         // #endregion load objects map
 
         // #region create UI fight
-        this.createUIFight()
+        this.drawUIFight()
         // #endregion create UI fight
+        // #endregion draw
+        this.addEventAngleOfFire()
+
+        // #region create person
+        this.playerPersons.forEach((p) => p.create())
+        // #endregion create person
+
         //
         this.listeningSocket()
-        this.updateUIHearthLineGun(45)
     }
 
     update(time: any, delta: any) {
         if (!this.isPlay) return
-        this.controls.update(delta)
+        this.handleKeyAngleOfFire()
+        this.controls && this.controls.update(delta)
+        this.playerPersons.forEach((p) => p.update(time, delta))
         // fixed camera static
-        this.cameraGame!.scrollX = Phaser.Math.Clamp(
-            this.cameraGame?.scrollX!,
-            0,
-            this.MAX_WIDTH - this.CAMERA_WIDTH,
-        )
-        this.cameraGame!.scrollY = Phaser.Math.Clamp(
-            this.cameraGame?.scrollY!,
-            0,
-            this.MAX_HEIGHT - this.CAMERA_HEIGHT,
-        )
+        this.fixedCamera()
     }
 
-    updateUIHearthLineGun(angle: number) {
-        this.graphicsLine && this.graphicsLine.clear()
-        this.gunAngle = angle
-        this.graphicsLine = this.add.graphics()
-        this.graphicsLine.fillStyle(0x000000, 1)
-        this.graphicsLine.slice(
-            this.gunMidAngle.x,
-            this.gunMidAngle.y,
-            this.r,
-            Phaser.Math.DegToRad(this.zeroGunAngle + this.gunAngle - 0.5),
-            Phaser.Math.DegToRad(this.zeroGunAngle + this.gunAngle + 0.5),
-            false,
-        )
-        this.graphicsLine.fillPath()
-        this.graphicsLine.setScrollFactor(0, 0)
+    fixedCamera() {
+        if (this.cameraGame) {
+            this.cameraGame.scrollX = Math.min(
+                Math.max(this.cameraGame.scrollX, 0),
+                this.MAX_WIDTH - this.CAMERA_WIDTH,
+            )
+
+            this.cameraGame.scrollY = Math.min(
+                Math.max(this.cameraGame.scrollY, 0),
+                this.MAX_HEIGHT - this.CAMERA_HEIGHT,
+            )
+        }
+    }
+
+    drawUIFight(): void {
+        // #region create card plugins
+        this.drawUICardPlugin()
+        // #endregion create card plugins
+
+        // #region create circle gun angle zone
+        this.add
+            .circle(this.__xGunAngleZone, this.__yGunAngleZone, this.r, 0xffffff, 0.3)
+            .setOrigin(0)
+            .setScrollFactor(0, 0)
+        this.add.circle(this.gunMidAngle.x, this.gunMidAngle.y, 2, 0xff00000).setScrollFactor(0, 0)
+        this.add
+            .text(this.gunMidAngle.x - 5.8, this.__yGunAngleZone, '0', {
+                color: '#fff',
+                fontSize: '20px',
+            })
+            .setScrollFactor(0, 0)
+        // #endregion create circle gun angle zone
+
+        // #region create gun zone
+        this.drawUIGunZone({ beginAngle: 0, endAngle: 90 })
+        // #endregion create gun zone
+
+        // #region create gun angle
+        this.updateGunAngleAndRedrawUIHearthLineGun(0)
+        // #endregion create gun angle
     }
 
     drawUIGunZone({ beginAngle, endAngle }: { beginAngle: number; endAngle: number }) {
@@ -215,64 +270,168 @@ class GunGame extends Phaser.Scene {
         graphicsFanShaped.setScrollFactor(0, 0)
     }
 
-    createUIFight(): void {
-        // #region create card plugins
-        const keyObjCardPlugins = ['z', 'x', 'c', 'v', 'b']
+    drawUICardPlugin() {
+        this.addEventCard()
+        const keyObjCardPlugins = [
+            getChar(this.eventListener?.cardNumberOne!),
+            getChar(this.eventListener?.cardNumberTwo!),
+            getChar(this.eventListener?.cardNumberThree!),
+            getChar(this.eventListener?.cardNumberFour!),
+            getChar(this.eventListener?.cardNumberFive!),
+        ]
         for (let i = 0; i < 5; i++) {
             let y = 100 * (i + 1) - 50 * i
 
             const obj = this.add.rectangle(50, y, 30.5, 44, 0xffffff, 0.3).setScrollFactor(0, 0)
             const text = this.add
                 .text(20, y, keyObjCardPlugins[i], {
-                    color: '#fff',
+                    color: '#ffffff70',
                     fontSize: 16,
                 })
                 .setScrollFactor(0, 0)
             this.cardPlugins.push(obj)
         }
-        // #endregion create card plugins
 
-        // #region create create circle
-        this.add.circle(20, this.cH, this.r, 0xffffff, 0.3).setOrigin(0).setScrollFactor(0, 0)
-        this.add.circle(this.gunMidAngle.x, this.gunMidAngle.y, 4, 0xff00000).setScrollFactor(0, 0)
-        this.add
-            .text(this.gunMidAngle.x - 5, this.cH, '0', {
-                color: '#fff',
-                fontSize: '20px',
-            })
-            .setScrollFactor(0, 0)
-        // #endregion create circle
-
-        // #region create gun zone
-        this.drawUIGunZone({ beginAngle: 0, endAngle: 90 })
-        // #endregion create gun zone
-
-        // #region create gun angle
-        this.updateUIHearthLineGun(0)
-        // #endregion create gun angle
+        function getChar(key: Phaser.Input.Keyboard.Key): string {
+            return String.fromCharCode(key.keyCode)
+        }
     }
 
-    createUIObjectsMap() {
+    drawUIObjectsMap() {
         const objs: Array<IObject> = this.mainStore.getMatch!.objects
         objs.forEach((obj: IObject) => {
-            this.add
-                .image(JSON.parse(obj.location.x), JSON.parse(obj.location.y), obj.data._id)
+            const objMap = this.add
+                .image(obj.location.x, Math.abs(obj.location.y), obj.data._id)
                 .setOrigin(0)
+            this.objsMap.push(objMap)
         })
     }
+
+    // #region func update state gun game
+    clearObjMap(location: { x: number; y: number }): void {
+        const objIndex = this.objsMap.findIndex(
+            (obj) => obj.x === location.x && obj.y === location.y,
+        )
+        if (objIndex === -1) return
+        const objMap = this.objsMap.splice(objIndex, 1)[0]
+        objMap.destroy()
+    }
+
+    updateGunAngleAndRedrawUIHearthLineGun(angle: number) {
+        this.graphicsLine && this.graphicsLine.clear()
+        this.gunAngle = angle
+        this.graphicsLine = this.add.graphics()
+        this.graphicsLine.fillStyle(0x000000, 1)
+        this.graphicsLine.slice(
+            this.gunMidAngle.x,
+            this.gunMidAngle.y,
+            this.r,
+            Phaser.Math.DegToRad(this.zeroGunAngle + this.gunAngle - 1),
+            Phaser.Math.DegToRad(this.zeroGunAngle + this.gunAngle + 1),
+            false,
+        )
+        this.graphicsLine.fillPath()
+        this.graphicsLine.setScrollFactor(0, 0)
+    }
+    // #region func update state gun game
+
+    // #region handle events
+    addEventCard() {
+        this.eventListener.cardNumberOne = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.Z,
+        )
+        this.eventListener.cardNumberTwo = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.W,
+        )
+        this.eventListener.cardNumberThree = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.C,
+        )
+        this.eventListener.cardNumberFour = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.V,
+        )
+        this.eventListener.cardNumberFive = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.B,
+        )
+    }
+    handleKeyCardEvent() {}
+    addEventAngleOfFire() {
+        this.eventListener.increaseAngle = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.UP,
+        )
+        this.eventListener.decreaseAngle = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.DOWN,
+        )
+    }
+    handleKeyAngleOfFire() {
+        const isIncreaseKeyDown: boolean = this.eventListener.increaseAngle?.isDown || false
+        const isDecreaseKeyDown: boolean = this.eventListener.decreaseAngle?.isDown || false
+        const angleDelta = 0.2
+
+        if (isIncreaseKeyDown) {
+            this.updateGunAngleAndRedrawUIHearthLineGun(this.gunAngle - angleDelta)
+        }
+
+        if (isDecreaseKeyDown) {
+            this.updateGunAngleAndRedrawUIHearthLineGun(this.gunAngle + angleDelta)
+        }
+    }
+    handleDisplayCardPickUp(data: ICardRes) {
+        if (data.owner === this.mainStore.getPlayer._id) {
+            const displacer = () => {
+                const isExist = this.cards.findIndex((card) => card.name === data._id)
+                if (isExist !== -1) return
+                const pluginCard = this.cardPlugins.find((plugin) => plugin.name.length === 0)
+                if (!pluginCard) return
+                pluginCard.name = data._id
+                // console.log('Is loaded?: ', this.textures.exists(data.card._id))
+                const card = this.add
+                    .image(pluginCard.x, pluginCard.y, data.card._id)
+                    .setOrigin(0.5)
+                card.scaleX = pluginCard.width / card.width
+                card.scaleY = pluginCard.height / card.height
+                card.name = data._id
+                this.cards.push(card)
+            }
+            const time = JSON.parse(data.time)
+            if (time === 0) {
+                displacer()
+                return
+            }
+            const timeForTimeout = time - new Date().getTime()
+            const timeOut = setTimeout(displacer, timeForTimeout > 0 ? timeForTimeout : 0)
+        }
+    }
+    handleDestroyCard(id: string) {
+        const cardIndex = this.cards.findIndex((card) => card.name === id)
+        if (cardIndex === -1) return
+        const card = this.cards.splice(cardIndex, 1)[0]
+        card.destroy()
+        const pluginCard = this.cardPlugins.find((plugin) => plugin.name === id)
+        if (!pluginCard) return
+        pluginCard.name = ''
+    }
+    // #endregion handle events
 
     // #region listening socket
     listeningSocket() {
         stickService.listeningUpdateCard((data: ICardRes) => {
-            if (data.owner === this.mainStore.getPlayer._id) {
-                const location = this.cardPlugins[this.cards.length]
-                console.log('Is loaded?: ', this.textures.exists(data.card._id))
-                const card = this.add.image(location.x, location.y, data.card._id).setOrigin(0.5)
-                card.scaleX = location.width / card.width
-                card.scaleY = location.height / card.height
-                card.name = data._id
-                this.cards.push(card)
-            }
+            this.handleDisplayCardPickUp(data)
+        })
+
+        gunService.listeningUpdateLocation((data: IUpdateLocationGunGame) => {
+            console.log('Data update location: ', data)
+            const pPersonIndex = this.playerPersons.findIndex(
+                (pP) => pP.thisPlayer.target._id === data._id,
+            )
+            if (pPersonIndex === -1) return
+            const pPerson = this.playerPersons[pPersonIndex]
+            pPerson.updateData(data)
+            if (!data.isLive)
+                setTimeout(() => {
+                    console.log('Player ', data._id, ' is not alive')
+                    pPerson.destroy()
+                    this.playerPersons.splice(pPersonIndex, 1)
+                }, 5000)
         })
     }
     // #endregion listening socket

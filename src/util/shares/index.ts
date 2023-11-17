@@ -18,12 +18,13 @@ export function createAnimation(game: any, name: string, animations: any) {
             // console.log('instance: ', instance)
             const anim = game.anims.get(keyAnim)
             if (anim) return
-            animationsInstances[keyAnim] = game.anims.create({
+            const objAnim: Phaser.Types.Animations.Animation = {
                 ...instance,
                 defaultTextureKey: name,
                 key: keyAnim,
                 frames: instance.frames,
-            })
+            }
+            animationsInstances[keyAnim] = game.anims.create(objAnim)
             // console.groupEnd()
         }
     }

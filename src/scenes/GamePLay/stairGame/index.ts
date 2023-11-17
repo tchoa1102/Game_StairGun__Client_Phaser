@@ -43,7 +43,7 @@ class StairGame extends Phaser.Scene {
     private CAMERA_V_Y = 0
     private cameraGame: Phaser.Cameras.Scene2D.Camera | undefined
     private mainStore: any
-    private sticks: Array<Stick>
+    private sticks: Array<Stick> = []
     private background: Phaser.GameObjects.Image | undefined
     private yourPosition: number = 0
     private yourIndex: number = 0
@@ -58,7 +58,6 @@ class StairGame extends Phaser.Scene {
         this.CAMERA_HEIGHT = this.mainStore.height * this.mainStore.zoom
         this.MARGIN_WIDTH = this.CAMERA_WIDTH / 2
         this.MARGIN_HEIGHT = this.mainStore.height / 2
-        this.sticks = []
     }
 
     init(data: IStairGameReceivingData) {
@@ -83,7 +82,7 @@ class StairGame extends Phaser.Scene {
             const stick = new Stick(
                 this,
                 player.position,
-                'circleStick-' + player.position,
+                'Stick: ' + player.target.name,
                 Number.parseFloat(player.stairGame.x),
                 Number.parseFloat(player.stairGame.y),
                 mainStore.getMatch.stickConfig,
@@ -110,7 +109,7 @@ class StairGame extends Phaser.Scene {
     }
 
     create(data: IStairGameReceivingData) {
-        ;(this.game.scene.getScene('game-play-scene') as any).loaded()
+        // ;(this.game.scene.getScene('game-play-scene') as any).loaded()
         this.createGameObject(true)
     }
 
@@ -180,7 +179,6 @@ class StairGame extends Phaser.Scene {
                 stick.addEvent()
             }
         })
-        this.receivingState()
         // #endregion
 
         // #region config camera
@@ -189,6 +187,7 @@ class StairGame extends Phaser.Scene {
         // #endregion
 
         this.isPlay = true
+        this.listeningSocket()
     }
 
     update(time: any, delta: any) {
@@ -222,10 +221,12 @@ class StairGame extends Phaser.Scene {
         // #endregion
     }
 
-    receivingState() {
+    listeningSocket() {
         stickService.listeningAnimation((data: any) => {
             // console.log(data)
-            const index = this.players?.findIndex((p, index) => p.target._id === data._id) || 0
+            if (!this.players) return
+            const index = this.players.findIndex((p, index) => p.target._id === data._id)
+            if (index === -1) return
             this.sticks[index].updateData({ event: data.event, x: data.x, y: data.y })
             // this.updateData({ event: data.event, x: data.x, y: data.y })
         })
@@ -237,25 +238,21 @@ class StairGame extends Phaser.Scene {
     updateCardState(_id: string, owner: string, time: number): void {
         const mainStore: any = useMainStore()
         const cardsPickUp = mainStore.getMatch.cardsPickUp || {}
-        const timeOut = setTimeout(() => {
+
+        const destroyCard = () => {
             console.log('Destroy')
-            const card = this.cardsObj.find((c: Phaser.GameObjects.Image) => c.name === _id)
-            card?.destroy()
-            this.cardsObj = this.cardsObj.reduce(
-                (newArray: Array<Phaser.GameObjects.Image>, card: Phaser.GameObjects.Image) => {
-                    if (card.name !== _id) newArray.push(card)
+            const cardIndex = this.cardsObj.findIndex((c) => c.name === _id)
+            if (cardIndex === -1) return
+            const card = this.cardsObj.splice(cardIndex, 1)[0]
+            card.destroy()
+        }
 
-                    return newArray
-                },
-                [],
-            )
-            mainStore.getMatch.cards.forEach((card: ICardOnMatch) => {
-                if (card._id === _id) {
-                    card.isEnable = false
-                }
-            })
-        }, time - new Date().getTime())
-
+        if (time === 0) {
+            destroyCard()
+            return
+        }
+        const timeForTimeout = time - new Date().getTime()
+        const timeOut = setTimeout(destroyCard, timeForTimeout > 0 ? timeForTimeout : 0)
         if (Object.prototype.hasOwnProperty.call(cardsPickUp, timeOut)) {
             clearTimeout(cardsPickUp[_id])
             return

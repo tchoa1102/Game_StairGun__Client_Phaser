@@ -1,6 +1,8 @@
 import type { StairGame, GamePlay, GunGame } from '@/scenes'
 import { initKeyAnimation } from '@/util/shares'
 import './interface'
+import { useMainStore } from '@/stores'
+import type { IPlayerOnMatch } from '@/util/interface/index.interface'
 
 export default abstract class Character {
     public x: number | undefined = undefined
@@ -9,12 +11,16 @@ export default abstract class Character {
     public name: string
     public keyActivities: Record<string, string> = {}
     public character: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null = null
+    protected nameTextObject: Phaser.GameObjects.Text | undefined
 
     protected game: GamePlay | StairGame | GunGame
+    protected mainStore: any
+    public thisPlayer: IPlayerOnMatch
     protected configCharacter: IStickAnimationConfig | null = null
     protected characterAnimation: IAnimation = {}
     protected scale: number = 1
     protected eventListener: IEventListener = {}
+    protected nameText: Phaser.GameObjects.Text | undefined
 
     abstract preload(): void
     abstract create(): void
@@ -39,6 +45,8 @@ export default abstract class Character {
         this.y = y
         this.configCharacter = JSON.parse(config)
         this.scale = scale
+        this.mainStore = useMainStore()
+        this.thisPlayer = this.mainStore.getMatch.players[this.index]
     }
 
     isOldAnimation(event: string): boolean {
@@ -67,6 +75,8 @@ export default abstract class Character {
         y && this.character!.setY(y)
         this.x = this.character!.x
         this.y = this.character!.y
+        x && this.nameTextObject!.setX(x)
+        y && this.nameTextObject!.setY(y)
         // console.log('location Y: ', this.character?.y)
     }
 

@@ -64,6 +64,7 @@ export default class BoardBag extends Board {
             face: this.createItemBoxPreview(itemsBoxWrapper.node, 'Mũ'),
             body: this.createItemBoxPreview(itemsBoxWrapper.node, 'Áo'),
             foot: this.createItemBoxPreview(itemsBoxWrapper.node, 'Quần'),
+            weapon: this.createItemBoxPreview(itemsBoxWrapper.node, 'Vũ Khí'),
         }
         const bag: Array<IItemOnBag> = this.mainStore.getPlayer.bag
         for (const item of bag) {
@@ -100,7 +101,7 @@ export default class BoardBag extends Board {
         className: string,
         data: IItemOnBag,
     ): Phaser.GameObjects.DOMElement {
-        console.log('Render data: ', data._id)
+        // console.log('Render data: ', data._id)
         const itemClassName = className + '__item'
         const btn = this.createBtn('button', {})
             .addListener('dblclick')

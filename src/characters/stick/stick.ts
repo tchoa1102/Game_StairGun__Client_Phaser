@@ -18,7 +18,6 @@ export default class Stick extends Character {
     // private characterAnimation: IAnimation = {}
     // private eventListener: IEventListener = {}
     // private configCharacter: IStickAnimationConfig
-    private mainStore: any
     private curY: number
     private curT: number = 0
     // #endregion
@@ -34,13 +33,12 @@ export default class Stick extends Character {
     ) {
         super(_this, index, name, x, y - 100, configCharacter, scale)
         this.curY = y
-        this.mainStore = useMainStore()
     }
 
     preload() {
         console.log(`%c\Preload ${this.name}...\n`, 'color: blue; font-size: 16px;')
         const textureUrl = this.configCharacter!.src[this.index]
-        console.log('Preload: file config: ', this.configCharacter)
+        // console.log('Preload: file config: ', this.configCharacter)
 
         this.game.load.atlas({
             key: this.name,
@@ -53,7 +51,7 @@ export default class Stick extends Character {
         console.log(`%c\nCreate ${this.name}...\n`, 'color: red; font-size: 16px;')
         const mainStore = useMainStore()
         // #region init animation from config json
-        console.log('file config: ', this.configCharacter)
+        // console.log('file config: ', this.configCharacter)
 
         const animations = this.configCharacter!.animations
         for (const key in animations) {
@@ -80,6 +78,13 @@ export default class Stick extends Character {
 
         // #region init sprite
         this.character = this.game.physics.add.sprite(this.x!, this.y!, this.name)
+        this.nameTextObject = this.game.add
+            .text(this.x!, this.y!, this.name, {
+                color: 'blue',
+                fontSize: '16px',
+                backgroundColor: '#ffffff70',
+            })
+            .setOrigin(0.5)
         // this.character.setVelocityY(9.8)
         const keyDefault = initKeyAnimation(this.name, this.keyActivities.stand)
         // console.group('Start animation')

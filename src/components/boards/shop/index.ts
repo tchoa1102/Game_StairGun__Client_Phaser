@@ -70,7 +70,7 @@ export default class BoardShop extends Board {
         item.node.appendChild(imgWrapper.node)
         this.game.load.image(data.imgItem, data.imgItem)
         this.game.load.once('complete', () => {
-            console.log('Load successfully')
+            // console.log('Load successfully')
             const sourceImg: any = this.game.textures.get(data.imgItem).getSourceImage()
             imgWrapper.node.appendChild(sourceImg)
         })

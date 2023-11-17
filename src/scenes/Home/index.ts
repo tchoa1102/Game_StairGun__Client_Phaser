@@ -744,43 +744,37 @@ const dRaw = {
             match: '6528fb7d960eecd821e4040d',
             target: {
                 _id: '103339144746729860355111',
-                uid: 'eFBDGlyOChPjXeNhoELoV4XMn8V2',
-                socketId: 'nNeW8ixNSEkAz5ycAAAe',
-                clientId: 'uOfiMF7FvdPo8wwpAAAd',
-                name: 'Shu Kyuseishu',
-                email: 'kyuseishu1593@gmail.com',
-                picture:
-                    'https://lh3.googleusercontent.com/a/ACg8ocLjbnNiiN1sPo_o4mm2Fl9Mo_K6O6-OL1OIwyulzZwo1g=s96-c',
                 level: 1,
-                HP: '100',
-                STA: '100',
-                ATK: '10',
-                DEF: '5',
-                LUK: '5',
-                AGI: '5',
-                character: '65015266187107a35aa5c222',
-                skills: [],
+                name: 'Shu Kyuseishu',
                 looks: {
-                    face: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/face/face.default.json',
-                    body: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.json',
-                    hand: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.hand.json',
-                    foot: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/foot/foot.default.json',
+                    face: '',
+                    body: '',
+                    foot: '',
+                    weapon: '',
                 },
-                bag: [],
-                createdAt: '2023-10-02T01:44:38.233Z',
-                updatedAt: '2023-10-13T08:10:18.381Z',
-                __v: 0,
+                AGI: 5,
+                ATK: 5,
+                DEF: 5,
+                HP: 100,
+                LUK: 5,
+                STA: 100,
             },
             position: 0,
             mainGame: {
-                x: 10,
-                y: 10,
-                hp: '100',
-                sta: '100',
-                atk: '10',
-                def: '5',
-                luk: '5',
-                agi: '5',
+                bottomLeft: { x: 600, y: -340 },
+                characterAngle: 90,
+                AGI: 5,
+                ATK: 5,
+                DEF: 5,
+                HP: 100,
+                LUK: 5,
+                STA: 100,
+                skillsUsing: [],
+                cardsUsing: [],
+                gunZone: {
+                    begin: 0,
+                    end: 90,
+                },
                 stateEffects: [],
             },
             stairGame: { x: 434.6562286730177, y: 3500 - 1000 },
@@ -789,42 +783,37 @@ const dRaw = {
             match: '6528fb7d960eecd821e4040d',
             target: {
                 _id: '115421543287322673156111',
-                uid: 'FaBAeAH0GsQq0J83tjMZMwKTqbF2',
-                socketId: 'B1O0uw8jaz8TPz3EAAAf',
-                clientId: 'Ma9QOiiichYwpTdtAAAc',
                 name: 'Kyuseishu Shu',
-                email: 'chihoa1593@gmail.com',
-                picture:
-                    'https://lh3.googleusercontent.com/a/ACg8ocIHww5amL1M1RYEUP_UzHlX35DUZH2spv8znVITPOqB7w=s96-c',
                 level: 1,
-                HP: '100',
-                STA: '100',
-                ATK: '10',
-                DEF: '5',
-                LUK: '5',
-                AGI: '5',
-                character: '000000000000000000000000',
-                skills: [],
                 looks: {
-                    face: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/face/face.default.json',
-                    body: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.json',
-                    hand: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.hand.json',
-                    foot: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/foot/foot.default.json',
+                    face: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1699550530/StairGunGame/equipment/face/face.doremon.png',
+                    body: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1699597726/StairGunGame/equipment/body/body.doremon.png',
+                    foot: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1699597820/StairGunGame/equipment/foot/foot.doremon.png',
+                    weapon: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1699862545/StairGunGame/equipment/weapon/The-Spirit-Sword.png',
                 },
-                bag: [],
-                __v: 0,
-                updatedAt: '2023-10-13T08:10:18.595Z',
+                AGI: 5,
+                ATK: 5,
+                DEF: 5,
+                HP: 100,
+                LUK: 5,
+                STA: 100,
             },
             position: 3,
             mainGame: {
-                x: 10,
-                y: 10,
-                hp: '100',
-                sta: '100',
-                atk: '10',
-                def: '5',
-                luk: '5',
-                agi: '5',
+                bottomLeft: { x: 190.5, y: -400 },
+                characterAngle: 90,
+                AGI: 5,
+                ATK: 5,
+                DEF: 5,
+                HP: 100,
+                LUK: 5,
+                STA: 100,
+                skillsUsing: [],
+                cardsUsing: [],
+                gunZone: {
+                    begin: 0,
+                    end: 90,
+                },
                 stateEffects: [],
             },
             // stairGame: { x: 307.3022282869877, y: 1606.374863249674 },
@@ -836,8 +825,8 @@ const dRaw = {
     objects: [
         {
             location: {
-                x: '100',
-                y: '400',
+                x: 100,
+                y: -400,
             },
             data: {
                 _id: '653938778921bd559f21975f',
@@ -882,8 +871,8 @@ const dRaw = {
         },
         {
             location: {
-                x: '600',
-                y: '340',
+                x: 600,
+                y: -340,
             },
             data: {
                 _id: '65393b588921bd559f219760',
@@ -928,8 +917,8 @@ const dRaw = {
         },
         {
             location: {
-                x: '120',
-                y: '380',
+                x: 120,
+                y: -380,
             },
             data: {
                 _id: '65386e998921bd559f21975e',
@@ -1171,28 +1160,28 @@ class Home extends BaseScene {
 
         // #endregion add scene
 
-        // const section = this.createContainer('section', {})
-        // section.node.setAttribute('id', 'game-container')
-        // section.node.classList.add('position-absolute')
-        // const main = document.querySelector('#game')
-        // main?.append(section.node)
-        // const mainStore: any = useMainStore()
-        // const config: Phaser.Types.Core.GameConfig = {
-        //     type: Phaser.AUTO,
-        //     width: mainStore.getWidth * mainStore.zoom,
-        //     height: mainStore.getHeight * mainStore.zoom,
-        //     parent: section.node as HTMLElement,
-        //     // transparent: true,
-        //     physics: {
-        //         default: 'arcade',
-        //         arcade: {
-        //             debug: true,
-        //         },
-        //     },
-        // }
-        // const game = new Phaser.Game(config)
-        // mainStore.setMatch(dataRes)
-        // this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {}) as GamePlay
+        const section = this.createContainer('section', {})
+        section.node.setAttribute('id', 'game-container')
+        section.node.classList.add('position-absolute')
+        const main = document.querySelector('#game')
+        main?.append(section.node)
+        const mainStore: any = useMainStore()
+        const config: Phaser.Types.Core.GameConfig = {
+            type: Phaser.AUTO,
+            width: mainStore.getWidth * mainStore.zoom,
+            height: mainStore.getHeight * mainStore.zoom,
+            parent: section.node as HTMLElement,
+            // transparent: true,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    debug: true,
+                },
+            },
+        }
+        const game = new Phaser.Game(config)
+        mainStore.setMatch(dataRes)
+        this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {}) as GamePlay
 
         // setTimeout(() => {
         //     console.log('Chat message')

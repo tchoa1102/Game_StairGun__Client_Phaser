@@ -122,7 +122,8 @@ export default class ShowCharacter extends Phaser.Scene {
     }
 
     changeDisplay(type: string, key?: string) {
-        console.log('type: ', type, ', new Key: ', key)
+        // console.log('type: ', type, ', new Key: ', key)
+        if (!CONSTANT.sprites.hasOwnProperty(type)) return
         if (!key || key.length === 0) {
             this.keysShow[type] = (CONSTANT.sprites as any)[type].key
             this.changeSprite(type, this.keysShow[type])
@@ -131,16 +132,16 @@ export default class ShowCharacter extends Phaser.Scene {
         const texture = this.textures.get(key)
         // console.log(texture)
         if (texture.key === CONSTANT.textureNotFound) {
-            console.log('texture not found, loading...')
+            // console.log('texture not found, loading...')
             this.load.atlas(key, key, this.configs[type])
             this.load.once('complete', () => {
-                console.log('load new texture successfully')
+                // console.log('load new texture successfully')
                 this.changeSprite(type, key)
             })
             this.load.start()
             return
         }
-        console.log('texture found! Adding...')
+        // console.log('texture found! Adding...')
 
         this.changeSprite(type, key)
     }

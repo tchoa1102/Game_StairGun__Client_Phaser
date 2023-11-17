@@ -78,30 +78,26 @@ class GamePlay extends BaseScene {
         const w = mainStore.getWidth * mainStore.getZoom
         const h = mainStore.getHeight * mainStore.getZoom
 
-        const rect = this.add.rectangle(0, 0, w, h, 0xffffff, 0.2).setOrigin(0)
-        const loading = this.add.sprite(w / 2, h / 2, CONSTANT_HOME.loading.key)
-        this.anims.create({
-            key: 'animation__' + CONSTANT_HOME.loading.key,
-            frames: this.anims.generateFrameNumbers(CONSTANT_HOME.loading.key, {
-                start: 0,
-                end: 4,
-            }),
-            frameRate: 6,
-            repeat: -1,
-        })
-        loading.anims.play('animation__' + CONSTANT_HOME.loading.key)
-        this.loadings.push(rect)
-        this.loadings.push(loading)
-        console.log('%c\nCreate Game Play...\n', 'color: red; font-size: 16px;')
+        // const rect = this.add.rectangle(0, 0, w, h, 0xffffff, 0.2).setOrigin(0)
+        // const loading = this.add.sprite(w / 2, h / 2, CONSTANT_HOME.loading.key)
+        // this.anims.create({
+        //     key: 'animation__' + CONSTANT_HOME.loading.key,
+        //     frames: this.anims.generateFrameNumbers(CONSTANT_HOME.loading.key, {
+        //         start: 0,
+        //         end: 4,
+        //     }),
+        //     frameRate: 6,
+        //     repeat: -1,
+        // })
+        // loading.anims.play('animation__' + CONSTANT_HOME.loading.key)
+        // this.loadings.push(rect)
+        // this.loadings.push(loading)
+        // console.log('%c\nCreate Game Play...\n', 'color: red; font-size: 16px;')
         this.listeningSocket()
     }
 
     update(time: number, delta: number) {
         // console.log('%c\nUpdating...\n', 'color: blue; font-size: 16px;')
-    }
-
-    render() {
-        console.log('%c\nRendering...\n', 'color: #363; font-size: 16px;')
     }
 
     loaded() {

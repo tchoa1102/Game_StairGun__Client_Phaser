@@ -26,7 +26,7 @@ export interface IMatchRes {
 }
 
 export interface IObject {
-    location: { x: string; y: string }
+    location: { x: number; y: number }
     data: IDataObjectMatch
 }
 
@@ -71,17 +71,24 @@ export interface ICardRes {
 }
 
 export interface IPlayerOnMatch {
-    target: IPlayer
+    target: {
+        _id: string
+        name: string
+        level: number
+        looks: Record<string, string>
+        HP: number
+        STA: number
+    }
     position: number
     mainGame: {
-        x: string
-        y: string
-        hp: string
-        sta: number
-        atk: string
-        def: string
-        luk: string
-        agi: string
+        bottomLeft: { x: number; y: number }
+        characterAngle: number
+        HP: number
+        STA: number
+        ATK: number
+        DEF: number
+        LUK: number
+        AGI: number
         power_point: number
         stateEffects: Array<{
             data: { [key: string]: any }
@@ -103,4 +110,17 @@ export interface IChatReceiveMessage {
     sender: { _id: string; name: string }
     receiver: { _id: string; name?: string }
     message: string
+}
+
+export interface IUpdateLocationGunGame {
+    _id: string
+    data: Array<ILocationGunGame>
+    isLive: boolean
+}
+
+export interface ILocationGunGame {
+    x: number
+    y: number
+    angle: number
+    time: number
 }
