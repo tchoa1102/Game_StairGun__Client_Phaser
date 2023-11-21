@@ -13,9 +13,9 @@ class gunService {
         mainStore.getSocket.emit(this.baseUrl + '/to-left')
     }
 
-    crawRight() {
+    crawlRight() {
         const mainStore: any = useMainStore()
-        mainStore.getSocket.emit(this.baseUrl + '/to-left')
+        mainStore.getSocket.emit(this.baseUrl + '/to-right')
     }
 
     gun(data: { angle: number; force: number }) {
@@ -36,7 +36,7 @@ class gunService {
     listeningUpdateLocation(callback: (data: IUpdateLocationGunGame) => void) {
         const mainStore: any = useMainStore()
         mainStore.getSocket.on(
-            this.baseUrl + '/update-location',
+            this.baseUrl + '/players/update-location',
             (data: IUpdateLocationGunGame) => {
                 callback(data)
             },

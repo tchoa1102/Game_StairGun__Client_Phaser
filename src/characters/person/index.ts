@@ -212,7 +212,15 @@ class Person extends Character {
 
     updateData(data: IUpdateLocationGunGame): void {
         if (data._id !== this.thisPlayer.target._id) return
-        this.locations.concat(data.data)
+        data.data.forEach((locationInfo: ILocationGunGame) => {
+            this.updateLocation({
+                x: locationInfo.x,
+                y: locationInfo.y,
+                rotate: locationInfo.angle,
+            })
+            // setTimeout(() => {
+            // }, locationInfo.time)
+        })
     }
     addEvent(): void {
         this.eventListener.left = this.game.input.keyboard?.addKey(
