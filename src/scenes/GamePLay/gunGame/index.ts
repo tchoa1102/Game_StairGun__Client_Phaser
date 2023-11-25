@@ -127,6 +127,46 @@ class GunGame extends Phaser.Scene {
     create() {
         // ;(this.game.scene.getScene('game-play-scene') as any).loaded()
         this.createGameObject(true)
+        // const p = [
+        //     {
+        //         x: 0,
+        //         y: 54.5,
+        //     },
+        //     {
+        //         x: 45,
+        //         y: 22,
+        //     },
+        //     {
+        //         x: 90.5,
+        //         y: 0,
+        //     },
+        //     {
+        //         x: 152.5,
+        //         y: 0,
+        //     },
+        //     {
+        //         x: 199.5,
+        //         y: 15,
+        //     },
+        //     {
+        //         x: 185.5,
+        //         y: 97.5,
+        //     },
+        //     {
+        //         x: 134.5,
+        //         y: 140,
+        //     },
+        //     {
+        //         x: 9.5,
+        //         y: 140,
+        //     },
+        // ]
+        // p.forEach((i) => {
+        //     this.add.circle(i.x + 100, i.y + 400, 3, 0x000000)
+        //     this.add.text(i.x + 100, i.y + 403, `(${i.x + 100}, ${i.y + 400})`, {
+        //         fontSize: '16px',
+        //     })
+        // })
     }
 
     createGameObject(isCreate: boolean = true) {
@@ -193,7 +233,7 @@ class GunGame extends Phaser.Scene {
         this.drawUIFight()
         // #endregion create UI fight
         // #endregion draw
-        this.addEventAngleOfFire()
+        this.addEventAngleOfFireZone()
 
         // #region create person
         this.playerPersons.forEach((p) => p.create())
@@ -354,7 +394,7 @@ class GunGame extends Phaser.Scene {
         )
     }
     handleKeyCardEvent() {}
-    addEventAngleOfFire() {
+    addEventAngleOfFireZone() {
         this.eventListener.increaseAngle = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.UP,
         )
