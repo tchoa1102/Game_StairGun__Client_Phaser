@@ -10,6 +10,7 @@ import type {
     IObject,
     IPlayerOnMatch,
     IUpdateLocationGunGame,
+    IUseCardRes,
 } from '@/util/interface/index.interface'
 
 const CONSTANTS = {
@@ -445,22 +446,27 @@ class GunGame extends Phaser.Scene {
         const isCardNumberFiveDown = this.eventListener.cardNumberFive.isDown
 
         if (isCardNumberOneDown) {
+            this.handleUseCard(0)
             console.log('Card Number One Down')
         }
 
         if (isCardNumberTwoDown) {
+            this.handleUseCard(1)
             console.log('Card Number Two Down')
         }
 
         if (isCardNumberThreeDown) {
+            this.handleUseCard(2)
             console.log('Card Number Three Down')
         }
 
         if (isCardNumberFourDown) {
+            this.handleUseCard(3)
             console.log('Card Number Four Down')
         }
 
         if (isCardNumberFiveDown) {
+            this.handleUseCard(4)
             console.log('Card Number Five Down')
         }
     }
@@ -567,6 +573,15 @@ class GunGame extends Phaser.Scene {
             const timeOut = setTimeout(displacer, timeForTimeout > 0 ? timeForTimeout : 0)
         }
     }
+    handleUseCard(indexPlugin: number) {
+        const cardPlugin = this.cardPlugins[indexPlugin]
+        gunService.useCard(cardPlugin.name)
+    }
+    handleUseCardRes(data: IUseCardRes) {
+        if (data.owner === this.mainStore.getPlayer._id) {
+            this.handleDestroyCard(data._id)
+        }
+    }
     handleDestroyCard(id: string) {
         const cardIndex = this.cards.findIndex((card) => card.name === id)
         if (cardIndex === -1) return
@@ -598,6 +613,10 @@ class GunGame extends Phaser.Scene {
                     pPerson.destroy()
                     this.playerPersons.splice(pPersonIndex, 1)
                 }, 5000)
+        })
+
+        gunService.listeningUseCard((data: IUseCardRes) => {
+            this.handleUseCardRes(data)
         })
     }
     // #endregion listening socket

@@ -1,5 +1,5 @@
 import { useMainStore } from '@/stores'
-import type { IUpdateLocationGunGame } from '@/util/interface/index.interface'
+import type { IUpdateLocationGunGame, IUseCardRes } from '@/util/interface/index.interface'
 
 class gunService {
     private baseUrl: string
@@ -23,12 +23,12 @@ class gunService {
         mainStore.getSocket.emit(this.baseUrl + '/gun', data)
     }
 
-    useCard(cardId: number) {
+    useCard(cardId: String) {
         const mainStore: any = useMainStore()
         mainStore.getSocket.emit(this.baseUrl + '/use-card', { cardId })
     }
 
-    useSkill(skillId: number) {
+    useSkill(skillId: String) {
         const mainStore: any = useMainStore()
         mainStore.getSocket.emit(this.baseUrl + '/use-skill', { skillId })
     }
@@ -41,6 +41,13 @@ class gunService {
                 callback(data)
             },
         )
+    }
+
+    listeningUseCard(callback: (data: IUseCardRes) => void) {
+        const mainStore: any = useMainStore()
+        mainStore.getSocket.on(this.baseUrl + '/use-card/res', (data: IUseCardRes) => {
+            callback(data)
+        })
     }
 }
 

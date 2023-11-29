@@ -124,3 +124,9 @@ export interface ILocationGunGame {
     angle: number
     time: number
 }
+
+export interface IUseCardRes {
+    _id: string // card's id
+    owner: string // player use
+    turner: string // turn player :>
+}
