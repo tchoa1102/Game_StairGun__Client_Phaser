@@ -19,6 +19,10 @@ const CONSTANTS = {
     background: {
         key: 'background-gun',
     },
+    velocity: {
+        background: 'src/assets/img/velocity_background.png',
+        shape: 'src/assets/img/velocity_status.png',
+    },
 }
 
 class GunGame extends Phaser.Scene {
@@ -30,7 +34,7 @@ class GunGame extends Phaser.Scene {
     public cameraGame: Phaser.Cameras.Scene2D.Camera | undefined
 
     public x: number
-    public isPlay: boolean = false
+    public isPlay: boolean = true
     public eventListener: IEventListener = {}
 
     private mainStore: any
@@ -41,6 +45,7 @@ class GunGame extends Phaser.Scene {
 
     // #region gun zone
     private gunAngle: number = 0
+    private gunAngleText: Phaser.GameObjects.Text | undefined
     private graphicsFanShaped: Phaser.GameObjects.Graphics | undefined
     private graphicsLine: Phaser.GameObjects.Graphics | undefined
     private __xGunAngleZone: number = 20
@@ -49,6 +54,17 @@ class GunGame extends Phaser.Scene {
     private gunMidAngle: { x: number; y: number }
     private zeroGunAngle = -90
     // #endregion gun zone
+
+    // #region velocity
+    private velocity: number = 0
+    private velocity_interval: number = 0
+    private velocityShape: Phaser.GameObjects.Image | undefined
+    // #endregion velocity
+
+    // run flag
+    // false -> true => change battle phase, true -> false => change end battle phase, handle bullet and damage
+    public isBattlePhase: boolean = false
+    public isMainPhase: boolean = false
 
     private cardPlugins: Array<Phaser.GameObjects.Rectangle> = []
     private cards: Array<Phaser.GameObjects.Image> = []
@@ -87,6 +103,8 @@ class GunGame extends Phaser.Scene {
 
     preload() {
         this.load.image(CONSTANTS.background.key, this.mainStore!.getMatch.backgroundGunGame)
+        this.load.image(CONSTANTS.velocity.background, CONSTANTS.velocity.background)
+        this.load.image(CONSTANTS.velocity.shape, CONSTANTS.velocity.shape)
 
         CardService.getAll().then((allCard: Array<ICard>) => {
             console.log('All card: ', allCard)
@@ -232,8 +250,14 @@ class GunGame extends Phaser.Scene {
         // #region create UI fight
         this.drawUIFight()
         // #endregion create UI fight
+        this.drawVelocityShape()
         // #endregion draw
         this.addEventAngleOfFireZone()
+        this.addEventBattle()
+        this.addEventCard()
+        // #region create card plugins
+        this.drawUICardPlugin()
+        // #endregion create card plugins
 
         // #region create person
         this.playerPersons.forEach((p) => p.create())
@@ -245,7 +269,9 @@ class GunGame extends Phaser.Scene {
 
     update(time: any, delta: any) {
         if (!this.isPlay) return
+        this.handleKeyCardEvent()
         this.handleKeyAngleOfFire()
+        this.handleKeyChangeBattleFlag()
         this.controls && this.controls.update(delta)
         this.playerPersons.forEach((p) => p.update(time, delta))
         // fixed camera static
@@ -267,18 +293,14 @@ class GunGame extends Phaser.Scene {
     }
 
     drawUIFight(): void {
-        // #region create card plugins
-        this.drawUICardPlugin()
-        // #endregion create card plugins
-
         // #region create circle gun angle zone
         this.add
             .circle(this.__xGunAngleZone, this.__yGunAngleZone, this.r, 0xffffff, 0.3)
             .setOrigin(0)
             .setScrollFactor(0, 0)
         this.add.circle(this.gunMidAngle.x, this.gunMidAngle.y, 2, 0xff00000).setScrollFactor(0, 0)
-        this.add
-            .text(this.gunMidAngle.x - 5.8, this.__yGunAngleZone, '0', {
+        this.gunAngleText = this.add
+            .text(this.gunMidAngle.x - 5.8, this.__yGunAngleZone, this.gunAngle.toString(), {
                 color: '#fff',
                 fontSize: '20px',
             })
@@ -311,7 +333,6 @@ class GunGame extends Phaser.Scene {
     }
 
     drawUICardPlugin() {
-        this.addEventCard()
         const keyObjCardPlugins = [
             getChar(this.eventListener?.cardNumberOne!),
             getChar(this.eventListener?.cardNumberTwo!),
@@ -347,6 +368,18 @@ class GunGame extends Phaser.Scene {
         })
     }
 
+    drawVelocityShape() {
+        this.add.image(this.CAMERA_WIDTH / 2, this.gunMidAngle.y, CONSTANTS.velocity.background)
+        this.velocityShape = this.add.sprite(
+            this.CAMERA_WIDTH / 2,
+            this.gunMidAngle.y,
+            CONSTANTS.velocity.shape,
+        )
+        this.velocityShape.x -= this.velocityShape.displayWidth / 2
+        this.velocityShape.scaleX = 0
+        this.velocityShape.setOrigin(0, 0.5)
+    }
+
     // #region func update state gun game
     clearObjMap(location: { x: number; y: number }): void {
         const objIndex = this.objsMap.findIndex(
@@ -372,28 +405,65 @@ class GunGame extends Phaser.Scene {
         )
         this.graphicsLine.fillPath()
         this.graphicsLine.setScrollFactor(0, 0)
+        if (this.gunAngleText) {
+            this.gunAngleText!.text = this.gunAngle.toFixed(1)
+            this.gunAngleText!.setOrigin(0.5)
+        }
     }
-    // #region func update state gun game
+    // #endregion func update state gun game
 
     // #region handle events
     addEventCard() {
-        this.eventListener.cardNumberOne = this.input.keyboard?.addKey(
+        if (!this.input.keyboard) return
+        this.eventListener.cardNumberOne = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.Z,
         )
-        this.eventListener.cardNumberTwo = this.input.keyboard?.addKey(
+        console.log(this.eventListener.cardNumberOne)
+        this.eventListener.cardNumberTwo = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.W,
         )
-        this.eventListener.cardNumberThree = this.input.keyboard?.addKey(
+        this.eventListener.cardNumberThree = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.C,
         )
-        this.eventListener.cardNumberFour = this.input.keyboard?.addKey(
+        this.eventListener.cardNumberFour = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.V,
         )
-        this.eventListener.cardNumberFive = this.input.keyboard?.addKey(
+        this.eventListener.cardNumberFive = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.B,
         )
     }
-    handleKeyCardEvent() {}
+    handleKeyCardEvent() {
+        if (!this.eventListener.cardNumberOne) return
+        if (!this.eventListener.cardNumberTwo) return
+        if (!this.eventListener.cardNumberThree) return
+        if (!this.eventListener.cardNumberFour) return
+        if (!this.eventListener.cardNumberFive) return
+        const isCardNumberOneDown = this.eventListener.cardNumberOne.isDown
+        const isCardNumberTwoDown = this.eventListener.cardNumberTwo.isDown
+        const isCardNumberThreeDown = this.eventListener.cardNumberThree.isDown
+        const isCardNumberFourDown = this.eventListener.cardNumberFour.isDown
+        const isCardNumberFiveDown = this.eventListener.cardNumberFive.isDown
+
+        if (isCardNumberOneDown) {
+            console.log('Card Number One Down')
+        }
+
+        if (isCardNumberTwoDown) {
+            console.log('Card Number Two Down')
+        }
+
+        if (isCardNumberThreeDown) {
+            console.log('Card Number Three Down')
+        }
+
+        if (isCardNumberFourDown) {
+            console.log('Card Number Four Down')
+        }
+
+        if (isCardNumberFiveDown) {
+            console.log('Card Number Five Down')
+        }
+    }
     addEventAngleOfFireZone() {
         this.eventListener.increaseAngle = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.UP,
@@ -413,6 +483,62 @@ class GunGame extends Phaser.Scene {
 
         if (isDecreaseKeyDown) {
             this.updateGunAngleAndRedrawUIHearthLineGun(this.gunAngle + angleDelta)
+        }
+    }
+    addEventBattle() {
+        this.eventListener.toBattlePhaseFlag = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.G,
+        )
+    }
+    handleKeyChangeBattleFlag(): void {
+        if (!this.eventListener.toBattlePhaseFlag) return
+        const isUp: boolean = this.eventListener.toBattlePhaseFlag.isUp
+        if (isUp) {
+            if (this.isMainPhase === true) {
+                this.isMainPhase = false
+                this.isBattlePhase = true
+                // console.log('Start battle phase')
+                setTimeout(() => {
+                    this.isBattlePhase = false
+                    console.log('End battle')
+                    this.velocity = 0
+                    if (this.velocityShape) {
+                        this.velocityShape.scaleX = this.velocity / 100
+                        this.velocityShape.setOrigin(0, 0.5)
+                    }
+                }, 15000)
+                clearInterval(this.velocity_interval)
+                // send change to battle phase
+            }
+            // return this.updateBattleFlag(true)
+        } else {
+            if (this.isMainPhase === false && this.isBattlePhase === false) {
+                this.isMainPhase = true
+                console.log('Start main phase')
+
+                // v = 100 * Math.cos(Math.PI/15000 *t + Math.PI / 2)
+                let t = 0
+                this.velocity_interval = setInterval(() => {
+                    this.velocity = 100 * Math.cos((Math.PI / 15000) * t - Math.PI / 2)
+
+                    // console.log('time: ', t, this.velocity)
+                    t += 50
+                    if (this.velocityShape) {
+                        this.velocityShape.scaleX = this.velocity / 100
+                        this.velocityShape.setOrigin(0, 0.5)
+                    }
+                    if (t > 15000) clearInterval(this.velocity_interval)
+                }, 50)
+                setTimeout(() => console.log('15s'), 15000)
+                // send change to main phase
+            }
+
+            // if (this.isMainPhase) {
+            //     if (this.velocityShape) {
+            //         this.velocityShape.scaleX = this.velocity / 100
+            //         this.velocityShape.setOrigin(0, 0.5)
+            //     }
+            // }
         }
     }
     handleDisplayCardPickUp(data: ICardRes) {

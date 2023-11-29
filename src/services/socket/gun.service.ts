@@ -18,7 +18,7 @@ class gunService {
         mainStore.getSocket.emit(this.baseUrl + '/to-right')
     }
 
-    gun(data: { angle: number; force: number }) {
+    gun(data: { angle: number; velocity_0: number }) {
         const mainStore: any = useMainStore()
         mainStore.getSocket.emit(this.baseUrl + '/gun', data)
     }
