@@ -264,8 +264,10 @@ class GunGame extends Phaser.Scene {
         this.playerPersons.forEach((p) => p.create())
         // #endregion create person
 
-        //
+        //#region register
+        this.mainStore.getWatch.turner.push(this.clearWhenChangeTurn.bind(this))
         this.listeningSocket()
+        //#endregion register
     }
 
     update(time: any, delta: any) {
@@ -447,27 +449,27 @@ class GunGame extends Phaser.Scene {
 
         if (isCardNumberOneDown) {
             this.handleUseCard(0)
-            console.log('Card Number One Down')
+            // console.log('Card Number One Down')
         }
 
         if (isCardNumberTwoDown) {
             this.handleUseCard(1)
-            console.log('Card Number Two Down')
+            // console.log('Card Number Two Down')
         }
 
         if (isCardNumberThreeDown) {
             this.handleUseCard(2)
-            console.log('Card Number Three Down')
+            // console.log('Card Number Three Down')
         }
 
         if (isCardNumberFourDown) {
             this.handleUseCard(3)
-            console.log('Card Number Four Down')
+            // console.log('Card Number Four Down')
         }
 
         if (isCardNumberFiveDown) {
             this.handleUseCard(4)
-            console.log('Card Number Five Down')
+            // console.log('Card Number Five Down')
         }
     }
     addEventAngleOfFireZone() {
@@ -500,25 +502,47 @@ class GunGame extends Phaser.Scene {
         if (!this.eventListener.toBattlePhaseFlag) return
         const isUp: boolean = this.eventListener.toBattlePhaseFlag.isUp
         if (isUp) {
+            // The first time, isMainPhase = false.
+            // when press down, then isMainPhase is true and when key up, isUp true
+            // => change to battle phase
             if (this.isMainPhase === true) {
+                // #region Set here, call once. If you wait feedback from server, call more.
                 this.isMainPhase = false
                 this.isBattlePhase = true
-                // console.log('Start battle phase')
-                setTimeout(() => {
-                    this.isBattlePhase = false
-                    console.log('End battle')
-                    this.velocity = 0
-                    if (this.velocityShape) {
-                        this.velocityShape.scaleX = this.velocity / 100
-                        this.velocityShape.setOrigin(0, 0.5)
-                    }
-                }, 15000)
+                // #endregion
+                // #region test time
+                // setTimeout(() => {
+                //     console.log('End battle')
+                //     // this.velocity = 0
+                //     // if (this.velocityShape) {
+                //         //     this.velocityShape.scaleX = this.velocity / 100
+                //     //     this.velocityShape.setOrigin(0, 0.5)
+                //     // }
+                // }, 15000)
+                // #endregion test time
                 clearInterval(this.velocity_interval)
                 // send change to battle phase
+                const callbackUpdateStateLocal = () => {
+                    console.log('Start battle phase')
+                }
+                gunService.gun(
+                    { angle: this.gunAngle, velocity_0: this.velocity },
+                    callbackUpdateStateLocal.bind(this),
+                )
             }
-            // return this.updateBattleFlag(true)
         } else {
-            if (this.isMainPhase === false && this.isBattlePhase === false) {
+            if (
+                !this.mainStore.getMatch &&
+                this.mainStore.getMatch.turner !== this.mainStore.getPlayer._id
+            ) {
+                console.log('The match invalid or The turn is not this player.')
+                return
+            }
+
+            if (this.isMainPhase !== false || this.isBattlePhase !== false) return
+            // this.isMainPhase === false && this.isBattlePhase === false
+            const callbackChooseVelocity = () => {
+                // send change to main phase
                 this.isMainPhase = true
                 console.log('Start main phase')
 
@@ -535,9 +559,9 @@ class GunGame extends Phaser.Scene {
                     }
                     if (t > 15000) clearInterval(this.velocity_interval)
                 }, 50)
-                setTimeout(() => console.log('15s'), 15000)
-                // send change to main phase
             }
+            // setTimeout(() => console.log('15s'), 15000)
+            gunService.chooseVelocity(callbackChooseVelocity.bind(this))
 
             // if (this.isMainPhase) {
             //     if (this.velocityShape) {
@@ -618,8 +642,28 @@ class GunGame extends Phaser.Scene {
         gunService.listeningUseCard((data: IUseCardRes) => {
             this.handleUseCardRes(data)
         })
+
+        gunService.listeningChangeTurn()
     }
     // #endregion listening socket
+
+    clearWhenChangeTurn() {
+        // #region change state flag
+        console.log('End phase, next turn')
+        this.isMainPhase = false
+        this.isBattlePhase = false
+        // #endregion change state flag
+        // #region reset velocity
+        this.velocity = 0
+        if (this.velocityShape) {
+            this.velocityShape.scaleX = this.velocity / 100
+            this.velocityShape.setOrigin(0, 0.5)
+        }
+        // #endregion reset velocity
+
+        // #region redisplay weapon
+        // #endregion redisplay weapon
+    }
 }
 
 export default GunGame

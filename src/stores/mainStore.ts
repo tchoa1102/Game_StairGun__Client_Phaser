@@ -1,4 +1,4 @@
-import type { IChatReceiveMessage } from './../util/interface/index.interface'
+import type { IChangeTurn, IChatReceiveMessage } from './../util/interface/index.interface'
 import {
     type IChat,
     type IFriend,
@@ -22,13 +22,14 @@ const state: IState = {
     watches: {
         chat: [],
         room: [],
-        match: [],
         friend: [],
         dataShop: [],
         bag: [],
         status: [],
-        statusMatch: [],
         gold: [],
+        match: [],
+        statusMatch: [],
+        turner: [],
     },
     game: undefined,
     socket: null,
@@ -226,6 +227,17 @@ const useMainStore = defineStore('main', {
                     this.watches.status.forEach((callback) => callback(property))
                 }
             }
+        },
+        updateTurner(data: IChangeTurn) {
+            if (!this.match || this.match._id !== data._id) return
+            this.match.turner = data.turner
+            this.watches.turner.forEach((callback) => callback(data))
+        },
+        endGame() {
+            this.match = undefined
+            this.watches.turner = []
+            this.watches.match = []
+            this.watches.statusMatch = []
         },
         // setMapDataJSON(name: string, data: string) {
         //     if (!this.match?.mapDataJSON) this.match!.mapDataJSON = {}

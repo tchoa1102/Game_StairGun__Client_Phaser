@@ -14,6 +14,7 @@ export interface IMatchRes {
         img: string
         _id: string
     }>
+    turner: string // objectid
     timeStart: string
     players: Array<IPlayerOnMatch>
     cards: Array<ICardOnMatch>
@@ -129,4 +130,9 @@ export interface IUseCardRes {
     _id: string // card's id
     owner: string // player use
     turner: string // turn player :>
+}
+
+export interface IChangeTurn {
+    _id: string // idMatch
+    turner: string
 }

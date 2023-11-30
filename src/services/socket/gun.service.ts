@@ -1,5 +1,9 @@
 import { useMainStore } from '@/stores'
-import type { IUpdateLocationGunGame, IUseCardRes } from '@/util/interface/index.interface'
+import type {
+    IChangeTurn,
+    IUpdateLocationGunGame,
+    IUseCardRes,
+} from '@/util/interface/index.interface'
 
 class gunService {
     private baseUrl: string
@@ -18,9 +22,9 @@ class gunService {
         mainStore.getSocket.emit(this.baseUrl + '/to-right')
     }
 
-    gun(data: { angle: number; velocity_0: number }) {
+    gun(data: { angle: number; velocity_0: number }, callback: CallableFunction) {
         const mainStore: any = useMainStore()
-        mainStore.getSocket.emit(this.baseUrl + '/gun', data)
+        mainStore.getSocket.emit(this.baseUrl + '/gun', data, callback)
     }
 
     useCard(cardId: String) {
@@ -31,6 +35,11 @@ class gunService {
     useSkill(skillId: String) {
         const mainStore: any = useMainStore()
         mainStore.getSocket.emit(this.baseUrl + '/use-skill', { skillId })
+    }
+
+    chooseVelocity(callback: CallableFunction) {
+        const mainStore: any = useMainStore()
+        mainStore.getSocket.emit(this.baseUrl + '/choose-velocity', {}, callback)
     }
 
     listeningUpdateLocation(callback: (data: IUpdateLocationGunGame) => void) {
@@ -47,6 +56,14 @@ class gunService {
         const mainStore: any = useMainStore()
         mainStore.getSocket.on(this.baseUrl + '/use-card/res', (data: IUseCardRes) => {
             callback(data)
+        })
+    }
+
+    listeningChangeTurn(callback?: (data: IChangeTurn) => void) {
+        const mainStore: any = useMainStore()
+        mainStore.getSocket.on(this.baseUrl + '/change-turn/res', (data: IChangeTurn) => {
+            callback && callback(data)
+            mainStore.updateTurner(data)
         })
     }
 }

@@ -189,6 +189,12 @@ class Person extends Character {
         this.hpBarBorder?.destroy()
         this.nameText?.destroy()
     }
+    hiddenWeapon(): void {
+        this.weaponSprite && this.weaponSprite.setVisible(false)
+    }
+    showWeapon(): void {
+        this.weaponSprite && this.weaponSprite.setVisible(true)
+    }
 
     getNameKey(type: string): string {
         return this.name + type

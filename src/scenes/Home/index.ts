@@ -13,6 +13,7 @@ import Status from '@/components/status'
 import BoardShop from '@/components/boards/shop'
 
 const dRaw = {
+    turner: '115421543287322673156111',
     _id: '6528fb7d960eecd821e4040d',
     stairs: [
         {

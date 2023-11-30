@@ -22,6 +22,7 @@ export default interface IState {
         status: Array<(data: IProperty) => any>
         statusMatch: Array<CallableFunction>
         gold: Array<CallableFunction>
+        turner: Array<CallableFunction>
     }
 }
 
