@@ -6,6 +6,7 @@ import { gunService, stickService } from '@/services/socket'
 import { useMainStore } from '@/stores'
 import type {
     ICard,
+    ICardOnMatch,
     ICardRes,
     IObject,
     IPlayerOnMatch,
@@ -416,62 +417,6 @@ class GunGame extends Phaser.Scene {
     // #endregion func update state gun game
 
     // #region handle events
-    addEventCard() {
-        if (!this.input.keyboard) return
-        this.eventListener.cardNumberOne = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.Z,
-        )
-        console.log(this.eventListener.cardNumberOne)
-        this.eventListener.cardNumberTwo = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.W,
-        )
-        this.eventListener.cardNumberThree = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.C,
-        )
-        this.eventListener.cardNumberFour = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.V,
-        )
-        this.eventListener.cardNumberFive = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.B,
-        )
-    }
-    handleKeyCardEvent() {
-        if (!this.eventListener.cardNumberOne) return
-        if (!this.eventListener.cardNumberTwo) return
-        if (!this.eventListener.cardNumberThree) return
-        if (!this.eventListener.cardNumberFour) return
-        if (!this.eventListener.cardNumberFive) return
-        const isCardNumberOneDown = this.eventListener.cardNumberOne.isDown
-        const isCardNumberTwoDown = this.eventListener.cardNumberTwo.isDown
-        const isCardNumberThreeDown = this.eventListener.cardNumberThree.isDown
-        const isCardNumberFourDown = this.eventListener.cardNumberFour.isDown
-        const isCardNumberFiveDown = this.eventListener.cardNumberFive.isDown
-
-        if (isCardNumberOneDown) {
-            this.handleUseCard(0)
-            // console.log('Card Number One Down')
-        }
-
-        if (isCardNumberTwoDown) {
-            this.handleUseCard(1)
-            // console.log('Card Number Two Down')
-        }
-
-        if (isCardNumberThreeDown) {
-            this.handleUseCard(2)
-            // console.log('Card Number Three Down')
-        }
-
-        if (isCardNumberFourDown) {
-            this.handleUseCard(3)
-            // console.log('Card Number Four Down')
-        }
-
-        if (isCardNumberFiveDown) {
-            this.handleUseCard(4)
-            // console.log('Card Number Five Down')
-        }
-    }
     addEventAngleOfFireZone() {
         this.eventListener.increaseAngle = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.UP,
@@ -571,6 +516,63 @@ class GunGame extends Phaser.Scene {
             // }
         }
     }
+    // #region handle card and skill
+    addEventCard() {
+        if (!this.input.keyboard) return
+        this.eventListener.cardNumberOne = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.Z,
+        )
+        console.log(this.eventListener.cardNumberOne)
+        this.eventListener.cardNumberTwo = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.W,
+        )
+        this.eventListener.cardNumberThree = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.C,
+        )
+        this.eventListener.cardNumberFour = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.V,
+        )
+        this.eventListener.cardNumberFive = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.B,
+        )
+    }
+    handleKeyCardEvent() {
+        if (!this.eventListener.cardNumberOne) return
+        if (!this.eventListener.cardNumberTwo) return
+        if (!this.eventListener.cardNumberThree) return
+        if (!this.eventListener.cardNumberFour) return
+        if (!this.eventListener.cardNumberFive) return
+        const isCardNumberOneDown = this.eventListener.cardNumberOne.isDown
+        const isCardNumberTwoDown = this.eventListener.cardNumberTwo.isDown
+        const isCardNumberThreeDown = this.eventListener.cardNumberThree.isDown
+        const isCardNumberFourDown = this.eventListener.cardNumberFour.isDown
+        const isCardNumberFiveDown = this.eventListener.cardNumberFive.isDown
+
+        if (isCardNumberOneDown) {
+            this.handleUseCard(0)
+            // console.log('Card Number One Down')
+        }
+
+        if (isCardNumberTwoDown) {
+            this.handleUseCard(1)
+            // console.log('Card Number Two Down')
+        }
+
+        if (isCardNumberThreeDown) {
+            this.handleUseCard(2)
+            // console.log('Card Number Three Down')
+        }
+
+        if (isCardNumberFourDown) {
+            this.handleUseCard(3)
+            // console.log('Card Number Four Down')
+        }
+
+        if (isCardNumberFiveDown) {
+            this.handleUseCard(4)
+            // console.log('Card Number Five Down')
+        }
+    }
     handleDisplayCardPickUp(data: ICardRes) {
         if (data.owner === this.mainStore.getPlayer._id) {
             const displacer = () => {
@@ -599,12 +601,15 @@ class GunGame extends Phaser.Scene {
     }
     handleUseCard(indexPlugin: number) {
         const cardPlugin = this.cardPlugins[indexPlugin]
+        if (!cardPlugin.name) return
         gunService.useCard(cardPlugin.name)
     }
     handleUseCardRes(data: IUseCardRes) {
-        if (data.owner === this.mainStore.getPlayer._id) {
-            this.handleDestroyCard(data._id)
-        }
+        if (data._id !== this.mainStore.getMatch._id) return
+        // handle display card in game
+        this.handleShowUseSkillOrCard(data.owner, data.card)
+        // destroy card
+        this.handleDestroyCard(data.card)
     }
     handleDestroyCard(id: string) {
         const cardIndex = this.cards.findIndex((card) => card.name === id)
@@ -615,6 +620,17 @@ class GunGame extends Phaser.Scene {
         if (!pluginCard) return
         pluginCard.name = ''
     }
+    handleShowUseSkillOrCard(playerId: string, id: string) {
+        const person = this.playerPersons.find((p) => p.thisPlayer.target._id === playerId)
+        if (!person) return
+        person.addItemSkillShow(id)
+    }
+    handleClearContainerSkillOrCard(playerId: string) {
+        const person = this.playerPersons.find((p) => p.thisPlayer.target._id === playerId)
+        if (!person) return
+        person.clearItemsShowSkill()
+    }
+    // #endregion handle card and skill
     // #endregion handle events
 
     // #region listening socket
@@ -663,6 +679,10 @@ class GunGame extends Phaser.Scene {
 
         // #region redisplay weapon
         // #endregion redisplay weapon
+
+        this.playerPersons.forEach((p) => {
+            p.clearItemsShowSkill()
+        })
     }
 }
 

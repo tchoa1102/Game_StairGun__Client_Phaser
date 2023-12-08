@@ -10,6 +10,10 @@ import { gunService } from '@/services/socket'
 import type { ILocationGunGame, IUpdateLocationGunGame } from '@/util/interface/index.interface'
 
 export const CONSTANT = {
+    size: {
+        width: 90,
+        height: 90,
+    },
     scene: {
         key: 'person',
     },
@@ -59,6 +63,8 @@ class Person extends Character {
     private sign: number = 1
     private hpBarBorder: Phaser.GameObjects.Rectangle | undefined
     private hpBar: Phaser.GameObjects.Rectangle | undefined
+    private skillContainer: Phaser.GameObjects.Container | undefined
+    // private usedBar:
     public keyActivities: Record<string, string> = {
         show: 'show',
         lieRight: 'lieRight',
@@ -68,9 +74,6 @@ class Person extends Character {
         crawlRight: 'crawlRight',
         crawlLeft: 'crawlLeft',
     }
-
-    private locations: Array<ILocationGunGame> = []
-    private indexLocation: number = 0
 
     constructor(
         game: any,
@@ -170,7 +173,10 @@ class Person extends Character {
         this.isCurPlayer && this.addEvent()
         // #endregion add event
 
-        console.log('Create show character successfully')
+        if (this.x && this.y) {
+            this.skillContainer = this.game.add.container(this.x, this.y - 140, [])
+            this.skillContainer.x += CONSTANT.size.width / 2
+        }
     }
     update(time: any, delta: any): void {
         // #region handle key event
@@ -194,6 +200,30 @@ class Person extends Character {
     }
     showWeapon(): void {
         this.weaponSprite && this.weaponSprite.setVisible(true)
+    }
+    addItemSkillShow(id: string): void {
+        if (!this.skillContainer) return
+        const card = this.game.add.image(0, 0, id)
+        card.scaleX = 30.5 / card.width
+        card.scaleY = 44 / card.height
+        card.name = id
+        // const text = this.game.add.text(0, 0, 'HA', { backgroundColor: '#000' })
+        const last = this.skillContainer.last
+        if (last) {
+            // console.log('This last: ', last)
+            const data = last as Phaser.GameObjects.Image
+            if (data) {
+                card.x = data.x + data.width * data.scaleX + 4
+            }
+        }
+        this.skillContainer.add(card)
+        this.skillContainer.x -= (card.width * card.scaleX) / 2
+    }
+    clearItemsShowSkill(): void {
+        if (!this.skillContainer) return
+        this.skillContainer.removeAll(true)
+        if (!this.x) return
+        this.skillContainer.x = this.x + CONSTANT.size.width / 2
     }
 
     getNameKey(type: string): string {
@@ -226,6 +256,7 @@ class Person extends Character {
             })
             // setTimeout(() => {
             // }, locationInfo.time)
+            this.updateAnimationGunGame(data.eventKey)
         })
     }
     addEvent(): void {
@@ -257,6 +288,16 @@ class Person extends Character {
         this.weaponSprite!.x = x
         this.weaponSprite!.y = y
         this.weaponSprite!.setRotation(Phaser.Math.DegToRad(this.TO_ZERO_DEG + rotate))
+        if (!this.skillContainer) return
+        this.skillContainer.x = x + CONSTANT.size.width / 2
+        const last = this.skillContainer.last
+        if (last) {
+            console.log('This last: ', last)
+            const data = last as Phaser.GameObjects.Text
+            if (data) {
+                this.skillContainer.x -= (data.x + data.width) / 2
+            }
+        }
     }
     handleKeyEvent(): void {
         let isKeyDown: boolean = false
@@ -273,7 +314,7 @@ class Person extends Character {
             const weaponKey = this.getNameKey('weapon')
             const keyAnimWeapon = initKeyAnimation(weaponKey, 'showLeft')
             this.weaponSprite?.anims.play(keyAnimWeapon)
-            this.updateAnimationGunGame(keyAnim)
+            // this.updateAnimationGunGame(keyAnim)
             // this.updateLocation({ x: this.x! - 0.5, y: this.y!, rotate: 90 })
         } else if (isRightDown) {
             isKeyDown = true
@@ -283,15 +324,20 @@ class Person extends Character {
             const weaponKey = this.getNameKey('weapon')
             const keyAnimWeapon = initKeyAnimation(weaponKey, 'show')
             this.weaponSprite?.anims.play(keyAnimWeapon)
-            this.updateAnimationGunGame(keyAnim)
+            // this.updateAnimationGunGame(keyAnim)
             // this.updateLocation({ x: this.x! + 0.5, y: this.y!, rotate: 90 })
         }
 
-        if (!this.isKeyChangeAnimation && !isKeyDown && !this.isOldAnimationGunGame(keyAnim)) {
-            this.updateAnimationGunGame(keyAnim)
+        if (!isKeyDown && !this.isOldAnimationGunGame(keyAnim)) {
+            // console.log('lie')
+            try {
+                gunService.lie(keyAnim)
+            } catch (e) {
+                // console.log(e)
+            }
         }
 
-        if (!this.isKeyChangeAnimation && isKeyDown) {
+        if (isKeyDown) {
             // send event to server
             try {
                 ;(gunService as any)[keyAnim]()
@@ -304,6 +350,7 @@ class Person extends Character {
     isOldAnimationGunGame(event: string): boolean {
         const curKey = this.sprite.body!.anims.currentAnim?.key
         const key = initKeyAnimation(this.getNameKey('body'), this.keyActivities[event])
+        // console.log(curKey, key, curKey === key)
         return curKey === key
     }
 

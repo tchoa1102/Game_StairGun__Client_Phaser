@@ -12,6 +12,11 @@ class gunService {
         this.baseUrl = 'gun-game'
     }
 
+    lie(event: string) {
+        const mainStore: any = useMainStore()
+        mainStore.getSocket.emit(this.baseUrl + '/lie', { event })
+    }
+
     crawlLeft() {
         const mainStore: any = useMainStore()
         mainStore.getSocket.emit(this.baseUrl + '/to-left')

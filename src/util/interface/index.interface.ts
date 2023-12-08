@@ -117,6 +117,7 @@ export interface IUpdateLocationGunGame {
     _id: string
     data: Array<ILocationGunGame>
     isLive: boolean
+    eventKey: string
 }
 
 export interface ILocationGunGame {
@@ -127,9 +128,9 @@ export interface ILocationGunGame {
 }
 
 export interface IUseCardRes {
-    _id: string // card's id
+    _id: string // match id
+    card: string // card's id
     owner: string // player use
-    turner: string // turn player :>
 }
 
 export interface IChangeTurn {
