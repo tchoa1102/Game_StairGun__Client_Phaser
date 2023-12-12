@@ -77,12 +77,15 @@ export default class Stick extends Character {
         // #endregion
 
         // #region init sprite
+        const isBlueTeam = this.index < 3 ? 0 : 1
+        const colorName = ['blue', 'red']
         this.character = this.game.physics.add.sprite(this.x!, this.y!, this.name)
         this.nameTextObject = this.game.add
-            .text(this.x!, this.y!, this.name, {
-                color: 'blue',
+            .text(this.x!, this.y! + 100, this.name, {
+                color: colorName[isBlueTeam],
                 fontSize: '16px',
-                backgroundColor: '#ffffff70',
+                fontStyle: 'bold',
+                // backgroundColor: '#ffffff70',
             })
             .setOrigin(0.5)
         // this.character.setVelocityY(9.8)

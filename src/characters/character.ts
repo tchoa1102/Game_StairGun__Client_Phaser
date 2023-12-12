@@ -5,8 +5,8 @@ import { useMainStore } from '@/stores'
 import type { IPlayerOnMatch } from '@/util/interface/index.interface'
 
 export default abstract class Character {
-    public x: number | undefined = undefined
-    public y: number | undefined = undefined
+    public x: number = 0
+    public y: number = 0
     public index: number
     public name: string
     public keyActivities: Record<string, string> = {}
@@ -41,8 +41,8 @@ export default abstract class Character {
         this.game = _this
         this.index = index
         this.name = name
-        this.x = x
-        this.y = y
+        if (x) this.x = x
+        if (y) this.y = y
         this.configCharacter = JSON.parse(config)
         this.scale = scale
         this.mainStore = useMainStore()

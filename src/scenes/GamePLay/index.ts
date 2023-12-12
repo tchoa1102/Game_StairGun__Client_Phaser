@@ -5,6 +5,8 @@ import FETCH from '@/services/http-https/fetchConfig.service'
 import CONSTANT_HOME from '../Home/CONSTANT'
 import matchService from '@/services/socket/match.service'
 import BaseScene from '../baseScene'
+import { gunService } from '@/services/socket'
+import type { IGameEnd } from '@/util/interface/index.interface'
 
 class GamePlay extends BaseScene {
     public numOfLoaded: number = 0
@@ -78,21 +80,22 @@ class GamePlay extends BaseScene {
         const w = mainStore.getWidth * mainStore.getZoom
         const h = mainStore.getHeight * mainStore.getZoom
 
-        // const rect = this.add.rectangle(0, 0, w, h, 0xffffff, 0.2).setOrigin(0)
-        // const loading = this.add.sprite(w / 2, h / 2, CONSTANT_HOME.loading.key)
-        // this.anims.create({
-        //     key: 'animation__' + CONSTANT_HOME.loading.key,
-        //     frames: this.anims.generateFrameNumbers(CONSTANT_HOME.loading.key, {
-        //         start: 0,
-        //         end: 4,
-        //     }),
-        //     frameRate: 6,
-        //     repeat: -1,
-        // })
-        // loading.anims.play('animation__' + CONSTANT_HOME.loading.key)
-        // this.loadings.push(rect)
-        // this.loadings.push(loading)
-        // console.log('%c\nCreate Game Play...\n', 'color: red; font-size: 16px;')
+        const rect = this.add.rectangle(0, 0, w, h, 0xffffff, 0.2).setOrigin(0)
+        const loading = this.add.sprite(w / 2, h / 2, CONSTANT_HOME.loading.key)
+        this.anims.create({
+            key: CONSTANT_HOME.loading.key + '--animation',
+            frames: this.anims.generateFrameNumbers(CONSTANT_HOME.loading.key, {
+                start: 0,
+                end: 4,
+            }),
+            frameRate: 6,
+            repeat: -1,
+        })
+        loading.anims.play(CONSTANT_HOME.loading.key + '--animation')
+        this.loadings.push(rect)
+        this.loadings.push(loading)
+        console.log('%c\nCreate Game Play...\n', 'color: red; font-size: 16px;')
+
         this.listeningSocket()
     }
 
@@ -110,8 +113,16 @@ class GamePlay extends BaseScene {
 
     playGame() {
         this.getLoading().forEach((child) => child.setVisible(false))
-        ;(this.game.scene.getScene('stair-game') as any).createGameObject(true)
-        ;(this.game.scene.getScene('gun-game') as any).createGameObject(true)
+        let stairGame = this.game.scene.getScene('stair-game') as any
+        if (!stairGame) {
+            stairGame = this.game.scene.getScene(CONSTANT_HOME.key.stairGame) as any
+        }
+        stairGame.createGameObject(true)
+        let gunGame = this.game.scene.getScene('gun-game') as any
+        if (!gunGame) {
+            gunGame = this.game.scene.getScene(CONSTANT_HOME.key.gunGame) as any
+        }
+        gunGame.createGameObject(true)
         console.log('%cPlay!', 'color: red; font-size: 20px')
     }
 

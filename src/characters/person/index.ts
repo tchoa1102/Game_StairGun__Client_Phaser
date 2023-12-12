@@ -7,7 +7,11 @@ import weaponConfig from '@/assets/configs/weapon.json'
 import { createAnimation, initKeyAnimation } from '@/util/shares'
 import type { GunGame } from '@/scenes'
 import { gunService } from '@/services/socket'
-import type { ILocationGunGame, IUpdateLocationGunGame } from '@/util/interface/index.interface'
+import type {
+    IGunRes,
+    ILocationGunGame,
+    IUpdateLocationGunGame,
+} from '@/util/interface/index.interface'
 
 export const CONSTANT = {
     size: {
@@ -61,6 +65,7 @@ class Person extends Character {
     } = { face: undefined, body: undefined, foot: undefined }
     private weaponSprite: Phaser.GameObjects.Sprite | undefined
     private sign: number = 1
+    private isThrow: boolean = false
     private hpBarBorder: Phaser.GameObjects.Rectangle | undefined
     private hpBar: Phaser.GameObjects.Rectangle | undefined
     private skillContainer: Phaser.GameObjects.Container | undefined
@@ -112,7 +117,7 @@ class Person extends Character {
             }
         }
     }
-    create(): void {
+    create(): typeof this {
         const configs: { [key: string]: any } = this.configs
         const looks: { [key: string]: string } = this.thisPlayer.target.looks
         // #region create key animations
@@ -136,22 +141,25 @@ class Person extends Character {
         this.createSprite('body')
         this.createSprite('foot')
 
+        const isBlueTeam = this.thisPlayer.position < 3 ? 0 : 1
+        const colorName = ['blue', 'red']
         this.hpBarBorder = this.game.add
-            .rectangle(this.x!, this.y!, 100, 10, 0x000, 0.7)
+            .rectangle(this.x!, this.y! + 5, 100, 10, 0x000, 0.7)
             .setOrigin(0)
         this.hpBar = this.game.add
             .rectangle(
                 this.x!,
-                this.y!,
+                this.y! + 5,
                 (this.thisPlayer.mainGame.HP / this.thisPlayer.target.HP) * 100,
                 10,
                 0xd00000,
             )
             .setOrigin(0)
-        this.nameText = this.game.add.text(this.x!, this.y! + 12, this.name, {
-            color: 'blue',
+        this.nameText = this.game.add.text(this.x!, this.y! + 17, this.name, {
+            color: colorName[isBlueTeam],
             fontSize: '14px',
-            backgroundColor: '#ffffff70',
+            fontStyle: 'bold',
+            // backgroundColor: '#ffffff70',
         })
         this.nameText.setDepth(1000)
 
@@ -177,6 +185,8 @@ class Person extends Character {
             this.skillContainer = this.game.add.container(this.x, this.y - 140, [])
             this.skillContainer.x += CONSTANT.size.width / 2
         }
+
+        return this
     }
     update(time: any, delta: any): void {
         // #region handle key event
@@ -246,6 +256,26 @@ class Person extends Character {
         this.sprite[type]!.setRotation(Phaser.Math.DegToRad(this.TO_ZERO_DEG + rotate))
     }
 
+    changeAnimation(type: string = 'lie') {
+        let s = 'Left'
+        if (this.sign === 1) s = 'Right'
+        const t = type + s
+        for (const keyType in this.sprite) {
+            if (Object.prototype.hasOwnProperty.call(this.sprite, keyType)) {
+                const element = this.sprite[keyType]
+                const key: string = this.getNameKey(keyType)
+                const animationKey = initKeyAnimation(key, this.keyActivities[t])
+                element?.anims.play(animationKey)
+                element?.once('animationcomplete', (animation: any, frame: any) => {
+                    if (animation.key === animationKey) {
+                        console.log('End animation')
+                        this.isThrow = false
+                    }
+                })
+            }
+        }
+    }
+
     updateData(data: IUpdateLocationGunGame): void {
         if (data._id !== this.thisPlayer.target._id) return
         data.data.forEach((locationInfo: ILocationGunGame) => {
@@ -258,6 +288,77 @@ class Person extends Character {
             // }, locationInfo.time)
             this.updateAnimationGunGame(data.eventKey)
         })
+    }
+    updateHP(newHP: number) {
+        if (!this.hpBar) return
+        this.hpBar.width = (newHP / this.thisPlayer.target.HP) * 100
+    }
+    addDamageDisplay(damage: number): typeof this {
+        let fz = 14
+        const text = this.game.add.text(this.x + 90, this.y - 70, damage.toFixed(0), {
+            fontSize: fz + 'px',
+            color: 'red',
+            fontStyle: 'bold',
+        })
+        let t = 0
+        const inter = setInterval(() => {
+            if (fz >= 16) {
+                clearInterval(inter)
+                setTimeout(() => {
+                    text.destroy()
+                }, 500)
+            }
+            fz += 0.04
+            text.setFontSize(fz)
+            text.setPosition(text.x + 0.1, text.y - 0.1)
+            t += 5
+            // console.log(t, fz)
+        }, 1)
+        return this
+    }
+    handleGun(data: IGunRes, listPerson: Array<Person>) {
+        console.log(data)
+        let i = 0
+        this.hiddenWeapon()
+        // #region create weapon
+        const weaponKey = this.getNameKey('weapon')
+        const keyAnim = initKeyAnimation(weaponKey, 'throw')
+        const weaponSprite = this.game.add
+            .sprite(this.x!, this.y!, weaponKey)
+            .setDepth(100000)
+            .setOrigin(0, 1)
+        weaponSprite.anims.play(keyAnim)
+        this.isThrow = true
+        this.changeAnimation('throw')
+        // #region create weapon
+        const interval = setInterval(() => {
+            if (i >= data.bullets.length) {
+                clearInterval(interval)
+                this.showWeapon()
+                weaponSprite.anims.play(initKeyAnimation(weaponKey, 'explosion'))
+
+                data.players.forEach((p) => {
+                    const thisPerson = listPerson.find(
+                        (person) => person.thisPlayer.target._id === p.target,
+                    )
+                    if (!thisPerson) return
+                    p.damages.forEach((d) => thisPerson.addDamageDisplay(d))
+                    thisPerson.updateHP(p.HP)
+                })
+
+                weaponSprite.on('animationcomplete', (animation: any, frame: any) => {
+                    if (animation.key === initKeyAnimation(weaponKey, 'explosion')) {
+                        weaponSprite.destroy()
+                    }
+                })
+
+                return
+            }
+            weaponSprite
+                .setRotation(Phaser.Math.DegToRad(-this.TO_ZERO_DEG + data.bullets[i].angle))
+                .setPosition(data.bullets[i].point.x, data.bullets[i].point.y)
+            i++
+        }, 5)
     }
     addEvent(): void {
         this.eventListener.left = this.game.input.keyboard?.addKey(
@@ -272,21 +373,21 @@ class Person extends Character {
             if (Object.prototype.hasOwnProperty.call(this.sprite, type)) {
                 const sprite = this.sprite[type]
                 this.x = x
-                this.y = y
+                this.y = -y
                 sprite!.x = x
-                sprite!.y = y
+                sprite!.y = -y
                 sprite!.setRotation(Phaser.Math.DegToRad(this.TO_ZERO_DEG + rotate))
             }
         }
         this.mainStore.getMatch.players[this.index].mainGame.characterAngle = rotate * this.sign
         this.nameText!.x = x
-        this.nameText!.y = y + 10
+        this.nameText!.y = -y + 17
         this.hpBar!.x = x
-        this.hpBar!.y = y
+        this.hpBar!.y = -y + 5
         this.hpBarBorder!.x = x
-        this.hpBarBorder!.y = y
+        this.hpBarBorder!.y = -y + 5
         this.weaponSprite!.x = x
-        this.weaponSprite!.y = y
+        this.weaponSprite!.y = -y
         this.weaponSprite!.setRotation(Phaser.Math.DegToRad(this.TO_ZERO_DEG + rotate))
         if (!this.skillContainer) return
         this.skillContainer.x = x + CONSTANT.size.width / 2
@@ -328,7 +429,7 @@ class Person extends Character {
             // this.updateLocation({ x: this.x! + 0.5, y: this.y!, rotate: 90 })
         }
 
-        if (!isKeyDown && !this.isOldAnimationGunGame(keyAnim)) {
+        if (!isKeyDown && !this.isOldAnimationGunGame(keyAnim) && !this.isThrow) {
             // console.log('lie')
             try {
                 gunService.lie(keyAnim)
@@ -348,10 +449,13 @@ class Person extends Character {
     }
 
     isOldAnimationGunGame(event: string): boolean {
-        const curKey = this.sprite.body!.anims.currentAnim?.key
-        const key = initKeyAnimation(this.getNameKey('body'), this.keyActivities[event])
-        // console.log(curKey, key, curKey === key)
-        return curKey === key
+        if (this.sprite.body) {
+            const curKey = this.sprite.body!.anims.currentAnim?.key
+            const key = initKeyAnimation(this.getNameKey('body'), this.keyActivities[event])
+            // console.log(curKey, key, curKey === key)
+            return curKey === key
+        }
+        return true
     }
 
     updateAnimationGunGame(event: string): boolean {

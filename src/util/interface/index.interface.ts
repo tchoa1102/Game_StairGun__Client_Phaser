@@ -14,6 +14,7 @@ export interface IMatchRes {
         img: string
         _id: string
     }>
+    windForce: number
     turner: string // objectid
     timeStart: string
     players: Array<IPlayerOnMatch>
@@ -136,4 +137,30 @@ export interface IUseCardRes {
 export interface IChangeTurn {
     _id: string // idMatch
     turner: string
+    windForce: number
+    updateStatuses: Array<Record<string, any>>
+}
+
+export interface IGunRes {
+    bullets: Array<IBulletLocation>
+    players: Array<{
+        target: string
+        damages: Array<number>
+        HP: number
+    }>
+}
+
+export interface IBulletLocation {
+    point: IPoint
+    angle: number
+}
+
+export interface IPoint {
+    x: number
+    y: number
+}
+
+export interface IGameEnd {
+    winner: string
+    statuses: Record<string, number>
 }

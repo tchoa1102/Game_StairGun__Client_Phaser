@@ -15,6 +15,7 @@ import BoardShop from '@/components/boards/shop'
 const dRaw = {
     turner: '115421543287322673156111',
     _id: '6528fb7d960eecd821e4040d',
+    windForce: 1.1,
     stairs: [
         {
             x: 313.151575522744,
@@ -1283,28 +1284,28 @@ class Home extends BaseScene {
 
         // #endregion add scene
 
-        const section = this.createContainer('section', {})
-        section.node.setAttribute('id', 'game-container')
-        section.node.classList.add('position-absolute')
-        const main = document.querySelector('#game')
-        main?.append(section.node)
-        const mainStore: any = useMainStore()
-        const config: Phaser.Types.Core.GameConfig = {
-            type: Phaser.AUTO,
-            width: mainStore.getWidth * mainStore.zoom,
-            height: mainStore.getHeight * mainStore.zoom,
-            parent: section.node as HTMLElement,
-            // transparent: true,
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    debug: true,
-                },
-            },
-        }
-        const game = new Phaser.Game(config)
-        mainStore.setMatch(dataRes)
-        this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {}) as GamePlay
+        // const section = this.createContainer('section', {})
+        // section.node.setAttribute('id', 'game-container')
+        // section.node.classList.add('position-absolute')
+        // const main = document.querySelector('#game')
+        // main?.append(section.node)
+        // const mainStore: any = useMainStore()
+        // const config: Phaser.Types.Core.GameConfig = {
+        //     type: Phaser.AUTO,
+        //     width: mainStore.getWidth * mainStore.zoom,
+        //     height: mainStore.getHeight * mainStore.zoom,
+        //     parent: section.node as HTMLElement,
+        //     // transparent: true,
+        //     physics: {
+        //         default: 'arcade',
+        //         arcade: {
+        //             debug: true,
+        //         },
+        //     },
+        // }
+        // const game = new Phaser.Game(config)
+        // mainStore.setMatch(dataRes)
+        // this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {}) as GamePlay
     }
 
     update() {

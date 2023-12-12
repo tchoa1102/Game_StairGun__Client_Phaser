@@ -120,7 +120,7 @@
                 }
             ],
             "frameRate": 10,
-            "repeat": -1
+            "repeat": 0
         },
         "throwLeft": {
             "key": "throwLeft",
@@ -132,7 +132,7 @@
                 }
             ],
             "frameRate": 10,
-            "repeat": -1
+            "repeat": 0
         },
         "crawlRight": {
             "key": "crawlRight",
