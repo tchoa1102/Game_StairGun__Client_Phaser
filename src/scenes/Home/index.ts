@@ -764,7 +764,7 @@ const dRaw = {
             position: 0,
             mainGame: {
                 bottomLeft: { x: 600, y: -340 },
-                characterAngle: 90,
+                characterGradient: 90,
                 AGI: 5,
                 ATK: 5,
                 DEF: 5,
@@ -1387,7 +1387,7 @@ class Home extends BaseScene {
                 physics: {
                     default: 'arcade',
                     arcade: {
-                        debug: true,
+                        debug: false,
                     },
                 },
             }

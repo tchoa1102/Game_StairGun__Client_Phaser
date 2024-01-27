@@ -1,1 +1,1 @@
-export {default as useMainStore} from '@/stores/mainStore'
+export { default as useMainStore } from '@/stores/mainStore'

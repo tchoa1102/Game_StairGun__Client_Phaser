@@ -8,8 +8,9 @@
     </section>
 </template>
 
-<script>
-import { useMainStore } from '@/stores/index'
+<script lang="ts">
+import { useMainStore } from '@/stores'
+import type IIndicator from '@/util/interface/init.interface'
 export default {
     setup() {
         const mainStore = useMainStore()
@@ -22,12 +23,20 @@ export default {
     },
     watch: {
         'mainStore.player._id'() {
-            this.mainStore.init(document.getElementById('main').getBoundingClientRect().height, {
+            console.log('Start game')
+            const initObj: IIndicator = {
                 parent: 'game',
-            })
+                canvas: undefined,
+            }
+            this.mainStore.init(
+                document.getElementById('main')!.getBoundingClientRect().height,
+                initObj,
+            )
         },
     },
-    mounted() {},
+    mounted() {
+        console.log('Mounted game')
+    },
 }
 </script>
 

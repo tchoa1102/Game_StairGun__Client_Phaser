@@ -48,6 +48,7 @@ class FirebaseService {
     async signInWithGoogle() {
         try {
             await setPersistence(this.auth, browserLocalPersistence)
+            // const result: UserCredential = await signInWithPopup(this.auth, this.provider)
             const result: UserCredential = await signInWithPopup(this.auth, this.provider)
             await saveUser((result.user as any).accessToken)
             return result
@@ -72,11 +73,15 @@ class FirebaseService {
                     return router.push({ name: 'login' })
                 }
 
-                const userLoaded = await authService.loadUser()
-                console.log('player loaded: ', userLoaded)
-                const mainStore = useMainStore()
-                mainStore.player = { ...userLoaded }
-                console.log('Player loaded: ', mainStore.player)
+                try {
+                    const userLoaded = await authService.loadUser()
+                    console.log('player loaded: ', userLoaded)
+                    const mainStore = useMainStore()
+                    mainStore.player = { ...userLoaded }
+                    console.log('Player loaded: ', mainStore.player)
+                } catch (error) {
+                    console.log('User loaded ERROR: ', error)
+                }
 
                 // user !== null and this page is login page, then redirect to home page
                 if (route.name === 'login') {
@@ -86,7 +91,7 @@ class FirebaseService {
             },
             (e: Error) => {
                 router.push({ name: 'login' })
-                console.log(e)
+                console.log('Auto login failure!', e)
             },
         )
     }

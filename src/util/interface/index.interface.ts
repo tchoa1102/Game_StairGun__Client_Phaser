@@ -84,7 +84,7 @@ export interface IPlayerOnMatch {
     position: number
     mainGame: {
         bottomLeft: { x: number; y: number }
-        characterAngle: number
+        characterGradient: number
         HP: number
         STA: number
         ATK: number

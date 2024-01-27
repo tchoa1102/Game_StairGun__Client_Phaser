@@ -4,9 +4,12 @@ import { useMainStore } from '@/stores'
 import { roomService } from '@/services/socket'
 import BoardBag from '../boards/bag'
 
+import characterIcon from '@/assets/character.png'
+import goOutIcon from '@/assets/bye.png'
+
 const CONSTANTS = {
-    character: 'src/assets/character.png',
-    goOut: 'src/assets/bye.png',
+    character: characterIcon,
+    goOut: goOutIcon,
 }
 
 export default class BtnFunc extends BaseDOM {

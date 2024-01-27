@@ -4,45 +4,22 @@ import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 import FETCH from '@/services/http-https/fetchConfig.service'
 import { useMainStore } from '@/stores'
 import { createAnimation, initKeyAnimation } from '@/util/shares'
-import faceConfig from '@/assets/configs/face.json'
-import bodyConfig from '@/assets/configs/face.json'
-import footConfig from '@/assets/configs/face.json'
 
 export const CONSTANT = {
     scene: {
         key: 'character-show',
     },
+    sprites: CONSTANT_HOME.sprites,
+    deeps: CONSTANT_HOME.deeps,
     textureNotFound: '__MISSING',
-    sprites: {
-        face: {
-            key: 'face.default',
-            config: 'src/assets/configs/face.json',
-            img: 'src/assets/img/equips/faces/face.default.png',
-        },
-        body: {
-            key: 'body.default',
-            config: 'src/assets/configs/body.json',
-            img: 'src/assets/img/equips/bodies/body.default.png',
-        },
-        foot: {
-            key: 'foot.default',
-            config: 'src/assets/configs/foot.json',
-            img: 'src/assets/img/equips/foots/foot.default.png',
-        },
-    },
-    deeps: {
-        face: 3,
-        body: 2,
-        foot: 1,
-    },
     active: 'show',
 }
 
 export default class ShowCharacter extends Phaser.Scene {
     private configs: { [key: string]: any } = {
-        face: faceConfig,
-        body: bodyConfig,
-        foot: footConfig,
+        face: CONSTANT.sprites.face.config,
+        body: CONSTANT.sprites.body.config,
+        foot: CONSTANT.sprites.foot.config,
     }
     private sprite: {
         [key: string]: Phaser.GameObjects.Sprite | undefined

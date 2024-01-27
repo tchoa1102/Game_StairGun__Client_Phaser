@@ -1,9 +1,6 @@
 import { Character } from '..'
 
-import faceConfig from '@/assets/configs/face.json'
-import bodyConfig from '@/assets/configs/body.json'
-import footConfig from '@/assets/configs/foot.json'
-import weaponConfig from '@/assets/configs/weapon.json'
+import CONSTANT_HOME from '@/scenes/Home/CONSTANT'
 import { createAnimation, initKeyAnimation } from '@/util/shares'
 import type { GunGame } from '@/scenes'
 import { gunService } from '@/services/socket'
@@ -22,28 +19,8 @@ export const CONSTANT = {
         key: 'person',
     },
     textureNotFound: '__MISSING',
-    sprites: {
-        face: {
-            key: 'face.default',
-            config: 'src/assets/configs/face.json',
-            img: 'src/assets/img/equips/faces/face.default.png',
-        },
-        body: {
-            key: 'body.default',
-            config: 'src/assets/configs/body.json',
-            img: 'src/assets/img/equips/bodies/body.default.png',
-        },
-        foot: {
-            key: 'foot.default',
-            config: 'src/assets/configs/foot.json',
-            img: 'src/assets/img/equips/foots/foot.default.png',
-        },
-    },
-    deeps: {
-        face: 3,
-        body: 2,
-        foot: 1,
-    },
+    sprites: CONSTANT_HOME.sprites,
+    deeps: CONSTANT_HOME.deeps,
     active: 'show',
 }
 
@@ -52,10 +29,10 @@ class Person extends Character {
     private TO_ZERO_DEG: number = -90
     private isCurPlayer: boolean
     private configs: { [key: string]: any } = {
-        face: faceConfig,
-        body: bodyConfig,
-        foot: footConfig,
-        weapon: weaponConfig,
+        face: CONSTANT.sprites.face.config,
+        body: CONSTANT.sprites.body.config,
+        foot: CONSTANT.sprites.foot.config,
+        weapon: CONSTANT_HOME.weaponConfig,
     }
     private sprite: {
         [key: string]: Phaser.GameObjects.Sprite | undefined
@@ -164,7 +141,7 @@ class Person extends Character {
         this.nameText.setDepth(1000)
 
         if (looks.weapon.length > 0) {
-            const rotate = this.thisPlayer.mainGame.characterAngle
+            const rotate = this.thisPlayer.mainGame.characterGradient
 
             const weaponKey = this.getNameKey('weapon')
             const keyAnim = initKeyAnimation(weaponKey, 'show')
@@ -251,7 +228,7 @@ class Person extends Character {
         const keyAnim = initKeyAnimation(key, this.keyActivities.lieRight)
         // console.log('Key animation: ', keyAnim)
         this.sprite[type]!.anims.play(keyAnim)
-        const rotate = this.thisPlayer.mainGame.characterAngle
+        const rotate = this.thisPlayer.mainGame.characterGradient
         // console.log('Rotation animation: ', rotate)
         this.sprite[type]!.setRotation(Phaser.Math.DegToRad(this.TO_ZERO_DEG + rotate))
     }
@@ -369,25 +346,27 @@ class Person extends Character {
         )
     }
     updateLocation({ x, y, rotate }: { x: number; y: number; rotate: number }) {
+        console.log('Location update: ', { x, y: y, rotate })
+        if ((!x && x !== 0) || (!y && y !== 0) || (!rotate && rotate !== 0)) return
         for (const type in this.sprite) {
             if (Object.prototype.hasOwnProperty.call(this.sprite, type)) {
                 const sprite = this.sprite[type]
                 this.x = x
-                this.y = -y
+                this.y = Math.abs(y)
                 sprite!.x = x
-                sprite!.y = -y
+                sprite!.y = Math.abs(y)
                 sprite!.setRotation(Phaser.Math.DegToRad(this.TO_ZERO_DEG + rotate))
             }
         }
-        this.mainStore.getMatch.players[this.index].mainGame.characterAngle = rotate * this.sign
+        this.mainStore.getMatch.players[this.index].mainGame.characterGradient = rotate * this.sign
         this.nameText!.x = x
-        this.nameText!.y = -y + 17
+        this.nameText!.y = Math.abs(y) + 17
         this.hpBar!.x = x
-        this.hpBar!.y = -y + 5
+        this.hpBar!.y = Math.abs(y) + 5
         this.hpBarBorder!.x = x
-        this.hpBarBorder!.y = -y + 5
+        this.hpBarBorder!.y = Math.abs(y) + 5
         this.weaponSprite!.x = x
-        this.weaponSprite!.y = -y
+        this.weaponSprite!.y = Math.abs(y)
         this.weaponSprite!.setRotation(Phaser.Math.DegToRad(this.TO_ZERO_DEG + rotate))
         if (!this.skillContainer) return
         this.skillContainer.x = x + CONSTANT.size.width / 2

@@ -126,6 +126,7 @@ class GunGame extends Phaser.Scene {
                 1,
             )
             this.playerPersons.push(person)
+            console.log('Person: ', person.thisPlayer.target._id, index)
         })
     }
 
@@ -322,7 +323,7 @@ class GunGame extends Phaser.Scene {
         // #endregion create person
 
         //#region register
-        this.mainStore.getWatch.turner.push(this.clearWhenChangeTurn.bind(this))
+        // this.mainStore.getWatch.turner.push(this.clearWhenChangeTurn.bind(this))
         this.listeningSocket()
         //#endregion register
     }
@@ -771,7 +772,7 @@ class GunGame extends Phaser.Scene {
         if (!this.skillContainer) return
         const listSkillPlugin = this.skillContainer.getAll()
         const skillPlugin = listSkillPlugin[n]
-        gunService.useSkill('percent10', (STA: number) => this.handleComputedUseSkill(STA))
+        gunService.useSkill(skillPlugin.name, (STA: number) => this.handleComputedUseSkill(STA))
     }
     handleComputedUseSkill(STA: number) {
         this.drawUIForceSTABar(STA)
@@ -886,6 +887,7 @@ class GunGame extends Phaser.Scene {
             (p) => p.thisPlayer.target._id === this.mainStore.getMatch.turner,
         )
         if (!playerGun) return
+        console.log('Bullet: ', data)
         playerGun.handleGun(data, this.playerPersons)
     }
     // #endregion handle events
@@ -922,6 +924,8 @@ class GunGame extends Phaser.Scene {
 
         gunService.listeningChangeTurn((data: IChangeTurn) => {
             console.log(data)
+            this.mainStore.getMatch.turner = data.turner
+            this.clearWhenChangeTurn()
             this.changeWindForce(data.windForce)
             data.updateStatuses.forEach((statuses) => {
                 if (statuses.target === this.mainStore.getPlayer._id) {
@@ -941,6 +945,9 @@ class GunGame extends Phaser.Scene {
 
         gunService.listeningGunRes(this.handleGunRes.bind(this))
         gunService.listeningEndGame((data: IGameEnd) => {
+            setTimeout(() => {
+                location.reload()
+            }, 15000)
             const container = this.add.container(0, 0, []).setDepth(100000).setScrollFactor(0)
             const rect = this.add
                 .rectangle(0, 0, this.CAMERA_WIDTH, this.CAMERA_HEIGHT, 0x000000, 0.8)
@@ -975,7 +982,7 @@ class GunGame extends Phaser.Scene {
                         fontSize: '40px',
                         color: '#ccc',
                     })
-                    const value = this.add.text(110, 0 + i, element.toFixed(0), {
+                    const value = this.add.text(110, 0 + i, element?.toFixed(0), {
                         fontSize: '40px',
                         color: '#ccc',
                     })
@@ -985,9 +992,6 @@ class GunGame extends Phaser.Scene {
             }
             container.add(groupStatus)
             container.add(text)
-            setTimeout(() => {
-                location.reload()
-            }, 15000)
         })
     }
     // #endregion listening socket

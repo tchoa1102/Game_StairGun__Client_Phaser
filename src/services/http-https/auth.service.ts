@@ -18,6 +18,7 @@ class AuthService {
     }
 
     async loadUser() {
+        console.log('Loading user...')
         const result = await this.api.get('/load')
         return regexResponse(result)
     }

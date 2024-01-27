@@ -1,8 +1,10 @@
 import type { GamePlay, Home, PrepareDuel } from '@/scenes'
 import { useMainStore } from '@/stores'
 
+import exitIcon from '@/assets/exit.png'
+
 const CONSTANTS = {
-    exitBtn: 'src/assets/exit.png',
+    exitBtn: exitIcon,
 }
 
 abstract class Board extends Phaser.GameObjects.DOMElement {

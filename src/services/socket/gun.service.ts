@@ -76,8 +76,8 @@ class gunService {
     listeningChangeTurn(callback?: (data: IChangeTurn) => void) {
         const mainStore: any = useMainStore()
         mainStore.getSocket.on(this.baseUrl + '/change-turn/res', (data: IChangeTurn) => {
+            // mainStore.updateTurner(data)
             callback && callback(data)
-            mainStore.updateTurner(data)
         })
     }
 
@@ -92,6 +92,7 @@ class gunService {
         const mainStore: any = useMainStore()
         mainStore.getSocket.on(this.baseUrl + '/game-end', (data: IGameEnd) => {
             callback(data)
+            mainStore.endGame()
         })
     }
 }

@@ -1,4 +1,4 @@
-import type { IChangeTurn, IChatReceiveMessage } from './../util/interface/index.interface'
+import type { IChangeTurn, IChatReceiveMessage } from '@/util/interface/index.interface'
 import {
     type IChat,
     type IFriend,
@@ -14,7 +14,6 @@ import { type IIndicator, type IMatchRes, type IState } from '@/util/interface/i
 import { GamePlay, Home } from '@/scenes'
 import { io } from 'socket.io-client'
 import { firebaseService } from '@/services/http-https'
-import PrepareDuel from '@/scenes/BootGame/prepareDuel'
 
 const MIN_HEIGHT = 740
 
@@ -229,7 +228,11 @@ const useMainStore = defineStore('main', {
             }
         },
         updateTurner(data: IChangeTurn) {
+            if (this.match) {
+                console.log(!this.match, this.match._id, data._id, this.match._id !== data._id)
+            }
             if (!this.match || this.match._id !== data._id) return
+            console.log('Update turner')
             this.match.turner = data.turner
             this.watches.turner.forEach((callback) => callback(data))
         },

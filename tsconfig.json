@@ -10,6 +10,8 @@
   ],
   "compilerOptions": {
     "strict": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": ".",
+    "resolveJsonModule": true
   }
 }

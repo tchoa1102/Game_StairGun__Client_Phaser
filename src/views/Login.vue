@@ -17,7 +17,7 @@
     </section>
 </template>
 
-<script>
+<script lang="ts">
 import { firebaseService } from '../services/http-https'
 export default {
     data() {
