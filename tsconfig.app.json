@@ -11,6 +11,7 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true
   },
-  "include": ["env.d.ts", "src/**/*.vue", "src/**/*.json", "src/assets/**/*"],
+  "include": ["env.d.ts", "src/**/*.vue", "src/**/*.json", "src/assets/**/*", "src/**/*.ts"],
   "exclude": ["src/**/__tests__/*", "node_modules"]
 }
+// if import env error, then try compilerOptions > { , "target": "ESNext", "types": ["vite/client"] }

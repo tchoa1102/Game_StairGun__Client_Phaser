@@ -1,11 +1,18 @@
 /// <reference types="vite/client" />
-declare namespace NodeJS {
-    interface ProcessEnv {
-        VUE_APP_FBASE_API_KEY: string
-        VUE_APP_FBASE_AUTH_DOMAIN: string
-        VUE_APP_FBASE_PROJECT_ID: string
-        VUE_APP_FBASE_STORAGE_BUCKET: string
-        VUE_APP_FBASE_MESSAGIN_SENDER_ID: string
-        VUE_APP_FBASE_APP_ID: string
-    }
+interface ImportMetaEnv {
+    readonly VITE_APP_TITLE: string
+    readonly VITE_API: string
+
+    readonly FIREBASE_API_KEY: string
+    readonly FIREBASE_AUTH_DOMAIN: string
+    readonly FIREBASE_PROJECT_ID: string
+    readonly FIREBASE_STORAGE_BUCKET: string
+    readonly FIREBASE_MESSAGIN_SENDER_ID: string
+    readonly FIREBASE_APP_ID: string
+
+    // more env variables...
+}
+
+interface ImportMeta {
+    readonly env: ImportMetaEnv
 }

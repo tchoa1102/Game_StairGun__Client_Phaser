@@ -5,7 +5,7 @@ import type { IItemOnBag } from '@/util/interface/state.main.interface'
 
 class ItemService extends BaseService {
     constructor() {
-        super('http://localhost:4000/api/items')
+        super(import.meta.env.VITE_API + '/items')
     }
 
     // [POST] /buy

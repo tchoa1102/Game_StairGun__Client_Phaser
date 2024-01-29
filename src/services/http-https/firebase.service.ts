@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios'
-import { initializeApp, type FirebaseApp } from 'firebase/app'
+import { initializeApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app'
 import {
     getAuth,
     GoogleAuthProvider,
@@ -16,13 +16,13 @@ import type { RouteLocationNormalizedLoaded, Router } from 'vue-router'
 import { useMainStore } from '@/stores'
 import authService from './auth.service'
 
-const firebaseSettings = {
-    apiKey: 'AIzaSyCWB2y7o4HkwG2i1XJbDxO7eTtEfkRMwME',
-    authDomain: 'middleware-auth-2221e.firebaseapp.com',
-    projectId: 'middleware-auth-2221e',
-    storageBucket: 'middleware-auth-2221e.appspot.com',
-    messagingSenderId: '17874562481',
-    appId: '1:17874562481:web:62c90da73c4e343b0aa190',
+const firebaseSettings: FirebaseOptions = {
+    apiKey: import.meta.env.FIREBASE_API_KEY,
+    authDomain: import.meta.env.FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.FIREBASE_MESSAGIN_SENDER_ID,
+    appId: import.meta.env.FIREBASE_APP_ID,
 }
 async function saveUser(accessToken: string) {
     await axios
@@ -31,7 +31,7 @@ async function saveUser(accessToken: string) {
                 Authorization: `Bearer ${accessToken}`,
             },
         })
-        .get('http://localhost:4000/api/auth/login')
+        .get(import.meta.env.VITE_API + '/auth/login')
 }
 
 class FirebaseService {

@@ -5,7 +5,6 @@ import weaponConfig from '@/configs/weapon.json'
 import imgFaceDefault from '@/assets/img/equips/faces/face.default.png'
 import imgBodyDefault from '@/assets/img/equips/bodies/body.default.png'
 import imgFootDefault from '@/assets/img/equips/foots/foot.default.png'
-console.log('Image', imgFaceDefault, imgFootDefault)
 
 import backgroundHome from '@/assets/home-1480x740.png'
 

@@ -6,7 +6,7 @@ import firebaseService from './firebase.service'
 class AuthService {
     api: AxiosInstance
     constructor() {
-        this.api = createApiClient('http://localhost:4000/api/auth')
+        this.api = createApiClient(import.meta.env.VITE_API + '/auth')
 
         this.api.interceptors.request.use(async function (
             config: InternalAxiosRequestConfig<any>,
