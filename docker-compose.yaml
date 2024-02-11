@@ -1,8 +1,14 @@
+name: game_stairgun
+
 services:
-  game_stairgun_client:
-    container_name: game_stairgun_client
+  client:
+    image: kyuseishu/game_stairgun
+    container_name: ${name}client
+    ports:
+      - 3000:8080
     build:
+      context: .
       dockerfile: dockerfile
 networks:
   default:
-    driver: bridge
+    driver: game_stairgun
