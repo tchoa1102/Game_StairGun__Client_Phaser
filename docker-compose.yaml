@@ -1,0 +1,8 @@
+services:
+  game_stairgun_client:
+    container_name: game_stairgun_client
+    build:
+      dockerfile: dockerfile
+networks:
+  default:
+    driver: bridge
