@@ -24,6 +24,7 @@ const firebaseSettings: FirebaseOptions = {
     messagingSenderId: import.meta.env.FIREBASE_MESSAGIN_SENDER_ID,
     appId: import.meta.env.FIREBASE_APP_ID,
 }
+// console.log('firebaseSettings: ', firebaseSettings, import.meta.env.FIREBASE_API_KEY)
 async function saveUser(accessToken: string) {
     await axios
         .create({

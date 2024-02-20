@@ -2,13 +2,18 @@ name: game_stairgun
 
 services:
   client:
-    image: kyuseishu/game_stairgun
-    container_name: ${name}client
+    image: kyuseishu/${COMPOSE_PROJECT_NAME}/client
+    container_name: client
     ports:
       - 3000:8080
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfile
+    networks:
+      game_stairgun:
 networks:
-  default:
-    driver: game_stairgun
+  game_stairgun:
+    name: ${COMPOSE_PROJECT_NAME}
+    driver: bridge
