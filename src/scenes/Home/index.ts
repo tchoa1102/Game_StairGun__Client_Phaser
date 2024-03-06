@@ -1307,7 +1307,7 @@ class Home extends BaseScene {
         // const game = new Phaser.Game(config)
         // mainStore.setMatch(dataRes)
         // this.gamePlay = game.scene.add('game-play-scene', GamePlay, true, {}) as GamePlay
-        // #region test
+        // #endregion test
     }
 
     update() {
